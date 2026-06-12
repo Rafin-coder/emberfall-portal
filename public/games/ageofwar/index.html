@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Âges de Guerre — Ember Arcade</title>
+<title>Conquête des Âges — Ember Arcade</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -12,10 +12,15 @@
 :root{--bg:#08080e;--text:#ece9f5;--muted:#8d8aa0;--ember:#ff7a3c;--ember2:#ffb04d;--cool:#5fe3c8;--danger:#ff5d6c;--line:rgba(255,255,255,.1)}
 html,body{height:100%;background:var(--bg);color:var(--text);overflow:hidden;touch-action:none;user-select:none}
 #wrap{position:fixed;inset:0;display:flex;flex-direction:column}
-#top{display:flex;align-items:center;gap:12px;padding:10px 14px 8px;font-family:"JetBrains Mono",monospace;font-size:12px}
-#top .gold{color:var(--ember2);font-size:16px;font-weight:500;min-width:90px}
-#top .age{color:var(--cool)}
-#top .right{margin-left:auto;display:flex;gap:16px;align-items:center}
+#top{display:flex;align-items:center;gap:12px;padding:8px 14px 8px 102px;font-family:"JetBrains Mono",monospace;font-size:12px;flex-wrap:wrap}
+.res{display:flex;flex-direction:column;line-height:1.15}
+.res .v{font-size:16px;font-weight:500;color:var(--text)}
+.res .k{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.res.gold .v{color:var(--ember2)}
+.xpwrap{min-width:160px}
+.xpbar{height:7px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin:3px 0 2px}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,#5fe3c8,#9bf5e4);transition:width .15s}
+#top .right{margin-left:auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 .hpwrap{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted)}
 .hpbar{width:120px;height:8px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}
 .hpbar i{display:block;height:100%}
@@ -30,6 +35,8 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
 .b .c{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ember2);margin-top:3px}
 .b.evo{border-color:rgba(95,227,200,.35)} .b.evo .c{color:var(--cool)}
 .b.sp{border-color:rgba(255,93,108,.35)} .b.sp .c{color:var(--danger)}
+.b.sell{border-color:rgba(124,252,154,.3)} .b.sell .c{color:#7CFC9A}
+.b .s{font-family:"JetBrains Mono",monospace;font-size:9.5px;color:var(--muted);margin-top:3px;letter-spacing:.02em}
 .b .key{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted)}
 #back{position:fixed;top:9px;left:12px;z-index:40;font:600 12px/1 "Space Grotesk";letter-spacing:.05em;color:#bfb9d6;
   background:rgba(8,8,14,.7);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:9px;padding:8px 12px;text-decoration:none}
@@ -57,8 +64,9 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
 
 <div id="wrap">
   <div id="top">
-    <span class="gold" id="gold">◉ 0</span>
-    <span class="age" id="ageName">Préhistoire</span>
+    <div class="res gold"><span class="v" id="gold">◉ 0</span><span class="k">or</span></div>
+    <div class="res xpwrap"><span class="v" id="ageName">Préhistoire</span><div class="xpbar"><i id="xpb" style="width:0%"></i></div><span class="k" id="xpTxt">0 / 0 XP</span></div>
+    <div class="res"><span class="v" id="popTxt">0</span><span class="k">tes unités</span></div>
     <div class="right">
       <span id="modeInfo" style="color:var(--muted)"></span>
       <div class="hpwrap">TOI <div class="hpbar"><i id="phpb" style="width:100%;background:linear-gradient(90deg,#ff7a3c,#ffb04d)"></i></div></div>
@@ -72,7 +80,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
 <div class="overlay" id="menu">
   <div class="panel">
     <div class="eyebrow">ember arcade</div>
-    <h1>Âges de Guerre</h1>
+    <h1>Conquête des Âges</h1>
     <p>Mène ton armée de la préhistoire au futur. Produis des unités, défends ta base avec des tourelles, évolue d'ère, et déclenche ton pouvoir spécial pour renverser la marée.</p>
     <div class="modebtns">
       <button class="btn" id="campBtn">Campagne — détruire la base ennemie</button>
@@ -132,12 +140,12 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     const m=am(age);
     return {cost:Math.round(base.cost*m),hp:Math.round(base.hp*m),dmg:base.dmg*m,
             rng:base.rng,sp:base.sp,rate:base.rate,sz:base.sz,
-            gold:Math.round(base.cost*m*0.55),xp:Math.round((10+6*age)*0.9)};
+            gold:Math.round(base.cost*m*0.6),xp:Math.round((10+6*age)*0.9)};
   }
   function turretStats(age){const m=am(age);return {cost:Math.round(130*m),dmg:15*m,rng:230,rate:0.65};}
   function specialDmg(age){return 55*am(age);}
   function evolveXp(age){return Math.round(120*Math.pow(2.05,age));}
-  function evolveCost(age){return Math.round(220*Math.pow(2.1,age));}
+  function evolveCost(age){return Math.round(200*Math.pow(2.0,age));}
   const SPECIAL_CD=24, MAXAGE=4, MAXSLOTS=4;
 
   // ---------- état ----------
@@ -261,7 +269,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     G.t+=dt;
     if(G.spawnCd>0)G.spawnCd-=dt; if(G.spCd>0)G.spCd-=dt; if(G.special>0)G.special-=dt;
     if(G.shake>0)G.shake=Math.max(0,G.shake-dt*26); if(bannerT>0)bannerT-=dt;
-    G.gold += 6*dt; // revenu passif
+    G.gold += 8*dt; // revenu passif
     spawnFromQueue();
     aiUpdate(dt);
 
@@ -507,17 +515,24 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
 
 
   // ---------- HUD ----------
+  function sellTurret(){
+    if(!G.turrets.length) return;
+    const tr=G.turrets.pop();
+    G.gold += Math.round(turretStats(tr.age).cost*0.5);
+    blip(360,.06,'sine',.03);
+  }
   function buildBar(){
     const bar=document.getElementById('bar'); bar.innerHTML='';
     const defs=[];
-    for(let i=0;i<3;i++) defs.push({k:'u'+i});
-    defs.push({k:'turret'}); defs.push({k:'slot'}); defs.push({k:'evo'}); defs.push({k:'sp'});
+    for(let i=0;i<3;i++) defs.push({k:'u'+i,stat:true});
+    defs.push({k:'turret'}); defs.push({k:'sell'}); defs.push({k:'slot'}); defs.push({k:'evo'}); defs.push({k:'sp'});
     defs.forEach(d=>{ const b=document.createElement('button'); b.className='b'; b.id='btn_'+d.k;
-      if(d.k==='evo')b.classList.add('evo'); if(d.k==='sp')b.classList.add('sp');
-      b.innerHTML='<div class="n"></div><div class="c"></div>'; bar.appendChild(b);
+      if(d.k==='evo')b.classList.add('evo'); if(d.k==='sp')b.classList.add('sp'); if(d.k==='sell')b.classList.add('sell');
+      b.innerHTML='<div class="n"></div><div class="c"></div>'+(d.stat?'<div class="s"></div>':''); bar.appendChild(b);
       b.onclick=()=>{ ac();
         if(d.k.startsWith('u')) buyUnit(+d.k[1]);
         else if(d.k==='turret') buyTurret();
+        else if(d.k==='sell') sellTurret();
         else if(d.k==='slot') buySlot();
         else if(d.k==='evo') evolve();
         else if(d.k==='sp') castSpecial();
@@ -527,22 +542,32 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
   function updateHUD(){
     document.getElementById('gold').textContent='◉ '+Math.floor(G.gold);
     document.getElementById('ageName').textContent=AGES[G.age];
+    const need=G.age<MAXAGE?evolveXp(G.age):1;
+    document.getElementById('xpb').style.width=(G.age>=MAXAGE?100:Math.min(100,G.xp/need*100))+'%';
+    document.getElementById('xpTxt').textContent=G.age>=MAXAGE?'ÈRE MAX':Math.floor(Math.min(G.xp,need))+' / '+need+' XP';
+    document.getElementById('popTxt').textContent=G.units.filter(u=>u.side==='p').length;
     document.getElementById('phpb').style.width=Math.max(0,G.pbHp/G.pbMax*100)+'%';
     const ew=document.getElementById('ehpwrap');
-    if(G.mode==='endless'){ ew.style.display='none'; document.getElementById('modeInfo').textContent='Vague '+G.wave+' · '+G.kills+' détruits'; }
-    else { ew.style.display='flex'; document.getElementById('ehpb').style.width=Math.max(0,G.ebHp/G.ebMax*100)+'%'; document.getElementById('modeInfo').textContent=''; }
+    if(G.mode==='endless'){ ew.style.display='none'; document.getElementById('modeInfo').textContent='Vague '+G.wave+' · '+G.kills+' détruits · ère IA '+AGES[G.e.age]; }
+    else { ew.style.display='flex'; document.getElementById('ehpb').style.width=Math.max(0,G.ebHp/G.ebMax*100)+'%'; document.getElementById('modeInfo').textContent='IA : '+AGES[G.e.age]; }
+    const labels=['Mêlée','Distance','Lourd'];
     for(let i=0;i<3;i++){ const s=unitStats(G.age,ROLES[i]); const b=document.getElementById('btn_u'+i);
-      b.querySelector('.n').textContent=UNAMES[G.age][i]; b.querySelector('.c').textContent='◉ '+s.cost+'  ['+(i+1)+']'; b.disabled=G.gold<s.cost; }
+      b.querySelector('.n').textContent=UNAMES[G.age][i]; b.querySelector('.c').textContent='◉ '+s.cost+'  ['+(i+1)+']';
+      b.querySelector('.s').textContent=labels[i]+' · PV '+s.hp+' · DGT '+Math.round(s.dmg); b.disabled=G.gold<s.cost; }
     const ts=turretStats(G.age), bt=document.getElementById('btn_turret');
     bt.querySelector('.n').textContent=TNAMES[G.age]+' ('+G.turrets.length+'/'+G.slots+')';
     bt.querySelector('.c').textContent='◉ '+ts.cost+'  [T]'; bt.disabled=G.turrets.length>=G.slots||G.gold<ts.cost;
+    const bsl=document.getElementById('btn_sell');
+    bsl.querySelector('.n').textContent='Vendre tourelle';
+    bsl.querySelector('.c').textContent=G.turrets.length?'+◉ '+Math.round(turretStats(G.turrets[G.turrets.length-1].age).cost*0.5):'—';
+    bsl.disabled=!G.turrets.length;
     const bs=document.getElementById('btn_slot');
     bs.querySelector('.n').textContent='+ Emplacement'; bs.querySelector('.c').textContent=G.slots>=MAXSLOTS?'max':'◉ '+slotCost(); bs.disabled=G.slots>=MAXSLOTS||G.gold<slotCost();
     const be=document.getElementById('btn_evo');
     if(G.age>=MAXAGE){ be.querySelector('.n').textContent='Ère max'; be.querySelector('.c').textContent='—'; be.disabled=true; }
-    else { const need=evolveXp(G.age),cost=evolveCost(G.age);
-      be.querySelector('.n').textContent='Évoluer ('+Math.min(G.xp,need)+'/'+need+' XP)';
-      be.querySelector('.c').textContent='◉ '+cost+'  [E]'; be.disabled=G.xp<need||G.gold<cost; }
+    else { const cost=evolveCost(G.age);
+      be.querySelector('.n').textContent='Évoluer → '+AGES[G.age+1];
+      be.querySelector('.c').textContent='◉ '+cost+' · '+Math.floor(Math.min(G.xp,need))+'/'+need+'xp  [E]'; be.disabled=G.xp<need||G.gold<cost; }
     const bsp=document.getElementById('btn_sp');
     bsp.querySelector('.n').textContent=SPNAMES[G.age];
     bsp.querySelector('.c').textContent=G.spCd>0?Math.ceil(G.spCd)+'s  [Esp]':'PRÊT  [Esp]'; bsp.disabled=G.spCd>0;
