@@ -15,8 +15,9 @@ emberfall-portal/
 │   ├── sdk.js               Le SDK commun à tous les jeux
 │   ├── styles.css           Identité visuelle partagée
 │   └── games/
-│       ├── emberfall/index.html   Le jeu, branché au SDK
-│       └── lumen/index.html       2ᵉ jeu (arcade de lumière), branché au SDK
+│       ├── emberfall/index.html   Survivor roguelite, branché au SDK
+│       ├── lumen/index.html       Arcade de lumière, branché au SDK
+│       └── ageofwar/index.html    Stratégie de couloir (campagne + endless), branché au SDK
 ├── supabase/
 │   ├── schema.sql           Base de données + sécurité (RLS) + anti-triche
 │   ├── add_lumen.sql        Ajoute Lumen au catalogue en ligne (à exécuter une fois)

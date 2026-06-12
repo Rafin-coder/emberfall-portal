@@ -56,7 +56,8 @@
 <script>
 const FALLBACK_GAMES = [
   { id:'emberfall', title:'Emberfall' },
-  { id:'lumen', title:'Lumen' }
+  { id:'lumen', title:'Lumen' },
+  { id:'ageofwar', title:'Âges de Guerre' }
 ];
 const TIME_GAMES = new Set(['emberfall']);
 const brandName = (window.GAMEPORTAL_CONFIG&&GAMEPORTAL_CONFIG.PORTAL_NAME)||'EMBER ARCADE';
@@ -76,7 +77,8 @@ function emberfallConds(){
 }
 const COND = {
   emberfall: emberfallConds,
-  lumen: ()=> 'Séquence de braises partagée'
+  lumen: ()=> 'Séquence de braises partagée',
+  ageofwar: ()=> 'Mêmes vagues ennemies pour tous'
 };
 
 function cardHTML(g){

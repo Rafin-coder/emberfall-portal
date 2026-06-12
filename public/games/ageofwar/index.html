@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Âges de Guerre — Ember Arcade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;font-family:"Space Grotesk",system-ui,sans-serif}
+:root{--bg:#08080e;--text:#ece9f5;--muted:#8d8aa0;--ember:#ff7a3c;--ember2:#ffb04d;--cool:#5fe3c8;--danger:#ff5d6c;--line:rgba(255,255,255,.1)}
+html,body{height:100%;background:var(--bg);color:var(--text);overflow:hidden;touch-action:none;user-select:none}
+#wrap{position:fixed;inset:0;display:flex;flex-direction:column}
+#top{display:flex;align-items:center;gap:12px;padding:10px 14px 8px;font-family:"JetBrains Mono",monospace;font-size:12px}
+#top .gold{color:var(--ember2);font-size:16px;font-weight:500;min-width:90px}
+#top .age{color:var(--cool)}
+#top .right{margin-left:auto;display:flex;gap:16px;align-items:center}
+.hpwrap{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted)}
+.hpbar{width:120px;height:8px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}
+.hpbar i{display:block;height:100%}
+#stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center}
+canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+#bar{display:flex;gap:8px;padding:10px 12px;justify-content:center;flex-wrap:wrap;background:rgba(10,10,16,.6)}
+.b{flex:0 0 auto;min-width:84px;background:linear-gradient(180deg,#181826,#13131e);border:1px solid var(--line);
+  border-radius:11px;padding:9px 11px;cursor:pointer;text-align:left;transition:.12s;color:var(--text)}
+.b:hover{border-color:rgba(255,122,60,.4)}
+.b:disabled{opacity:.4;cursor:default}
+.b .n{font-size:12.5px;font-weight:600}
+.b .c{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ember2);margin-top:3px}
+.b.evo{border-color:rgba(95,227,200,.35)} .b.evo .c{color:var(--cool)}
+.b.sp{border-color:rgba(255,93,108,.35)} .b.sp .c{color:var(--danger)}
+.b .key{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted)}
+#back{position:fixed;top:9px;left:12px;z-index:40;font:600 12px/1 "Space Grotesk";letter-spacing:.05em;color:#bfb9d6;
+  background:rgba(8,8,14,.7);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:9px;padding:8px 12px;text-decoration:none}
+#dailyBadge{display:none;position:fixed;top:9px;left:50%;transform:translateX(-50%);z-index:40;font:600 11px/1 "JetBrains Mono",monospace;
+  letter-spacing:.12em;color:#ffd27a;background:rgba(8,8,14,.7);backdrop-filter:blur(8px);border:1px solid rgba(255,176,77,.35);border-radius:9px;padding:8px 12px}
+.overlay{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(700px 400px at 50% 38%,rgba(255,122,60,.10),transparent 70%),rgba(6,6,12,.82);backdrop-filter:blur(6px)}
+.overlay.hidden{display:none}
+.panel{text-align:center;padding:30px 32px;max-width:380px}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--ember);margin-bottom:14px}
+.panel h1{font-size:46px;font-weight:700;line-height:1;background:linear-gradient(120deg,#fff,var(--ember2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.panel p{color:var(--muted);margin-top:14px;font-size:14px;line-height:1.5}
+.panel .big{font-family:"JetBrains Mono",monospace;font-size:40px;color:var(--ember2);margin:6px 0}
+.modebtns{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.btn{font:600 15px/1 "Space Grotesk";letter-spacing:.03em;color:#0c0a08;cursor:pointer;background:linear-gradient(120deg,var(--ember),var(--ember2));border:none;border-radius:11px;padding:13px 22px}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:#bfb9d6;border:1px solid var(--line)}
+.keys{margin-top:14px;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted)}
+#lbBox{margin:8px 0 2px}
+</style>
+</head>
+<body>
+<a id="back" href="/">← Arcade</a>
+<div id="dailyBadge"></div>
+
+<div id="wrap">
+  <div id="top">
+    <span class="gold" id="gold">◉ 0</span>
+    <span class="age" id="ageName">Préhistoire</span>
+    <div class="right">
+      <span id="modeInfo" style="color:var(--muted)"></span>
+      <div class="hpwrap">TOI <div class="hpbar"><i id="phpb" style="width:100%;background:linear-gradient(90deg,#ff7a3c,#ffb04d)"></i></div></div>
+      <div class="hpwrap" id="ehpwrap">ENNEMI <div class="hpbar"><i id="ehpb" style="width:100%;background:linear-gradient(90deg,#ff5d6c,#c44)"></i></div></div>
+    </div>
+  </div>
+  <div id="stage"><canvas id="c"></canvas></div>
+  <div id="bar"></div>
+</div>
+
+<div class="overlay" id="menu">
+  <div class="panel">
+    <div class="eyebrow">ember arcade</div>
+    <h1>Âges de Guerre</h1>
+    <p>Mène ton armée de la préhistoire au futur. Produis des unités, défends ta base avec des tourelles, évolue d'ère, et déclenche ton pouvoir spécial pour renverser la marée.</p>
+    <div class="modebtns">
+      <button class="btn" id="campBtn">Campagne — détruire la base ennemie</button>
+      <button class="btn ghost" id="endlessBtn">Endless — survivre aux vagues (classé)</button>
+    </div>
+    <div class="keys">1/2/3 unités · T tourelle · E évoluer · Espace spécial</div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="over">
+  <div class="panel">
+    <div class="eyebrow" id="overTitle">fin de partie</div>
+    <div class="big" id="overScore">0</div>
+    <div id="overSub" style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:13px"></div>
+    <p id="netLine" style="font-size:12px"></p>
+    <div id="lbBox"></div>
+    <div class="modebtns">
+      <button class="btn" id="retryBtn">Rejouer</button>
+      <button class="btn ghost" id="menuBtn">Menu</button>
+    </div>
+  </div>
+</div>
+
+<script src="/config.js"></script>
+<script src="/sdk.js"></script>
+<script>
+(function(){
+  const cv=document.getElementById('c'), ctx=cv.getContext('2d');
+  let W=960,H=440,DPR=Math.min(2,window.devicePixelRatio||1);
+  function fit(){
+    W=Math.min(window.innerWidth-12, 980);
+    H=Math.max(300, Math.min(window.innerHeight-188, 520));
+    cv.style.width=W+'px'; cv.style.height=H+'px';
+    cv.width=W*DPR; cv.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  window.addEventListener('resize',fit); fit();
+
+  // ---------- audio ----------
+  let AC=null; function ac(){ if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}} }
+  function blip(f,d,t,v){ if(!AC)return; const n=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();
+    o.type=t||'sine';o.frequency.setValueAtTime(f,n);g.gain.setValueAtTime(.0001,n);
+    g.gain.exponentialRampToValueAtTime(v||.04,n+.01);g.gain.exponentialRampToValueAtTime(.0001,n+d);
+    o.connect(g).connect(AC.destination);o.start(n);o.stop(n+d+.02);}
+
+  // ---------- données ----------
+  const AGES=['Préhistoire','Antiquité','Médiéval','Moderne','Futur'];
+  const AGETINT=['90,70,45','120,95,55','110,118,132','90,120,140','90,200,210'];
+  const UNAMES=[['Massue','Sagaie','Mammouth'],['Légionnaire','Archer','Catapulte'],['Chevalier','Arbalétrier','Bélier'],['Soldat','Tireur','Blindé'],['Droïde','Laser','Méca']];
+  const TNAMES=['Piège à pieux','Baliste','Canon','Mitrailleuse','Tourelle laser'];
+  const SPNAMES=['Cri de guerre','Pluie de flèches','Bombarde','Frappe aérienne','Frappe orbitale'];
+  const ROLES=['light','ranged','heavy'];
+  function am(age){return Math.pow(1.85,age);}
+  function unitStats(age,role){
+    const base={light:{cost:25,hp:62,dmg:8,rng:22,sp:48,rate:0.8,sz:12},
+                ranged:{cost:48,hp:40,dmg:11,rng:140,sp:42,rate:1.15,sz:12},
+                heavy:{cost:105,hp:185,dmg:21,rng:24,sp:30,rate:1.1,sz:18}}[role];
+    const m=am(age);
+    return {cost:Math.round(base.cost*m),hp:Math.round(base.hp*m),dmg:base.dmg*m,
+            rng:base.rng,sp:base.sp,rate:base.rate,sz:base.sz,
+            gold:Math.round(base.cost*m*0.55),xp:Math.round((10+6*age)*0.9)};
+  }
+  function turretStats(age){const m=am(age);return {cost:Math.round(130*m),dmg:15*m,rng:230,rate:0.65};}
+  function specialDmg(age){return 55*am(age);}
+  function evolveXp(age){return Math.round(120*Math.pow(2.05,age));}
+  function evolveCost(age){return Math.round(220*Math.pow(2.1,age));}
+  const SPECIAL_CD=24, MAXAGE=4, MAXSLOTS=4;
+
+  // ---------- état ----------
+  let G=null, DAILY=null, RNG=Math.random;
+  function reset(mode){
+    const baseHp=1400;
+    G={mode, t:0, gold:80, xp:0, age:0, kills:0, wave:0,
+       pbHp:baseHp, pbMax:baseHp, ebHp:baseHp, ebMax:baseHp,
+       units:[], turrets:[], slots:2, tracers:[], parts:[],
+       spawnCd:0, queue:[], spCd:0, special:0, shake:0,
+       e:{gold:90, xp:0, age:0, buyCd:1.2},
+       spawnT:2.0, state:'play'};
+  }
+
+  // ---------- contrôles ----------
+  function laneY(){ return H-66; }
+  function pBaseX(){ return 58; }
+  function eBaseX(){ return W-58; }
+
+  function buyUnit(roleIdx){
+    const s=unitStats(G.age, ROLES[roleIdx]);
+    if(G.gold<s.cost) return;
+    G.gold-=s.cost; G.queue.push({age:G.age, role:roleIdx});
+    blip(300+roleIdx*60,.05,'square',.03);
+  }
+  function spawnFromQueue(){
+    if(!G.queue.length || G.spawnCd>0) return;
+    const q=G.queue.shift(); const s=unitStats(q.age, ROLES[q.role]);
+    G.units.push(mkUnit('p', q.age, q.role, s));
+    G.spawnCd=0.5;
+  }
+  function mkUnit(side,age,role,s){
+    const x= side==='p'? pBaseX()+24 : eBaseX()-24;
+    return {side,age,role,x,hp:s.hp,maxhp:s.hp,dmg:s.dmg,rng:s.rng,sp:s.sp,rate:s.rate,sz:s.sz,
+            gold:s.gold,xp:s.xp,atk:0,hit:0,lunge:0};
+  }
+  function buyTurret(){
+    if(G.turrets.length>=G.slots) return;
+    const ts=turretStats(G.age); if(G.gold<ts.cost) return;
+    G.gold-=ts.cost; G.turrets.push({age:G.age,dmg:ts.dmg,rng:ts.rng,rate:ts.rate,cd:0,slot:G.turrets.length});
+    blip(420,.06,'triangle',.03);
+  }
+  function buySlot(){
+    const cost=Math.round(260*Math.pow(1.7,G.slots-2));
+    if(G.slots>=MAXSLOTS||G.gold<cost) return;
+    G.gold-=cost; G.slots++;
+  }
+  function slotCost(){ return Math.round(260*Math.pow(1.7,G.slots-2)); }
+  function evolve(){
+    if(G.age>=MAXAGE) return;
+    if(G.xp<evolveXp(G.age)||G.gold<evolveCost(G.age)) return;
+    G.gold-=evolveCost(G.age); G.xp-=evolveXp(G.age); G.age++;
+    G.shake=8; banner(); blip(440,.12,'sawtooth',.05); blip(880,.16,'triangle',.05);
+  }
+  function castSpecial(){
+    if(G.spCd>0) return;
+    G.spCd=SPECIAL_CD; G.special=0.5; G.shake=14;
+    const d=specialDmg(G.age);
+    for(const u of G.units) if(u.side==='e'){ u.hp-=d; u.hit=.15; }
+    blip(180,.3,'sawtooth',.06); blip(90,.4,'triangle',.05);
+  }
+  let bannerT=0;
+  function banner(){ bannerT=1.4; }
+
+  document.addEventListener('keydown',e=>{
+    if(!G||G.state!=='play')return; const k=e.key.toLowerCase();
+    if(k==='1')buyUnit(0); else if(k==='2')buyUnit(1); else if(k==='3')buyUnit(2);
+    else if(k==='t')buyTurret(); else if(k==='e')evolve(); else if(k===' '){castSpecial();e.preventDefault();}
+  });
+
+  // ---------- IA / vagues ----------
+  function aiUpdate(dt){
+    const e=G.e;
+    if(G.mode==='campaign'){
+      e.gold += (5 + G.t*0.03) * dt;
+      e.buyCd -= dt;
+      if(e.buyCd<=0){
+        e.buyCd = Math.max(0.7, 1.6 - G.t*0.004);
+        // évolution IA
+        if(e.age<MAXAGE && e.xp>=evolveXp(e.age) && e.gold>=evolveCost(e.age)){
+          e.gold-=evolveCost(e.age); e.xp-=evolveXp(e.age); e.age++;
+        }
+        // achat : privilégie le lourd quand riche
+        const roll=Math.random(); let role = roll<0.5?0 : roll<0.8?1 : 2;
+        const s=unitStats(e.age, ROLES[role]);
+        if(e.gold>=s.cost){ e.gold-=s.cost; G.units.push(mkUnit('e', e.age, role, s)); }
+      }
+    } else { // endless : vagues croissantes
+      e.age=Math.min(MAXAGE, Math.floor(G.t/50));
+      G.spawnT-=dt;
+      if(G.spawnT<=0){
+        G.wave++;
+        G.spawnT=Math.max(0.7, 2.2 - G.t*0.008);
+        const cnt=1+Math.floor(G.t/40);
+        for(let i=0;i<cnt;i++){
+          const role=(RNG()*3)|0; const s=unitStats(e.age, ROLES[role]);
+          // bonus PV pour la pression en endless
+          const u=mkUnit('e', e.age, role, s); u.hp*=1+G.t*0.004; u.maxhp=u.hp; u.x=eBaseX()-24-i*22;
+          G.units.push(u);
+        }
+      }
+    }
+  }
+
+  // ---------- combat ----------
+  function frontAlly(u){ // allié juste devant (même côté)
+    let best=null, bd=Infinity;
+    for(const o of G.units){ if(o===u||o.side!==u.side)continue;
+      const ahead = u.side==='p' ? (o.x>u.x) : (o.x<u.x);
+      if(!ahead) continue; const d=Math.abs(o.x-u.x); if(d<bd){bd=d;best=o;} }
+    return best;
+  }
+  function frontEnemy(u){ // ennemi le plus proche devant
+    let best=null, bd=Infinity;
+    for(const o of G.units){ if(o.side===u.side)continue;
+      const ahead = u.side==='p' ? (o.x>=u.x-2) : (o.x<=u.x+2);
+      if(!ahead) continue; const d=Math.abs(o.x-u.x); if(d<bd){bd=d;best=o;} }
+    return best;
+  }
+  function step(dt){
+    G.t+=dt;
+    if(G.spawnCd>0)G.spawnCd-=dt; if(G.spCd>0)G.spCd-=dt; if(G.special>0)G.special-=dt;
+    if(G.shake>0)G.shake=Math.max(0,G.shake-dt*26); if(bannerT>0)bannerT-=dt;
+    G.gold += 6*dt; // revenu passif
+    spawnFromQueue();
+    aiUpdate(dt);
+
+    // unités
+    for(const u of G.units){
+      if(u.hit>0)u.hit-=dt; if(u.lunge>0)u.lunge-=dt; u.atk-=dt;
+      const dir = u.side==='p'?1:-1;
+      const baseX = u.side==='p'? eBaseX() : pBaseX();
+      const tgt=frontEnemy(u);
+      let engaged=false, atkBase=false;
+      if(tgt){ const gap=Math.abs(tgt.x-u.x); if(gap<=u.rng+u.sz+tgt.sz){ engaged=true; } }
+      if(!engaged){ const gapB=Math.abs(baseX-u.x); if(gapB<=u.rng+u.sz+18 && (!tgt||Math.abs(tgt.x-u.x)>gapB)){ engaged=true; atkBase=true; } }
+      if(engaged){
+        if(u.atk<=0){
+          u.atk=u.rate; u.lunge=.12;
+          if(atkBase){ if(u.side==='p')G.ebHp-=u.dmg; else G.pbHp-=u.dmg; }
+          else { tgt.hp-=u.dmg; tgt.hit=.12;
+            if(u.rng>60) G.tracers.push({x1:u.x,y1:laneY()-10,x2:tgt.x,y2:laneY()-10,t:.1,col:u.side==='p'?'255,200,120':'255,120,120'}); }
+          if(u.rng>60)blip(u.side==='p'?700:420,.03,'square',.012);
+        }
+      } else {
+        let nx=u.x+dir*u.sp*dt;
+        const ally=frontAlly(u);
+        if(ally){ const minGap=u.sz+ally.sz+4; if(u.side==='p') nx=Math.min(nx, ally.x-minGap); else nx=Math.max(nx, ally.x+minGap); }
+        if(u.side==='p') nx=Math.min(nx, eBaseX()-u.sz-14); else nx=Math.max(nx, pBaseX()+u.sz+14);
+        u.x=nx;
+      }
+    }
+    // tourelles joueur
+    const ty0=laneY()-40;
+    for(const tr of G.turrets){ tr.cd-=dt;
+      if(tr.cd<=0){ let best=null,bd=tr.rng*tr.rng;
+        for(const o of G.units){ if(o.side!=='e')continue; const dx=o.x-pBaseX(); const d=dx*dx; if(dx>0&&d<bd){bd=d;best=o;} }
+        if(best){ tr.cd=tr.rate; best.hp-=tr.dmg; best.hit=.12;
+          G.tracers.push({x1:pBaseX()+10,y1:ty0-tr.slot*14,x2:best.x,y2:laneY()-10,t:.1,col:'120,230,200'}); blip(620,.03,'square',.012); } }
+    }
+    // morts
+    for(let i=G.units.length-1;i>=0;i--){ const u=G.units[i]; if(u.hp<=0){
+      for(let k=0;k<7;k++){const a=Math.random()*6.28,s=30+Math.random()*90;G.parts.push({x:u.x,y:laneY()-8,dx:Math.cos(a)*s,dy:Math.sin(a)*s-30,life:.5,t:0,col:u.side==='p'?'255,150,90':'255,110,120'});}
+      if(u.side==='e'){ G.gold+=u.gold; G.xp+=u.xp; G.kills++; }
+      else { G.e.gold+=u.gold*0.8; G.e.xp+=u.xp; }
+      G.units.splice(i,1);
+    }}
+    // tracers & particules
+    for(let i=G.tracers.length-1;i>=0;i--){G.tracers[i].t-=dt;if(G.tracers[i].t<=0)G.tracers.splice(i,1);}
+    for(let i=G.parts.length-1;i>=0;i--){const p=G.parts[i];p.t+=dt;p.x+=p.dx*dt;p.y+=p.dy*dt;p.dy+=200*dt;if(p.t>=p.life)G.parts.splice(i,1);}
+    // cap
+    if(G.units.length>90){ /* sécurité perf : stoppe les files */ G.queue.length=0; }
+    // fin
+    if(G.pbHp<=0){ G.pbHp=0; endGame(false); }
+    else if(G.mode==='campaign' && G.ebHp<=0){ G.ebHp=0; endGame(true); }
+  }
+
+  // ---------- rendu ----------
+  function render(){
+    const tint=AGETINT[G?G.age:0];
+    ctx.clearRect(0,0,W,H);
+    // ciel teinté par l'ère
+    const sky=ctx.createLinearGradient(0,0,0,H); sky.addColorStop(0,'rgba('+tint+',0.16)'); sky.addColorStop(1,'rgba('+tint+',0.02)');
+    ctx.fillStyle=sky; ctx.fillRect(0,0,W,H);
+    const gy=laneY();
+    // sol
+    ctx.fillStyle='rgba('+tint+',0.5)'; ctx.fillRect(0,gy,W,H-gy);
+    ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke();
+    const sh=G&&G.shake>0?(Math.random()*2-1)*G.shake:0;
+    ctx.save();ctx.translate(sh,0);
+    // bases
+    drawBase(pBaseX(),gy,true); drawBase(eBaseX(),gy,false);
+    // tourelles
+    for(const tr of G.turrets){ ctx.fillStyle='#5fe3c8'; const tx=pBaseX()+6, tyy=gy-44-tr.slot*14;
+      ctx.fillRect(tx-7,tyy-4,14,9); ctx.fillRect(tx+5,tyy-1,9,3); }
+    // tracers
+    for(const tc of G.tracers){ ctx.strokeStyle='rgba('+tc.col+','+Math.min(1,tc.t*10)+')';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(tc.x1,tc.y1);ctx.lineTo(tc.x2,tc.y2);ctx.stroke(); }
+    // unités
+    for(const u of G.units) drawUnit(u,gy);
+    // particules
+    for(const p of G.parts){const a=Math.max(0,1-p.t/p.life);ctx.fillStyle='rgba('+p.col+','+a+')';ctx.beginPath();ctx.arc(p.x,p.y,2.2*a+.5,0,6.28);ctx.fill();}
+    ctx.restore();
+    // bannière évolution
+    if(bannerT>0){ ctx.globalAlpha=Math.min(1,bannerT); ctx.fillStyle='#ffd27a'; ctx.font='700 26px Space Grotesk'; ctx.textAlign='center';
+      ctx.fillText('ÈRE : '+AGES[G.age].toUpperCase(), W/2, H*0.32); ctx.globalAlpha=1; ctx.textAlign='left'; }
+    // pouvoir spécial flash
+    if(G.special>0){ ctx.fillStyle='rgba(255,120,60,'+(G.special*0.5)+')'; ctx.fillRect(0,0,W,H); }
+  }
+  function drawBase(x,gy,player){
+    const w=44,h=80; const c=player?'#ff7a3c':'#ff5d6c';
+    ctx.fillStyle='rgba('+(player?'255,122,60':'255,93,108')+',0.18)'; ctx.fillRect(x-w/2,gy-h,w,h);
+    ctx.strokeStyle=c;ctx.lineWidth=2;ctx.strokeRect(x-w/2,gy-h,w,h);
+    ctx.fillStyle=c; ctx.fillRect(x-w/2,gy-h,w,5);
+  }
+  function drawUnit(u,gy){
+    const c = u.side==='p' ? (u.hit>0?'#fff':'#ffb04d') : (u.hit>0?'#fff':'#ff7d8e');
+    const lung = u.lunge>0 ? (u.side==='p'?4:-4) : 0;
+    const x=u.x+lung, y=gy-u.sz;
+    ctx.fillStyle=c;
+    if(u.role===1){ // distance : losange
+      ctx.beginPath();ctx.moveTo(x,y-u.sz);ctx.lineTo(x+u.sz*.8,y);ctx.lineTo(x,y+u.sz);ctx.lineTo(x-u.sz*.8,y);ctx.closePath();ctx.fill();
+    } else if(u.role===2){ // lourd : gros bloc
+      ctx.fillRect(x-u.sz,y-u.sz,u.sz*2,u.sz*2);
+    } else { // léger : cercle
+      ctx.beginPath();ctx.arc(x,y,u.sz,0,6.28);ctx.fill();
+    }
+    // barre de vie
+    if(u.hp<u.maxhp){ const wbar=u.sz*2, hpr=Math.max(0,u.hp/u.maxhp);
+      ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-u.sz,y-u.sz-7,wbar,3);
+      ctx.fillStyle=u.side==='p'?'#7CFC9A':'#ff6a6a';ctx.fillRect(x-u.sz,y-u.sz-7,wbar*hpr,3); }
+  }
+
+  // ---------- HUD ----------
+  function buildBar(){
+    const bar=document.getElementById('bar'); bar.innerHTML='';
+    const defs=[];
+    for(let i=0;i<3;i++) defs.push({k:'u'+i});
+    defs.push({k:'turret'}); defs.push({k:'slot'}); defs.push({k:'evo'}); defs.push({k:'sp'});
+    defs.forEach(d=>{ const b=document.createElement('button'); b.className='b'; b.id='btn_'+d.k;
+      if(d.k==='evo')b.classList.add('evo'); if(d.k==='sp')b.classList.add('sp');
+      b.innerHTML='<div class="n"></div><div class="c"></div>'; bar.appendChild(b);
+      b.onclick=()=>{ ac();
+        if(d.k.startsWith('u')) buyUnit(+d.k[1]);
+        else if(d.k==='turret') buyTurret();
+        else if(d.k==='slot') buySlot();
+        else if(d.k==='evo') evolve();
+        else if(d.k==='sp') castSpecial();
+      };
+    });
+  }
+  function updateHUD(){
+    document.getElementById('gold').textContent='◉ '+Math.floor(G.gold);
+    document.getElementById('ageName').textContent=AGES[G.age];
+    document.getElementById('phpb').style.width=Math.max(0,G.pbHp/G.pbMax*100)+'%';
+    const ew=document.getElementById('ehpwrap');
+    if(G.mode==='endless'){ ew.style.display='none'; document.getElementById('modeInfo').textContent='Vague '+G.wave+' · '+G.kills+' détruits'; }
+    else { ew.style.display='flex'; document.getElementById('ehpb').style.width=Math.max(0,G.ebHp/G.ebMax*100)+'%'; document.getElementById('modeInfo').textContent=''; }
+    for(let i=0;i<3;i++){ const s=unitStats(G.age,ROLES[i]); const b=document.getElementById('btn_u'+i);
+      b.querySelector('.n').textContent=UNAMES[G.age][i]; b.querySelector('.c').textContent='◉ '+s.cost+'  ['+(i+1)+']'; b.disabled=G.gold<s.cost; }
+    const ts=turretStats(G.age), bt=document.getElementById('btn_turret');
+    bt.querySelector('.n').textContent=TNAMES[G.age]+' ('+G.turrets.length+'/'+G.slots+')';
+    bt.querySelector('.c').textContent='◉ '+ts.cost+'  [T]'; bt.disabled=G.turrets.length>=G.slots||G.gold<ts.cost;
+    const bs=document.getElementById('btn_slot');
+    bs.querySelector('.n').textContent='+ Emplacement'; bs.querySelector('.c').textContent=G.slots>=MAXSLOTS?'max':'◉ '+slotCost(); bs.disabled=G.slots>=MAXSLOTS||G.gold<slotCost();
+    const be=document.getElementById('btn_evo');
+    if(G.age>=MAXAGE){ be.querySelector('.n').textContent='Ère max'; be.querySelector('.c').textContent='—'; be.disabled=true; }
+    else { const need=evolveXp(G.age),cost=evolveCost(G.age);
+      be.querySelector('.n').textContent='Évoluer ('+Math.min(G.xp,need)+'/'+need+' XP)';
+      be.querySelector('.c').textContent='◉ '+cost+'  [E]'; be.disabled=G.xp<need||G.gold<cost; }
+    const bsp=document.getElementById('btn_sp');
+    bsp.querySelector('.n').textContent=SPNAMES[G.age];
+    bsp.querySelector('.c').textContent=G.spCd>0?Math.ceil(G.spCd)+'s  [Esp]':'PRÊT  [Esp]'; bsp.disabled=G.spCd>0;
+  }
+
+  // ---------- boucle ----------
+  let last=performance.now();
+  function loop(now){
+    const dt=Math.min(.05,(now-last)/1000); last=now; requestAnimationFrame(loop);
+    if(G&&G.state==='play'){ step(dt); updateHUD(); }
+    if(G) render();
+  }
+
+  // ---------- fin ----------
+  function endGame(win){
+    G.state='done';
+    const ov=document.getElementById('over');
+    if(G.mode==='endless'){
+      document.getElementById('overTitle').textContent='base détruite';
+      document.getElementById('overScore').textContent=G.kills;
+      document.getElementById('overSub').textContent='unités détruites · vague '+G.wave+' · '+Math.floor(G.t)+'s';
+      submitEndless();
+    } else {
+      document.getElementById('overTitle').textContent= win?'victoire':'défaite';
+      document.getElementById('overScore').textContent= win?'⚑':'☠';
+      document.getElementById('overScore').style.fontSize='44px';
+      document.getElementById('overSub').textContent= win? 'Base ennemie détruite en '+Math.floor(G.t)+'s · ère '+AGES[G.age] : 'Ta base est tombée à la vague... tiens bon la prochaine fois.';
+      document.getElementById('netLine').textContent='Le mode Endless alimente le classement.';
+      document.getElementById('lbBox').innerHTML='';
+    }
+    blip(win?660:160,.3,win?'triangle':'sawtooth',.05);
+    setTimeout(()=>ov.classList.remove('hidden'),500);
+  }
+  function submitEndless(){
+    const nl=document.getElementById('netLine'), box=document.getElementById('lbBox');
+    if(!window.GamePortal){ nl.textContent=''; return; }
+    const meta={wave:G.wave, age:AGES[G.age], t:Math.floor(G.t)};
+    if(DAILY){ GamePortal.submitDaily(G.kills, meta); const st=GamePortal.getStreak();
+      nl.textContent=(GamePortal.online?'défi du jour envoyé':'hors-ligne — score local')+(st&&st.count>0?' · série '+st.count+' j':'');
+      if(GamePortal.online) setTimeout(()=>GamePortal.renderTop(box,{gameId:'ageofwar',limit:5,daily:true,title:'Défi du jour'}),350);
+    } else { GamePortal.submitScore(G.kills, meta);
+      nl.textContent=GamePortal.online?'score envoyé au classement':'hors-ligne — score gardé en local';
+      if(GamePortal.online) setTimeout(()=>GamePortal.renderTop(box,{gameId:'ageofwar',limit:5,title:'Classement en ligne'}),350);
+    }
+  }
+
+  // ---------- flow ----------
+  function start(mode){ ac(); reset(mode);
+    if(DAILY) mode='endless';
+    document.getElementById('menu').classList.add('hidden');
+    document.getElementById('over').classList.add('hidden');
+    document.getElementById('overScore').style.fontSize='40px';
+  }
+  document.getElementById('campBtn').onclick=()=>start('campaign');
+  document.getElementById('endlessBtn').onclick=()=>start('endless');
+  document.getElementById('retryBtn').onclick=()=>start(G?G.mode:'endless');
+  document.getElementById('menuBtn').onclick=()=>{ document.getElementById('over').classList.add('hidden'); document.getElementById('menu').classList.remove('hidden'); G.state='menu'; };
+
+  // défi du jour
+  const PARAMS=new URLSearchParams(location.search);
+  buildBar(); reset('endless'); G.state='menu';
+  if(PARAMS.get('daily')==='1' && window.GamePortal){
+    DAILY=GamePortal.daily(); RNG=DAILY.rng;
+    const b=document.getElementById('dailyBadge'); b.textContent='DÉFI DU JOUR · '+DAILY.date; b.style.display='block';
+    // en défi : on force l'Endless
+    document.getElementById('campBtn').style.display='none';
+    document.querySelector('#menu p').textContent='Défi du jour — mode Endless, mêmes vagues pour tous. Survis le plus longtemps et détruis un maximum d\'unités.';
+  }
+  requestAnimationFrame(loop);
+  if(window.GamePortal) GamePortal.init({gameId:'ageofwar'});
+})();
+</script>
+</body>
+</html>
