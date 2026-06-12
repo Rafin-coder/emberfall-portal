@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roadmap — Ember Arcade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<nav class="nav"><div class="wrap row">
+  <a class="brand" href="/"><span class="dot"></span><span id="brand">EMBER ARCADE</span></a>
+  <div class="navlinks">
+    <a href="/">Jeux</a>
+    <a href="/daily.html">Défi</a>
+    <a href="/leaderboard.html">Classement</a>
+    <a href="/roadmap.html" class="on">Roadmap</a>
+  </div>
+</div></nav>
+
+<header class="hero" style="padding-bottom:20px"><div class="scan"></div><div class="wrap">
+  <div class="eyebrow">ce qui est fait · ce qui arrive</div>
+  <h1>Roadmap</h1>
+  <p>La salle s'agrandit par étapes. On préfère peu de choses qui marchent à beaucoup qui plantent.</p>
+</div></header>
+
+<main class="wrap sec" style="padding-top:14px">
+  <div class="timeline">
+
+    <div class="phase done">
+      <div class="tag">livré</div>
+      <h3>Les jeux</h3>
+      <ul>
+        <li><b style="color:var(--text)">Emberfall</b> — survivor roguelite complet : 7 armes + évolutions, ennemis variés, boss, reliques, biomes, méta-progression, 5 personnages, succès, options, 3 difficultés.</li>
+        <li><b style="color:var(--text)">Lumen</b> — arcade de lumière nerveux, combos et accélération.</li>
+      </ul>
+    </div>
+
+    <div class="phase done">
+      <div class="tag">livré</div>
+      <h3>Le portail & le socle</h3>
+      <ul>
+        <li>Salle d'arcade : accueil, fiches de jeux, classements, roadmap.</li>
+        <li>SDK commun — chaque nouveau jeu hérite des comptes, classements et sauvegardes.</li>
+        <li>Comptes (connexion invitée), pseudo modifiable, sauvegarde cloud.</li>
+        <li>Classements partagés, vérifiés côté serveur (RLS + plafonds anti-triche).</li>
+        <li>Défi du jour : graine commune, classement quotidien, série (streak).</li>
+        <li>Finition : fenêtre de pseudo, top en ligne sur les écrans de fin.</li>
+      </ul>
+    </div>
+
+    <div class="phase now">
+      <div class="tag">en cours</div>
+      <h3>Fondations : mesurer & déployer proprement</h3>
+      <ul>
+        <li><b style="color:var(--text)">Analytics maison</b> — savoir combien de joueurs, où ils décrochent, ce qui accroche, le taux de retour.</li>
+        <li>Déploiement Git → Netlify avec clés en variables d'environnement (fini les copier-coller).</li>
+        <li>Suivi d'erreurs et sauvegardes de la base.</li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="tag">prévu — rétention</div>
+      <h3>Donner envie de revenir</h3>
+      <ul>
+        <li>Niveau de compte global (XP gagnée dans tous les jeux).</li>
+        <li>Classements hebdomadaires et entre amis, pas seulement all-time.</li>
+        <li>Quêtes quotidiennes & hebdomadaires avec récompenses.</li>
+        <li>Saisons : le défi du jour agrégé en classement saisonnier.</li>
+        <li>Succès transversaux, partage de score, notifications de retour (opt-in).</li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="tag">prévu — portail</div>
+      <h3>Attractivité & première impression</h3>
+      <ul>
+        <li>Onboarding en un clic : jouer immédiatement.</li>
+        <li>Catégories, recherche et filtres dès qu'il y aura plus de jeux.</li>
+        <li>Page profil publique : niveau, meilleurs scores, badges.</li>
+        <li>Thème clair/sombre, accessibilité, installable sur mobile (PWA).</li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="tag">prévu — contenu</div>
+      <h3>Plus de jeu, plus de profondeur</h3>
+      <ul>
+        <li>Emberfall : nouvelles armes, nouveaux ennemis (dont un type qui force à bouger), vrais boss par biome, évolutions conditionnelles, codex, arbre de talents.</li>
+        <li>Un 3ᵉ jeu d'un genre neuf (puzzle/réflexion) pour élargir le public.</li>
+        <li>Template de jeu vide branché au SDK pour aller plus vite.</li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="tag">prévu — modèle économique</div>
+      <h3>Rentabilité saine</h3>
+      <ul>
+        <li>Cosmétiques (skins, couleurs, effets) — sans avantage de jeu.</li>
+        <li>Tier « Soutien » et passe de saison, une fois l'audience installée.</li>
+        <li>Publicité non-intrusive en tout dernier, jamais pendant une partie.</li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="tag">exploration</div>
+      <h3>Vision long terme</h3>
+      <ul>
+        <li>Compétition asynchrone (fantômes, duels de score), puis prototype multijoueur temps réel sur un seul jeu.</li>
+        <li>Internationalisation (FR/EN), ouverture à d'autres créateurs de jeux.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <p class="mono" style="color:var(--faint);font-size:12px;margin-top:30px">
+    Priorité actuelle : mesurer avant d'enrichir, et mettre la salle devant de vrais joueurs.
+    Cet ordre bougera selon ce que les données montrent. Règle : chaque étape stable avant la suivante.
+  </p>
+</main>
+
+<footer class="foot"><div class="wrap" style="width:100%"><a href="/">← Retour à la salle</a></div></footer>
+
+<script src="/config.js"></script>
+<script>
+const b=(window.GAMEPORTAL_CONFIG&&GAMEPORTAL_CONFIG.PORTAL_NAME)||'EMBER ARCADE';
+document.getElementById('brand').textContent=b;
+</script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Lumen — Ember Arcade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#08080e;--text:#ece9f5;--muted:#8d8aa0;--ember:#ff7a3c;--ember2:#ffb04d;--cool:#5fe3c8;--danger:#ff5d6c;--line:rgba(255,255,255,.1)}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Space Grotesk",system-ui,sans-serif;overflow:hidden;touch-action:none}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px var(--line),0 30px 90px -40px rgba(255,122,60,.5)}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;gap:14px;padding:14px 18px;
+  font-family:"JetBrains Mono",monospace;font-size:13px;pointer-events:none;z-index:10}
+#hud .sc{font-size:22px;font-weight:500;color:var(--text)}
+#hud .cmb{color:var(--ember2);opacity:0;transition:opacity .2s}
+#hud .cmb.on{opacity:1}
+#hud .best{margin-left:auto;color:var(--muted)}
+#back{position:fixed;top:11px;left:14px;z-index:20;font:600 12px/1 "Space Grotesk",sans-serif;letter-spacing:.05em;
+  color:#bfb9d6;background:rgba(8,8,14,.7);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:9px;
+  padding:8px 12px;text-decoration:none}
+#back:hover{color:#fff}
+.overlay{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(700px 400px at 50% 38%,rgba(255,122,60,.10),transparent 70%),rgba(6,6,12,.78);
+  backdrop-filter:blur(6px)}
+.overlay.hidden{display:none}
+.panel{text-align:center;padding:30px 34px;max-width:340px}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--ember);margin-bottom:14px}
+.panel h1{font-size:54px;font-weight:700;letter-spacing:.02em;line-height:1;
+  background:linear-gradient(120deg,#fff,var(--ember2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.panel p{color:var(--muted);margin-top:14px;font-size:14px;line-height:1.5}
+.panel .big{font-family:"JetBrains Mono",monospace;font-size:42px;color:var(--ember2);margin:6px 0}
+.panel .sub{font-family:"JetBrains Mono",monospace;color:var(--muted);font-size:13px}
+.btn{margin-top:20px;font:600 15px/1 "Space Grotesk",sans-serif;letter-spacing:.03em;color:#0c0a08;cursor:pointer;
+  background:linear-gradient(120deg,var(--ember),var(--ember2));border:none;border-radius:11px;padding:13px 26px}
+.btn:hover{filter:brightness(1.08)}
+.keys{margin-top:16px;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted);letter-spacing:.06em}
+</style>
+</head>
+<body>
+<a id="back" href="/">← Arcade</a>
+<div id="dailyBadge" style="display:none;position:fixed;top:11px;left:50%;transform:translateX(-50%);z-index:20;font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#ffd27a;background:rgba(8,8,14,.7);backdrop-filter:blur(8px);border:1px solid rgba(255,176,77,.35);border-radius:9px;padding:8px 12px"></div>
+<div id="hud">
+  <span class="sc" id="score">0</span>
+  <span class="cmb" id="combo">×2</span>
+  <span class="best" id="best">record —</span>
+</div>
+<div id="stage"><canvas id="c"></canvas></div>
+
+<div class="overlay" id="menu">
+  <div class="panel">
+    <div class="eyebrow">ember arcade</div>
+    <h1>Lumen</h1>
+    <p>Guide la lumière, ramasse les braises, fuis tes propres ténèbres. Plus tu enchaînes vite, plus le combo grimpe.</p>
+    <button class="btn" id="startBtn">Commencer</button>
+    <div class="keys">flèches / ZQSD &nbsp;·&nbsp; ou glisse du doigt</div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="over">
+  <div class="panel">
+    <div class="eyebrow" style="color:var(--danger)">extinction</div>
+    <div class="big" id="finalScore">0</div>
+    <div class="sub" id="finalSub">longueur 0</div>
+    <p id="netLine" style="font-size:12px"></p>
+    <div id="lbBox" style="margin:10px 0 2px"></div>
+    <button class="btn" id="retryBtn">Rejouer</button>
+    <div class="keys"><a href="/leaderboard.html" style="color:var(--cool);text-decoration:none">voir le classement →</a></div>
+  </div>
+</div>
+
+<script src="/config.js"></script>
+<script src="/sdk.js"></script>
+<script>
+(function(){
+  const cv=document.getElementById('c'), ctx=cv.getContext('2d');
+  const GRID=22; let CELL=24, SIZE=GRID*CELL, DPR=Math.min(2,window.devicePixelRatio||1);
+
+  function fit(){
+    const m=Math.min(window.innerWidth, window.innerHeight)-36;
+    CELL=Math.max(12, Math.floor(m/GRID)); SIZE=GRID*CELL;
+    cv.style.width=SIZE+'px'; cv.style.height=SIZE+'px';
+    cv.width=SIZE*DPR; cv.height=SIZE*DPR; ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  window.addEventListener('resize',fit); fit();
+
+  // ---------- défi du jour (graine partagée par tous) ----------
+  const PARAMS=new URLSearchParams(location.search);
+  let DAILY=null, RNG=Math.random;
+  if(PARAMS.get('daily')==='1' && window.GamePortal){
+    DAILY=GamePortal.daily(); RNG=DAILY.rng;
+    const b=document.getElementById('dailyBadge');
+    if(b){ b.textContent='DÉFI DU JOUR · '+DAILY.date; b.style.display='block'; }
+  }
+
+  // ---------- audio ----------
+  let AC=null; function ac(){ if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } }
+  function blip(f,d,t,v){ if(!AC) return; const n=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();
+    o.type=t||'sine'; o.frequency.setValueAtTime(f,n); g.gain.setValueAtTime(.0001,n);
+    g.gain.exponentialRampToValueAtTime(v||.05,n+.01); g.gain.exponentialRampToValueAtTime(.0001,n+d);
+    o.connect(g).connect(AC.destination); o.start(n); o.stop(n+d+.02); }
+
+  // ---------- state ----------
+  let S=null;
+  function reset(){
+    S={ snake:[{x:11,y:11},{x:10,y:11},{x:9,y:11}], prev:[], dir:{x:1,y:0}, queue:[],
+        food:null, acc:0, interval:0.16, score:0, combo:1, comboT:0, parts:[], shake:0,
+        state:'play', foodPulse:0, eaten:0 };
+    placeFood();
+    document.getElementById('score').textContent='0';
+    setCombo(1);
+  }
+  function placeFood(){
+    // un seul tirage RNG par braise (le flux reste identique pour tous les joueurs),
+    // puis sondage déterministe si la case est occupée.
+    let idx=(RNG()*GRID*GRID)|0, guard=0;
+    while(guard<GRID*GRID && S.snake.some(s=>s.x===(idx%GRID)&&s.y===((idx/GRID)|0))){ idx=(idx+1)%(GRID*GRID); guard++; }
+    S.food={x:idx%GRID, y:(idx/GRID)|0}; S.foodPulse=0;
+  }
+  function setCombo(c){ const el=document.getElementById('combo'); el.textContent='×'+c; el.classList.toggle('on', c>1); }
+
+  // ---------- input ----------
+  function turn(dx,dy){ const d=S.queue.length?S.queue[S.queue.length-1]:S.dir;
+    if(dx===-d.x&&dy===-d.y) return; if(dx===d.x&&dy===d.y) return;
+    if(S.queue.length<2) S.queue.push({x:dx,y:dy}); }
+  window.addEventListener('keydown',e=>{
+    const k=e.key.toLowerCase();
+    if(['arrowup','z','w'].includes(k)){turn(0,-1);e.preventDefault();}
+    else if(['arrowdown','s'].includes(k)){turn(0,1);e.preventDefault();}
+    else if(['arrowleft','q','a'].includes(k)){turn(-1,0);e.preventDefault();}
+    else if(['arrowright','d'].includes(k)){turn(1,0);e.preventDefault();}
+    else if(k===' '){ if(S&&S.state==='menu') startGame(); }
+  });
+  let tsx=0,tsy=0,td=false;
+  cv.addEventListener('touchstart',e=>{const t=e.touches[0];tsx=t.clientX;tsy=t.clientY;td=true;},{passive:true});
+  cv.addEventListener('touchmove',e=>{ if(!td) return; const t=e.touches[0],dx=t.clientX-tsx,dy=t.clientY-tsy;
+    if(Math.abs(dx)+Math.abs(dy)<22) return;
+    if(Math.abs(dx)>Math.abs(dy)) turn(dx>0?1:-1,0); else turn(0,dy>0?1:-1);
+    tsx=t.clientX; tsy=t.clientY; },{passive:true});
+  cv.addEventListener('touchend',()=>{td=false;});
+
+  // ---------- step ----------
+  function step(){
+    if(S.queue.length) S.dir=S.queue.shift();
+    const head=S.snake[0], nh={x:head.x+S.dir.x, y:head.y+S.dir.y};
+    if(nh.x<0||nh.x>=GRID||nh.y<0||nh.y>=GRID){ return die(); }
+    const eat = S.food && nh.x===S.food.x && nh.y===S.food.y;
+    S.prev = S.snake.map(s=>({x:s.x,y:s.y}));
+    S.snake.unshift(nh);
+    if(!eat) S.snake.pop();
+    for(let i=1;i<S.snake.length;i++) if(S.snake[i].x===nh.x&&S.snake[i].y===nh.y) return die();
+    if(eat){
+      S.eaten++;
+      if(S.comboT>0) S.combo=Math.min(9,S.combo+1); else S.combo=1;
+      S.comboT=2.4; setCombo(S.combo);
+      S.score += 10*S.combo;
+      document.getElementById('score').textContent=S.score;
+      S.interval=Math.max(0.07, 0.16 - S.eaten*0.0025);
+      burst(S.food.x, S.food.y);
+      S.shake=Math.min(7, 3+S.combo*0.5);
+      blip(420+S.combo*70,.09,'triangle',.05); if(S.combo>1) blip(900+S.combo*60,.05,'sine',.03);
+      placeFood();
+    }
+  }
+  function burst(gx,gy){ const cx=(gx+.5)*CELL, cy=(gy+.5)*CELL;
+    for(let i=0;i<14;i++){ const a=Math.random()*6.283, sp=40+Math.random()*150;
+      S.parts.push({x:cx,y:cy,dx:Math.cos(a)*sp,dy:Math.sin(a)*sp,life:.4+Math.random()*.4,t:0,
+        col: Math.random()<.5?'255,176,77':'95,227,200'}); } }
+
+  function die(){
+    S.state='dead'; S.shake=12; blip(180,.3,'sawtooth',.06); blip(90,.45,'triangle',.05);
+    const best=Math.max(+(localStorage.getItem('gp:lumen:best')||0), S.score);
+    localStorage.setItem('gp:lumen:best', best);
+    document.getElementById('finalScore').textContent=S.score;
+    document.getElementById('finalSub').textContent='longueur '+S.snake.length+' · '+S.eaten+' braises';
+    const nl=document.getElementById('netLine');
+    if(window.GamePortal){ const box=document.getElementById('lbBox');
+      if(DAILY){
+        GamePortal.submitDaily(S.score,{len:S.snake.length,embers:S.eaten});
+        const st=GamePortal.getStreak();
+        nl.textContent=(GamePortal.online?'défi du jour envoyé':'hors-ligne — score local')+(st&&st.count>0?' · série '+st.count+' j':'');
+        if(GamePortal.online) setTimeout(()=>GamePortal.renderTop(box,{gameId:'lumen',limit:5,daily:true,title:'Défi du jour'}),350);
+      } else {
+        GamePortal.submitScore(S.score, {len:S.snake.length, embers:S.eaten});
+        nl.textContent = GamePortal.online ? 'score envoyé au classement' : 'hors-ligne — score gardé en local';
+        if(GamePortal.online) setTimeout(()=>GamePortal.renderTop(box,{gameId:'lumen',limit:3,title:'Classement en ligne'}),350);
+      } }
+    setTimeout(()=>document.getElementById('over').classList.remove('hidden'), 420);
+  }
+
+  // ---------- update / render ----------
+  let last=performance.now();
+  function loop(now){
+    const dt=Math.min(.05,(now-last)/1000); last=now; requestAnimationFrame(loop);
+    if(S.state==='play'){
+      S.acc+=dt; S.foodPulse+=dt;
+      if(S.comboT>0){ S.comboT-=dt; if(S.comboT<=0){ S.combo=1; setCombo(1); } }
+      while(S.acc>=S.interval){ S.acc-=S.interval; if(S.state==='play') step(); }
+    }
+    if(S.shake>0) S.shake=Math.max(0,S.shake-dt*30);
+    for(let i=S.parts.length-1;i>=0;i--){ const p=S.parts[i]; p.t+=dt; p.x+=p.dx*dt; p.y+=p.dy*dt; p.dx*=.92; p.dy*=.92; if(p.t>=p.life) S.parts.splice(i,1); }
+    render();
+  }
+  function render(){
+    ctx.clearRect(0,0,SIZE,SIZE);
+    const sh=S.shake, ox=sh?(Math.random()*2-1)*sh:0, oy=sh?(Math.random()*2-1)*sh:0;
+    ctx.save(); ctx.translate(ox,oy);
+    // grid
+    ctx.strokeStyle='rgba(255,255,255,.035)'; ctx.lineWidth=1;
+    for(let i=1;i<GRID;i++){ ctx.beginPath();ctx.moveTo(i*CELL,0);ctx.lineTo(i*CELL,SIZE);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(0,i*CELL);ctx.lineTo(SIZE,i*CELL);ctx.stroke(); }
+    // food
+    if(S.food){ const cx=(S.food.x+.5)*CELL, cy=(S.food.y+.5)*CELL, pr=CELL*0.30*(1+Math.sin(S.foodPulse*6)*0.12);
+      const g=ctx.createRadialGradient(cx,cy,0,cx,cy,CELL*1.1); g.addColorStop(0,'rgba(255,176,77,.55)'); g.addColorStop(1,'rgba(255,176,77,0)');
+      ctx.fillStyle=g; ctx.fillRect(cx-CELL*1.1,cy-CELL*1.1,CELL*2.2,CELL*2.2);
+      ctx.fillStyle='#ffd27a'; ctx.beginPath(); ctx.arc(cx,cy,pr,0,6.283); ctx.fill(); }
+    // snake (interpolé)
+    const prog = S.state==='play' ? Math.min(1, S.acc/S.interval) : 1;
+    const n=S.snake.length;
+    for(let i=n-1;i>=0;i--){
+      const cur=S.snake[i], src=(S.prev&&S.prev[i])?S.prev[i]:cur;
+      const x=(src.x+(cur.x-src.x)*prog+.5)*CELL, y=(src.y+(cur.y-src.y)*prog+.5)*CELL;
+      const f=1-i/(n+2), r=CELL*(0.30+0.12*f);
+      const col = i===0 ? '255,224,150' : '95,227,200';
+      const g=ctx.createRadialGradient(x,y,0,x,y,r*2.4);
+      g.addColorStop(0,'rgba('+col+','+(0.5*f+0.25)+')'); g.addColorStop(1,'rgba('+col+',0)');
+      ctx.fillStyle=g; ctx.fillRect(x-r*2.4,y-r*2.4,r*4.8,r*4.8);
+      ctx.fillStyle='rgba('+col+','+(0.55+0.4*f)+')'; ctx.beginPath(); ctx.arc(x,y,r,0,6.283); ctx.fill();
+    }
+    // particles
+    for(const p of S.parts){ const a=Math.max(0,1-p.t/p.life); ctx.fillStyle='rgba('+p.col+','+a+')';
+      ctx.beginPath(); ctx.arc(p.x,p.y,2.4*a+0.6,0,6.283); ctx.fill(); }
+    ctx.restore();
+  }
+
+  // ---------- flow ----------
+  function startGame(){ ac(); reset(); document.getElementById('menu').classList.add('hidden'); document.getElementById('over').classList.add('hidden'); }
+  document.getElementById('startBtn').onclick=startGame;
+  document.getElementById('retryBtn').onclick=startGame;
+
+  reset(); S.state='menu';
+  document.getElementById('best').textContent='record '+(+(localStorage.getItem('gp:lumen:best')||0));
+  requestAnimationFrame(loop);
+
+  if(window.GamePortal){ GamePortal.init({gameId:'lumen'}).then(()=>{
+    document.getElementById('best').textContent='record '+(+(localStorage.getItem('gp:lumen:best')||0)); }); }
+})();
+</script>
+</body>
+</html>

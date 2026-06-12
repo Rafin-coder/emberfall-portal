@@ -1,0 +1,149 @@
+/* ===========================================================
+   EMBER ARCADE — feuille de style partagée
+   Identité : cabinet d'arcade nocturne. Fond presque noir,
+   un seul accent braise, données en mono, cartouches comme signatures.
+   =========================================================== */
+:root{
+  --bg:#0a0a10; --bg2:#0d0d15; --panel:#13131e; --panel2:#181826;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.15);
+  --text:#ece9f5; --muted:#8d8aa0; --faint:#5b5870;
+  --ember:#ff7a3c; --ember2:#ffb04d; --cool:#5fe3c8; --danger:#ff5d6c;
+  --r:16px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(255,122,60,.10), transparent 60%),
+    var(--bg);
+  color:var(--text);
+  font-family:"Inter",system-ui,-apple-system,sans-serif;
+  font-size:15px; line-height:1.55; min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+
+/* ---------- NAV ---------- */
+.nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(14px);
+  background:linear-gradient(to bottom,rgba(10,10,16,.92),rgba(10,10,16,.6));
+  border-bottom:1px solid var(--line)}
+.nav .row{display:flex;align-items:center;gap:18px;height:62px}
+.brand{font-family:"Space Grotesk",sans-serif;font-weight:700;letter-spacing:.18em;
+  font-size:15px;display:flex;align-items:center;gap:9px}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--ember);
+  box-shadow:0 0 14px var(--ember);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.4;transform:scale(.8)}}
+.navlinks{display:flex;gap:4px;margin-left:auto}
+.navlinks a{font-size:12.5px;letter-spacing:.06em;color:var(--muted);
+  padding:8px 13px;border-radius:9px}
+.navlinks a:hover,.navlinks a.on{color:var(--text);background:rgba(255,255,255,.05)}
+.chip{display:inline-flex;align-items:center;gap:8px;font-family:"JetBrains Mono",monospace;
+  font-size:11.5px;color:var(--muted);border:1px solid var(--line);border-radius:999px;
+  padding:7px 12px;cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--line2);color:var(--text)}
+.chip b{color:var(--cool);font-weight:500}
+.chip .av{width:18px;height:18px;border-radius:50%;
+  background:conic-gradient(from 0deg,var(--ember),var(--ember2),var(--cool),var(--ember))}
+
+/* ---------- HERO ---------- */
+.hero{position:relative;padding:78px 0 46px;overflow:hidden}
+.hero .scan{position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background:repeating-linear-gradient(to bottom,transparent 0 3px,rgba(255,255,255,.02) 3px 4px);
+  mask:linear-gradient(to bottom,#000,transparent 70%)}
+.hero .eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.32em;
+  text-transform:uppercase;color:var(--ember);margin-bottom:18px}
+.hero h1{font-family:"Space Grotesk",sans-serif;font-weight:700;letter-spacing:-.01em;
+  font-size:clamp(40px,8vw,84px);line-height:.96;margin:0;
+  background:linear-gradient(180deg,#fff,#cfc8e6 64%,#7d6cff00);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.hero h1 .em{background:linear-gradient(120deg,var(--ember),var(--ember2));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);max-width:46ch;margin:20px 0 0;font-size:16px}
+.hero .stats{display:flex;gap:30px;margin-top:30px;font-family:"JetBrains Mono",monospace}
+.hero .stats .s .n{font-size:26px;color:var(--text);font-weight:500}
+.hero .stats .s .l{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-top:2px}
+
+/* ---------- SECTIONS ---------- */
+.sec{padding:34px 0 60px}
+.sechead{display:flex;align-items:baseline;gap:14px;margin-bottom:22px}
+.sechead h2{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:20px;letter-spacing:.01em;margin:0}
+.sechead .c{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--faint)}
+.sechead .line{flex:1;height:1px;background:var(--line)}
+
+/* ---------- CARTOUCHES (signature) ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:18px}
+.cart{position:relative;background:linear-gradient(180deg,var(--panel2),var(--panel));
+  border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.cart:hover{transform:translateY(-4px);border-color:rgba(255,122,60,.4);
+  box-shadow:0 16px 44px -22px rgba(255,122,60,.55)}
+.cart .label{display:flex;align-items:center;gap:8px;padding:11px 14px;
+  border-bottom:1px solid var(--line);font-family:"JetBrains Mono",monospace;
+  font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.cart .label .notch{width:26px;height:6px;border-radius:3px;
+  background:linear-gradient(90deg,var(--ember),var(--ember2))}
+.cart .label .st{margin-left:auto;color:var(--cool)}
+.cart .body{padding:18px 16px 16px}
+.cart .ttl{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:19px}
+.cart .tag{color:var(--muted);font-size:13px;margin-top:5px;min-height:38px}
+.cart .foot{display:flex;align-items:center;gap:10px;margin-top:14px}
+.cart .best{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--muted)}
+.cart .best b{color:var(--ember2);font-weight:500}
+.play{margin-left:auto;display:inline-flex;align-items:center;gap:7px;
+  font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:13px;letter-spacing:.04em;
+  color:#0c0a08;background:linear-gradient(120deg,var(--ember),var(--ember2));
+  padding:9px 15px;border-radius:10px;border:none;cursor:pointer;transition:.15s}
+.play:hover{filter:brightness(1.08)}
+.cart.soon{opacity:.6}
+.cart.soon .play{background:transparent;color:var(--faint);border:1px solid var(--line);cursor:default}
+
+/* ---------- TABLEAU CLASSEMENT ---------- */
+.controls{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+select,.btn{font-family:"Inter",sans-serif;font-size:13px;color:var(--text);
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 13px;cursor:pointer}
+select:hover,.btn:hover{border-color:var(--line2)}
+.lb{width:100%;border-collapse:collapse;font-family:"JetBrains Mono",monospace;font-size:13px}
+.lb th{text-align:left;color:var(--faint);font-weight:400;font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;padding:0 14px 12px}
+.lb td{padding:13px 14px;border-top:1px solid var(--line)}
+.lb tr.me td{background:rgba(255,122,60,.07)}
+.lb .rk{color:var(--faint);width:46px}
+.lb tr:nth-child(1 of .row) .rk{color:var(--ember2)}
+.lb .val{color:var(--ember2);text-align:right}
+.lb .who{color:var(--text)}
+.lb .me-tag{color:var(--cool);font-size:10px;margin-left:8px}
+.empty{color:var(--faint);font-size:14px;padding:30px 6px;text-align:center}
+
+/* ---------- ROADMAP ---------- */
+.timeline{position:relative;margin-left:8px;padding-left:28px;
+  border-left:1px solid var(--line)}
+.phase{position:relative;padding:0 0 34px}
+.phase::before{content:"";position:absolute;left:-35px;top:4px;width:13px;height:13px;border-radius:50%;
+  background:var(--panel);border:2px solid var(--faint)}
+.phase.done::before{background:var(--cool);border-color:var(--cool);box-shadow:0 0 12px rgba(95,227,200,.6)}
+.phase.now::before{background:var(--ember);border-color:var(--ember);box-shadow:0 0 12px var(--ember)}
+.phase .tag{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--faint)}
+.phase.done .tag{color:var(--cool)} .phase.now .tag{color:var(--ember)}
+.phase h3{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:18px;margin:6px 0 8px}
+.phase ul{margin:0;padding-left:18px;color:var(--muted)}
+.phase li{margin:4px 0}
+
+/* ---------- AD SLOT (réservé, non actif) ---------- */
+.adslot{border:1px dashed var(--line);border-radius:12px;color:var(--faint);
+  font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.1em;
+  text-align:center;padding:18px;margin:14px 0}
+
+/* ---------- FOOTER ---------- */
+.foot{border-top:1px solid var(--line);padding:30px 0;color:var(--faint);font-size:12.5px;
+  display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.foot a{color:var(--muted)} .foot a:hover{color:var(--text)}
+
+@media (max-width:560px){
+  .hero{padding:54px 0 34px}
+  .navlinks a{padding:8px 9px}
+  .hero .stats{gap:20px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classement — Ember Arcade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<nav class="nav"><div class="wrap row">
+  <a class="brand" href="/"><span class="dot"></span><span id="brand">EMBER ARCADE</span></a>
+  <div class="navlinks">
+    <a href="/">Jeux</a>
+    <a href="/daily.html">Défi</a>
+    <a href="/leaderboard.html" class="on">Classement</a>
+    <a href="/roadmap.html">Roadmap</a>
+  </div>
+  <div class="chip" id="userChip"><span class="av"></span><span>Pseudo</span> <b id="uname">…</b></div>
+</div></nav>
+
+<main class="wrap sec" style="padding-top:46px">
+  <div class="sechead"><h2>Classement</h2><span class="c">meilleur score par joueur</span><span class="line"></span></div>
+
+  <div class="controls">
+    <select id="gameSel"></select>
+    <span class="mono" id="netInfo" style="color:var(--faint);font-size:12px"></span>
+  </div>
+
+  <table class="lb">
+    <thead><tr><th class="rk">#</th><th>Joueur</th><th style="text-align:right">Score</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div class="empty" id="empty" style="display:none">Aucun score pour l'instant. Sois le premier à inscrire ton nom.</div>
+</main>
+
+<footer class="foot"><div class="wrap" style="width:100%"><a href="/">← Retour à la salle</a></div></footer>
+
+<script src="/config.js"></script>
+<script src="/sdk.js"></script>
+<script>
+const FALLBACK_GAMES = [{ id:'emberfall', title:'Emberfall' }, { id:'lumen', title:'Lumen' }];
+const TIME_GAMES = new Set(['emberfall']); // ces jeux affichent le score en mm:ss
+const brandName = (window.GAMEPORTAL_CONFIG&&GAMEPORTAL_CONFIG.PORTAL_NAME)||'EMBER ARCADE';
+document.getElementById('brand').textContent = brandName;
+
+function fmtTime(s){ s=Math.floor(s||0); const m=Math.floor(s/60); return m+':'+String(s%60).padStart(2,'0'); }
+function fmtVal(gid,v){ return TIME_GAMES.has(gid)?fmtTime(v):String(v); }
+function fmtMeta(m){ if(!m) return ''; const p=[]; if(m.char)p.push(m.char); if(m.diff)p.push(m.diff); if(m.lvl)p.push('niv '+m.lvl); return p.join(' · '); }
+
+async function render(gid){
+  const rows = document.getElementById('rows'), empty = document.getElementById('empty');
+  rows.innerHTML = '<tr><td colspan="3" class="mono" style="color:var(--faint)">chargement…</td></tr>';
+  const data = await GamePortal.getLeaderboard({ gameId: gid, limit: 50 });
+  if(!data.length){ rows.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  rows.innerHTML = data.map(r=>{
+    const meta = fmtMeta(r.meta);
+    return `<tr class="row ${r.is_me?'me':''}">
+      <td class="rk">${r.rank}</td>
+      <td class="who">${r.username||'—'}${r.is_me?'<span class="me-tag">toi</span>':''}${meta?`<span class="mono" style="color:var(--faint);font-size:11px;margin-left:8px">${meta}</span>`:''}</td>
+      <td class="val">${fmtVal(gid,r.value)}</td></tr>`;
+  }).join('');
+}
+
+async function boot(){
+  await GamePortal.init({ gameId:'portal' });
+  document.getElementById('uname').textContent = GamePortal.getUsername();
+  document.getElementById('netInfo').textContent = GamePortal.online ? 'classement en ligne' : 'hors-ligne — score local uniquement';
+  let games = await GamePortal.getGames();
+  if(!games || !games.length) games = FALLBACK_GAMES;
+  const sel = document.getElementById('gameSel');
+  sel.innerHTML = games.map(g=>`<option value="${g.id}">${g.title}</option>`).join('');
+  sel.onchange = ()=>render(sel.value);
+  render(sel.value);
+}
+
+document.getElementById('userChip').addEventListener('click', async ()=>{
+  const res = await GamePortal.promptUsername();
+  if(res){ document.getElementById('uname').textContent = GamePortal.getUsername(); render(document.getElementById('gameSel').value); }
+});
+
+boot();
+</script>
+</body>
+</html>

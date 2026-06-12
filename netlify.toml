@@ -1,0 +1,20 @@
+# Configuration Netlify
+[build]
+  publish = "public"
+  # Génère public/config.js depuis les variables d'environnement (déploiement Git).
+  # En glisser-déposer, cette commande est ignorée et ton config.js local est utilisé tel quel.
+  command = "node build-config.js"
+
+# En-têtes de sécurité raisonnables pour un portail de jeux.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Le SDK et la config peuvent être mis en cache courtement.
+[[headers]]
+  for = "/sdk.js"
+  [headers.values]
+    Cache-Control = "public, max-age=300"

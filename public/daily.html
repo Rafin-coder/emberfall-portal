@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Défi du jour — Ember Arcade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<style>
+.daycard{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.daycard .top{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.daycard .ttl{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:19px}
+.daycard .cond{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--cool);margin-left:auto}
+.daycard .lb{margin-top:14px}
+.streak{display:flex;align-items:center;gap:14px;background:linear-gradient(120deg,rgba(255,122,60,.12),rgba(255,176,77,.05));
+  border:1px solid rgba(255,122,60,.3);border-radius:14px;padding:16px 20px;margin-bottom:22px}
+.streak .flame{font-size:30px}
+.streak .n{font-family:"JetBrains Mono",monospace;font-size:26px;color:var(--ember2)}
+.streak .l{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="wrap row">
+  <a class="brand" href="/"><span class="dot"></span><span id="brand">EMBER ARCADE</span></a>
+  <div class="navlinks">
+    <a href="/">Jeux</a>
+    <a href="/daily.html" class="on">Défi</a>
+    <a href="/leaderboard.html">Classement</a>
+    <a href="/roadmap.html">Roadmap</a>
+  </div>
+  <div class="chip" id="userChip"><span class="av"></span><span>Pseudo</span> <b id="uname">…</b></div>
+</div></nav>
+
+<header class="hero" style="padding:54px 0 26px"><div class="scan"></div><div class="wrap">
+  <div class="eyebrow">une épreuve · 24 heures · le même départ pour tous</div>
+  <h1>Défi du <span class="em" id="dayLabel">jour</span></h1>
+  <p>Chaque jour, les mêmes conditions pour tout le monde. Inscris ton meilleur score avant minuit (UTC) et tiens ta série.</p>
+</div></header>
+
+<main class="wrap sec" style="padding-top:8px">
+  <div class="streak">
+    <span class="flame">🔥</span>
+    <div><div class="n"><span id="streakN">0</span> jour<span id="streakS"></span></div><div class="l">série en cours · record <b id="streakBest">0</b></div></div>
+    <span class="mono" id="netInfo" style="margin-left:auto;color:var(--faint);font-size:12px"></span>
+  </div>
+
+  <div id="cards"></div>
+</main>
+
+<footer class="foot"><div class="wrap" style="width:100%"><a href="/">← Retour à la salle</a></div></footer>
+
+<script src="/config.js"></script>
+<script src="/sdk.js"></script>
+<script>
+const FALLBACK_GAMES = [
+  { id:'emberfall', title:'Emberfall' },
+  { id:'lumen', title:'Lumen' }
+];
+const TIME_GAMES = new Set(['emberfall']);
+const brandName = (window.GAMEPORTAL_CONFIG&&GAMEPORTAL_CONFIG.PORTAL_NAME)||'EMBER ARCADE';
+document.getElementById('brand').textContent = brandName;
+
+function fmtTime(s){ s=Math.floor(s||0); const m=Math.floor(s/60); return m+':'+String(s%60).padStart(2,'0'); }
+function fmtVal(gid,v){ return TIME_GAMES.has(gid)?fmtTime(v):String(v); }
+
+// Recalcule les conditions imposées du jour, à l'identique des jeux.
+function emberfallConds(){
+  const D=GamePortal.daily();
+  const chars=['La Braise','Pyromancienne','Artilleuse','Spectre','Avare'];
+  const diffs=['Normal','Cauchemar','Enfer'];
+  const c=chars[Math.floor(D.rng()*chars.length)];
+  const d=diffs[Math.floor(D.rng()*diffs.length)];
+  return c+' · '+d;
+}
+const COND = {
+  emberfall: emberfallConds,
+  lumen: ()=> 'Séquence de braises partagée'
+};
+
+function cardHTML(g){
+  const cond = COND[g.id] ? COND[g.id]() : 'conditions du jour';
+  return `<div class="daycard" data-g="${g.id}">
+    <div class="top"><span class="ttl">${g.title}</span><span class="cond">${cond}</span></div>
+    <a class="play" href="/games/${g.id}/index.html?daily=1">Jouer le défi ▸</a>
+    <div class="lb" id="lb-${g.id}"></div>
+  </div>`;
+}
+
+async function boot(){
+  await GamePortal.init({ gameId:'portal' });
+  document.getElementById('uname').textContent = GamePortal.getUsername();
+  document.getElementById('dayLabel').textContent = GamePortal.daily().date;
+  document.getElementById('netInfo').textContent = GamePortal.online ? 'classements du jour en ligne' : 'hors-ligne — scores locaux';
+
+  const st = GamePortal.getStreak();
+  document.getElementById('streakN').textContent = st.count||0;
+  document.getElementById('streakS').textContent = (st.count||0)>1?'s':'';
+  document.getElementById('streakBest').textContent = st.best||0;
+
+  let games = await GamePortal.getGames();
+  if(!games || !games.length) games = FALLBACK_GAMES;
+  games = games.filter(g=>g.id!=='_portal');
+  document.getElementById('cards').innerHTML = games.map(cardHTML).join('');
+
+  for(const g of games){
+    const box = document.getElementById('lb-'+g.id);
+    GamePortal.renderTop(box, { gameId:g.id, limit:5, daily:true, title:'Classement du jour', format:(v)=>fmtVal(g.id,v) });
+  }
+}
+
+document.getElementById('userChip').addEventListener('click', async ()=>{
+  const res = await GamePortal.promptUsername();
+  if(res){ document.getElementById('uname').textContent = GamePortal.getUsername(); boot(); }
+});
+
+boot();
+</script>
+</body>
+</html>

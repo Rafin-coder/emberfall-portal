@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ember Arcade — petits jeux, gros scores</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<nav class="nav"><div class="wrap row">
+  <a class="brand" href="/"><span class="dot"></span><span id="brand">EMBER ARCADE</span></a>
+  <div class="navlinks">
+    <a href="/" class="on">Jeux</a>
+    <a href="/daily.html">Défi</a>
+    <a href="/leaderboard.html">Classement</a>
+    <a href="/roadmap.html">Roadmap</a>
+  </div>
+  <div class="chip" id="userChip" title="Changer de pseudo">
+    <span class="av"></span><span>Pseudo</span> <b id="uname">…</b>
+  </div>
+</div></nav>
+
+<header class="hero"><div class="scan"></div><div class="wrap">
+  <div class="eyebrow">salle d'arcade · navigateur · sans installation</div>
+  <h1>De petits jeux.<br>De <span class="em">vrais</span> classements.</h1>
+  <p>Une collection de jeux courts qui se jouent dans l'onglet. Un seul pseudo, des scores partagés, et une place à défendre sur chaque tableau.</p>
+  <div class="stats">
+    <div class="s"><div class="n mono" id="stGames">1</div><div class="l">jeu disponible</div></div>
+    <div class="s"><div class="n mono" id="stStatus">hors-ligne</div><div class="l">classements</div></div>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <a href="/daily.html" style="display:flex;align-items:center;gap:16px;text-decoration:none;margin:6px 0 8px;
+     background:linear-gradient(120deg,rgba(255,122,60,.14),rgba(255,176,77,.04));border:1px solid rgba(255,122,60,.32);
+     border-radius:16px;padding:18px 20px">
+    <span style="font-size:30px">🔥</span>
+    <span style="flex:1">
+      <span style="display:block;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;color:var(--text)">Défi du jour</span>
+      <span style="color:var(--muted);font-size:13px">Les mêmes conditions pour tous, un classement remis à zéro chaque jour. Garde ta série.</span>
+    </span>
+    <span class="play">Relever ▸</span>
+  </a>
+
+  <section class="sec" style="padding-top:18px">
+    <div class="sechead"><h2>À jouer maintenant</h2><span class="c" id="gcount"></span><span class="line"></span></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <div class="adslot">emplacement publicitaire — inactif tant que l'audience ne le justifie pas</div>
+</main>
+
+<footer class="foot"><div class="wrap" style="display:flex;gap:16px;flex-wrap:wrap;width:100%">
+  <span id="footName">Ember Arcade</span>
+  <a href="/roadmap.html">Roadmap</a>
+  <a href="/leaderboard.html">Classement</a>
+  <span style="margin-left:auto" id="netState" class="mono">·</span>
+</div></footer>
+
+<script src="/config.js"></script>
+<script src="/sdk.js"></script>
+<script>
+// Catalogue de repli (fonctionne même hors-ligne / sans Supabase).
+const FALLBACK_GAMES = [
+  { id:'emberfall', title:'Emberfall', tagline:'Tiens face à la nuit. Survivor roguelite.', enabled:true, sort:0 },
+  { id:'lumen', title:'Lumen', tagline:'Guide la lumière, enchaîne les braises. Arcade nerveux.', enabled:true, sort:1 }
+];
+const SOON = [];
+
+const brandName = (window.GAMEPORTAL_CONFIG&&GAMEPORTAL_CONFIG.PORTAL_NAME)||'EMBER ARCADE';
+document.getElementById('brand').textContent = brandName;
+document.getElementById('footName').textContent = brandName.charAt(0)+brandName.slice(1).toLowerCase();
+
+function fmtTime(s){ s=Math.floor(s||0); const m=Math.floor(s/60); return m+':'+String(s%60).padStart(2,'0'); }
+
+function cartHTML(g){
+  if(g.soon){
+    return `<article class="cart soon"><div class="label"><span class="notch"></span>${g.id}<span class="st">bientôt</span></div>
+      <div class="body"><div class="ttl">${g.title}</div><div class="tag">${g.tagline}</div>
+      <div class="foot"><button class="play" disabled>Verrouillé</button></div></div></article>`;
+  }
+  const best = +(localStorage.getItem('gp:'+g.id+':best')||0);
+  const bestTxt = best ? `record local <b>${g.id==='emberfall'?fmtTime(best):best}</b>` : 'pas encore joué';
+  return `<article class="cart"><div class="label"><span class="notch"></span>${g.id}<span class="st">prêt</span></div>
+    <div class="body"><div class="ttl">${g.title}</div><div class="tag">${g.tagline}</div>
+    <div class="foot"><span class="best">${bestTxt}</span>
+    <a class="play" href="/games/${g.id}/index.html">Jouer ▸</a></div></div></article>`;
+}
+
+async function boot(){
+  await GamePortal.init({ gameId:'portal' });
+  document.getElementById('uname').textContent = GamePortal.getUsername();
+  const online = GamePortal.online;
+  document.getElementById('stStatus').textContent = online ? 'en ligne' : 'hors-ligne';
+  document.getElementById('netState').textContent = online ? 'connecté à Supabase' : 'mode hors-ligne (scores locaux)';
+
+  let games = await GamePortal.getGames();
+  if(!games || !games.length) games = FALLBACK_GAMES;
+  const all = games.concat(SOON);
+  document.getElementById('grid').innerHTML = all.map(cartHTML).join('');
+  document.getElementById('stGames').textContent = games.length;
+  document.getElementById('gcount').textContent = games.length+' titre'+(games.length>1?'s':'');
+}
+
+document.getElementById('userChip').addEventListener('click', async ()=>{
+  const res = await GamePortal.promptUsername();
+  if(res) document.getElementById('uname').textContent = GamePortal.getUsername();
+});
+
+boot();
+</script>
+</body>
+</html>
