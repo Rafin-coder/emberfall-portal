@@ -28,7 +28,7 @@
   <h1>De petits jeux.<br>De <span class="em">vrais</span> classements.</h1>
   <p>Une collection de jeux courts qui se jouent dans l'onglet. Un seul pseudo, des scores partagés, et une place à défendre sur chaque tableau.</p>
   <div class="stats">
-    <div class="s"><div class="n mono" id="stGames">1</div><div class="l">jeu disponible</div></div>
+    <div class="s"><div class="n mono" id="stGames">1</div><div class="l">jeux jouables</div></div>
     <div class="s"><div class="n mono" id="stStatus">hors-ligne</div><div class="l">classements</div></div>
   </div>
 </div></header>
@@ -48,6 +48,27 @@
   <section class="sec" style="padding-top:18px">
     <div class="sechead"><h2>À jouer maintenant</h2><span class="c" id="gcount"></span><span class="line"></span></div>
     <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sechead"><h2>Comment ça marche</h2><span class="line"></span></div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+      <div class="cart"><div class="body"><div class="ttl" style="font-size:18px">🎮 Zéro installation</div>
+        <div class="tag">Tout se joue directement dans le navigateur, sur ordi comme sur mobile. Un clic et c'est parti.</div></div></div>
+      <div class="cart"><div class="body"><div class="ttl" style="font-size:18px">🏆 Un pseudo, tous les scores</div>
+        <div class="tag">Choisis un pseudo une fois. Tes scores comptent sur le classement en ligne de chaque jeu.</div></div></div>
+      <div class="cart"><div class="body"><div class="ttl" style="font-size:18px">🔥 Le défi du jour</div>
+        <div class="tag">Chaque jour, les mêmes conditions pour tout le monde et un classement remis à zéro. Garde ta série de jours.</div></div></div>
+      <div class="cart"><div class="body"><div class="ttl" style="font-size:18px">⏱️ Sessions courtes</div>
+        <div class="tag">Des jeux pensés pour une partie rapide — parfait pour une pause, avec l'envie de retenter « encore une ».</div></div></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sechead"><h2>À propos</h2><span class="line"></span></div>
+    <p style="color:var(--muted);max-width:680px;line-height:1.65">
+      <b style="color:var(--text)">Ember Arcade</b> est une petite salle d'arcade en ligne : une collection de jeux maison, courts et nerveux, qui partagent un même compte et des classements communs. Trois titres sont jouables aujourd'hui — un survivor roguelite (<b style="color:var(--text)">Emberfall</b>), un arcade de lumière (<b style="color:var(--text)">Lumen</b>) et une stratégie de couloir à travers les âges (<b style="color:var(--text)">Conquête des Âges</b>) — et d'autres arrivent. Le projet grandit au fil des retours : tu peux suivre ce qui est prévu sur la <a href="/roadmap.html" style="color:var(--ember)">roadmap publique</a>.
+    </p>
   </section>
 
   <div class="adslot">emplacement publicitaire — inactif tant que l'audience ne le justifie pas</div>
@@ -71,6 +92,16 @@ const FALLBACK_GAMES = [
 ];
 const SOON = [];
 
+// Infos d'affichage par jeu (genre + description + format), utilisées par les fiches.
+const GAME_INFO = {
+  emberfall:{ genre:'Survivor roguelite', meta:'Action · Solo · parties ~5–15 min',
+    desc:'Survis à des vagues d\'ennemis de plus en plus denses. Ramasse l\'XP, choisis tes armes et leurs évolutions, et va le plus loin possible avant d\'être submergé.' },
+  lumen:{ genre:'Arcade de réflexes', meta:'Nerveux · Solo · parties ~1–3 min',
+    desc:'Un serpent de lumière à faire grandir sans se mordre. Récupère les braises, enchaîne les combos et explose ton score.' },
+  ageofwar:{ genre:'Stratégie de couloir', meta:'Stratégie · Solo · campagne + endless',
+    desc:'Mène ton armée à travers cinq ères, de la préhistoire au futur. Produis des unités, pose des tourelles, évolue d\'ère, déclenche ton pouvoir spécial et détruis la base adverse.' },
+};
+
 const brandName = (window.GAMEPORTAL_CONFIG&&GAMEPORTAL_CONFIG.PORTAL_NAME)||'EMBER ARCADE';
 document.getElementById('brand').textContent = brandName;
 document.getElementById('footName').textContent = brandName.charAt(0)+brandName.slice(1).toLowerCase();
@@ -78,15 +109,18 @@ document.getElementById('footName').textContent = brandName.charAt(0)+brandName.
 function fmtTime(s){ s=Math.floor(s||0); const m=Math.floor(s/60); return m+':'+String(s%60).padStart(2,'0'); }
 
 function cartHTML(g){
+  const info = GAME_INFO[g.id] || {};
+  const genre = info.genre || 'Jeu';
   if(g.soon){
-    return `<article class="cart soon"><div class="label"><span class="notch"></span>${g.id}<span class="st">bientôt</span></div>
-      <div class="body"><div class="ttl">${g.title}</div><div class="tag">${g.tagline}</div>
+    return `<article class="cart soon"><div class="label"><span class="notch"></span>${genre}<span class="st">bientôt</span></div>
+      <div class="body"><div class="ttl">${g.title}</div><div class="tag">${info.desc||g.tagline}</div>
       <div class="foot"><button class="play" disabled>Verrouillé</button></div></div></article>`;
   }
   const best = +(localStorage.getItem('gp:'+g.id+':best')||0);
   const bestTxt = best ? `record local <b>${g.id==='emberfall'?fmtTime(best):best}</b>` : 'pas encore joué';
-  return `<article class="cart"><div class="label"><span class="notch"></span>${g.id}<span class="st">prêt</span></div>
-    <div class="body"><div class="ttl">${g.title}</div><div class="tag">${g.tagline}</div>
+  const meta = info.meta ? `<div class="tag" style="opacity:.7;font-size:12px;margin-top:6px">${info.meta}</div>` : '';
+  return `<article class="cart"><div class="label"><span class="notch"></span>${genre}<span class="st">prêt</span></div>
+    <div class="body"><div class="ttl">${g.title}</div><div class="tag">${info.desc||g.tagline}</div>${meta}
     <div class="foot"><span class="best">${bestTxt}</span>
     <a class="play" href="/games/${g.id}/index.html">Jouer ▸</a></div></div></article>`;
 }

@@ -53,9 +53,8 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
 .slot.empty.ok:hover{background:rgba(255,176,77,.1)}
 #back{position:fixed;top:9px;left:12px;z-index:40;font:600 12px/1 "Space Grotesk";letter-spacing:.05em;color:#bfb9d6;
   background:rgba(8,8,14,.7);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:9px;padding:8px 12px;text-decoration:none}
-#sound{position:fixed;top:9px;right:12px;z-index:40;width:38px;height:34px;font-size:16px;cursor:pointer;
-  background:rgba(8,8,14,.7);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:9px;color:#ffb04d}
-#sound.off{color:#6b6878}
+.vol{display:flex;align-items:center;gap:7px;color:#ffb04d;font-size:15px}
+.vol input{width:88px;accent-color:#ff7a3c;cursor:pointer}
 #dailyBadge{display:none;position:fixed;top:9px;left:50%;transform:translateX(-50%);z-index:40;font:600 11px/1 "JetBrains Mono",monospace;
   letter-spacing:.12em;color:#ffd27a;background:rgba(8,8,14,.7);backdrop-filter:blur(8px);border:1px solid rgba(255,176,77,.35);border-radius:9px;padding:8px 12px}
 .overlay{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
@@ -76,7 +75,6 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
 </head>
 <body>
 <a id="back" href="/">← Arcade</a>
-<button id="sound" title="Musique">♪</button>
 <audio id="bgm" src="music.mp3" loop preload="auto"></audio>
 <div id="dailyBadge"></div>
 
@@ -89,6 +87,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
       <div class="bhp"><div class="lab"><span style="color:#ffb04d">TA BASE</span><span class="pct" id="phpPct">100%</span></div><div class="bar"><i id="phpb" style="width:100%;background:linear-gradient(90deg,#ff7a3c,#ffb04d)"></i></div></div>
       <div class="bhp" id="ehpwrap"><div class="lab"><span style="color:#ff7d8e">BASE ENNEMIE</span><span class="pct" id="ehpPct">100%</span></div><div class="bar"><i id="ehpb" style="width:100%;background:linear-gradient(90deg,#ff5d6c,#c44)"></i></div></div>
       <div class="res" id="endlessInfo" style="display:none;text-align:right"><span class="v" id="waveTxt">0</span><span class="k" id="killTxt">vague · 0 détruits</span></div>
+      <label class="vol" title="Volume de la musique">♪<input id="vol" type="range" min="0" max="100" value="40"></label>
     </div>
   </div>
   <div id="stage"><canvas id="c"></canvas></div>
@@ -592,21 +591,28 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     if(G.age>=MAXAGE) setBtn('evo','Ère maximale','—').disabled=true;
     else setBtn('evo','Évoluer → '+AGES[G.age+1], '◉ '+evolveCost(G.age)+'  [E]').disabled=G.xp<need||G.gold<evolveCost(G.age);
     setBtn('sp', SPNAMES[G.age], G.spCd>0?Math.ceil(G.spCd)+'s  [Espace]':'PRÊT  [Espace]').disabled=G.spCd>0;
-    // rangée d'emplacements de tourelles : vides (construire) / occupés (vendre)
-    const ts=turretStats(G.age), sl=document.getElementById('slots'); sl.innerHTML='';
-    for(let i=0;i<G.slots;i++){
-      const c=document.createElement('div');
-      if(i<G.turrets.length){ const tr=G.turrets[i], refund=Math.round(turretStats(tr.age).cost*0.5);
-        c.className='slot filled';
-        c.innerHTML='<span>'+TNAMES[tr.age].split(' ')[0]+'</span><b title="Vendre (+'+refund+' or)">✕</b>';
-        c.querySelector('b').onclick=()=>{ ac(); sellTurretAt(i); };
-      } else { const can=G.gold>=ts.cost;
-        c.className='slot empty'+(can?' ok':'');
-        c.innerHTML='<span>+ '+TNAMES[G.age].split(' ')[0]+'</span><em>◉ '+ts.cost+'</em>';
-        if(can) c.onclick=()=>{ ac(); buyTurret(); };
+    // rangée d'emplacements : reconstruite seulement quand l'état change
+    // (la reconstruire à chaque image faisait perdre les clics)
+    const ts=turretStats(G.age), sl=document.getElementById('slots');
+    const sig=G.slots+'|'+G.age+'|'+G.turrets.map(t=>t.age).join(',');
+    if(sl.dataset.sig!==sig){
+      sl.dataset.sig=sig; sl.innerHTML='';
+      for(let i=0;i<G.slots;i++){
+        const c=document.createElement('div');
+        if(i<G.turrets.length){ const tr=G.turrets[i], refund=Math.round(turretStats(tr.age).cost*0.5);
+          c.className='slot filled';
+          c.innerHTML='<span>'+TNAMES[tr.age].split(' ')[0]+'</span><b title="Vendre (+'+refund+' or)">✕</b>';
+          c.querySelector('b').onclick=(ev)=>{ ev.stopPropagation(); ac(); sellTurretAt(i); };
+        } else {
+          c.className='slot empty';
+          c.innerHTML='<span>+ '+TNAMES[G.age].split(' ')[0]+'</span><em>◉ '+ts.cost+'</em>';
+          c.onclick=()=>{ ac(); buyTurret(); };
+        }
+        sl.appendChild(c);
       }
-      sl.appendChild(c);
     }
+    // affordabilité : mise à jour légère sans reconstruire
+    sl.querySelectorAll('.slot.empty').forEach(c=>c.classList.toggle('ok', G.gold>=ts.cost));
   }
 
   // ---------- boucle ----------
@@ -652,16 +658,12 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
 
   // ---------- flow ----------
   // ---------- musique de fond ----------
-  const bgm=document.getElementById('bgm'); bgm.volume=0.4;
-  let musicOn = localStorage.getItem('cda:music')!=='off';
-  function refreshSoundBtn(){ const b=document.getElementById('sound'); b.textContent=musicOn?'♪':'♪̸'; b.classList.toggle('off',!musicOn); }
-  function startMusic(){ if(musicOn){ bgm.play().catch(()=>{}); } }
-  document.getElementById('sound').onclick=()=>{
-    musicOn=!musicOn; localStorage.setItem('cda:music',musicOn?'on':'off');
-    if(musicOn) bgm.play().catch(()=>{}); else bgm.pause();
-    refreshSoundBtn();
-  };
-  refreshSoundBtn();
+  const bgm=document.getElementById('bgm');
+  let vol = parseInt(localStorage.getItem('cda:vol'),10); if(isNaN(vol)) vol=40;
+  const volEl=document.getElementById('vol'); volEl.value=vol; bgm.volume=vol/100;
+  volEl.oninput=()=>{ vol=+volEl.value; bgm.volume=vol/100; localStorage.setItem('cda:vol',vol);
+    if(vol>0 && bgm.paused) bgm.play().catch(()=>{}); };
+  function startMusic(){ if(bgm.volume>0) bgm.play().catch(()=>{}); }
 
   function start(mode){ ac(); startMusic(); reset(mode);
     if(DAILY) mode='endless';
