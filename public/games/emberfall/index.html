@@ -158,6 +158,25 @@ button:hover{filter:brightness(1.08)}button:active{transform:translateY(2px)}
 .invempty{font-size:12px;opacity:.55;padding:6px 4px;line-height:1.5}
 .hidden{display:none!important}
 @media(max-width:480px){.card{padding:26px 20px}}
+/* --- ajustements : lisibilité + anti-chevauchement bouton Arcade --- */
+.hudtop{padding:14px 16px 14px 112px}
+.timer{font-size:30px}
+.lvltag{font-size:13px} .lvltag b{font-size:17px}
+.xptxt{font-size:12px}
+.difftag{font-size:11px}
+.chip{font-size:15px;padding:7px 11px}
+.vlabel{font-size:12px}
+.barnum{font-size:12px}
+.wchip{font-size:12px;padding:5px 9px}
+.invrow .t{font-size:15px}
+.invrow .d{font-size:12.5px}
+.invrow .ic{width:46px;height:46px;font-size:23px}
+.lvlhead h2{font-size:30px}
+.choice .t{font-size:16.5px}
+.choice .d{font-size:13px}
+.choice .badge{font-size:13px}
+.menubtns button{font-size:15px}
+@media(max-width:560px){.hudtop{padding-left:104px}.timer{font-size:25px}}
 </style>
 </head>
 <body>
@@ -522,6 +541,7 @@ const META=[
  {id:'reg',ic:'✚',name:'Régénération',desc:'+0.3 PV/s',max:5,cost:l=>Math.round(160*Math.pow(1.65,l))},
  {id:'for',ic:'◉',name:'Fortune',desc:'+12% or trouvé',max:6,cost:l=>Math.round(120*Math.pow(1.6,l))},
  {id:'reroll',ic:'↻',name:'Clairvoyance',desc:'+1 relance de choix par partie',max:5,cost:l=>Math.round(200*Math.pow(1.7,l))},
+ {id:'slots',ic:'🗡',name:'Arsenal',desc:'+1 emplacement d\'arme (4 de base, 7 max)',max:3,cost:l=>Math.round(800*Math.pow(2.0,l))},
 ];
 function applyMeta(){const m=loadMeta(),p=G.p;
   p.maxhp+=18*(m.vit||0);p.hp=p.maxhp;
@@ -539,8 +559,8 @@ function applyMeta(){const m=loadMeta(),p=G.p;
 /* ---------- gameplay ---------- */
 function nearest(x,y,maxd){let best=null,bd=maxd?maxd*maxd:Infinity;
   for(const e of G.enemies){const d=dist2(x,y,e.x,e.y);if(d<bd){bd=d;best=e;}}return best;}
-function diffMul(){const t=G.t,D=DIFFS[diffGet()],B=BIOMES[G.biome<0?0:G.biome],late=1+Math.max(0,(t-240)/210)+Math.max(0,(t-540)/150);
-  return {hp:(1+0.58*(t/60)*(t/60))*late*D.hp*B.hpM, dmg:(1+t/180)*Math.sqrt(late)*D.dmg*B.dmgM, spd:(1+Math.min(1.4,t/260))*B.spdM};}
+function diffMul(){const t=G.t,D=DIFFS[diffGet()],B=BIOMES[G.biome<0?0:G.biome],late=1+Math.max(0,(t-180)/180)+Math.max(0,(t-420)/130);
+  return {hp:(1+0.66*(t/60)*(t/60))*late*D.hp*B.hpM, dmg:(1+t/180)*Math.sqrt(late)*D.dmg*B.dmgM, spd:(1+Math.min(1.4,t/260))*B.spdM};}
 function maxEnemies(){return Math.min(640,240+Math.floor(G.t/22)*28);}
 function mkEnemy(t,x,y,baseHp,baseSp,baseDmg,m){
   return {x,y,r:ETYPE[t].r,hp:baseHp*m.hp*G.relicHp,maxhp:baseHp*m.hp*G.relicHp,sp:Math.min(196,baseSp*m.spd),dmg:baseDmg*m.dmg,
@@ -727,12 +747,12 @@ function gainXP(v){G.p.xp+=Math.round(v*comboMul()*G.run.xpMul);sfx.xp();
   while(G.p.xp>=G.p.xpNext){G.p.xp-=G.p.xpNext;G.p.lvl++;G.p.xpNext=Math.round(G.p.xpNext*1.18+3);openLevelUp();}}
 
 const POOL=[
- {id:'bolt+',r:'common',ic:'✦',t:'Tir multiple',d:'+1 projectile vers l\'ennemi le plus proche.',can:w=>w.bolt<7&&!w.boltEvo,get:()=>'→ '+(G.w.bolt+1)+' tirs',ap:w=>w.bolt++},
+ {id:'bolt+',r:'common',ic:'✦',t:'Tir multiple',d:'+1 projectile vers l\'ennemi le plus proche.',can:w=>w.bolt<5&&!w.boltEvo,get:()=>'→ '+(G.w.bolt+1)+' tirs',ap:w=>w.bolt++},
  {id:'boltdmg',r:'common',ic:'⚡',t:'Charge ardente',d:'Tes projectiles frappent plus fort.',can:w=>!w.boltEvo,get:()=>nextDmg('bolt',1.35),ap:w=>w.boltDmg*=1.35},
  {id:'boltrate',r:'common',ic:'»',t:'Cadence',d:'Tu tires plus vite.',can:w=>w.boltRate>0.45&&!w.boltEvo,get:()=>'tir +20%',ap:w=>w.boltRate*=0.8},
- {id:'orb',r:'epic',ic:'◍',t:'Cendres tournoyantes',d:'Des braises orbitent et brûlent au contact.',can:w=>w.orb<6&&!w.orbEvo,get:w=>w.orb?'+1 braise':'NOUVELLE arme',ap:w=>w.orb++},
+ {id:'orb',r:'epic',ic:'◍',t:'Cendres tournoyantes',d:'Des braises orbitent et brûlent au contact.',can:w=>w.orb<5&&!w.orbEvo,get:w=>w.orb?'+1 braise':'NOUVELLE arme',ap:w=>w.orb++},
  {id:'orbdmg',r:'rare',ic:'☼',t:'Cendres incandescentes',d:'Les braises orbitales font plus mal.',can:w=>w.orb>0&&!w.orbEvo,get:()=>nextDmg('orb',1.4),ap:w=>w.orbDmg*=1.4},
- {id:'nova',r:'epic',ic:'◎',t:'Onde de lumière',d:'Une déflagration éclate régulièrement autour de toi.',can:w=>w.nova<6&&!w.novaEvo,get:w=>w.nova?'rayon + cadence':'NOUVELLE arme',ap:w=>w.nova++},
+ {id:'nova',r:'epic',ic:'◎',t:'Onde de lumière',d:'Une déflagration éclate régulièrement autour de toi.',can:w=>w.nova<5&&!w.novaEvo,get:w=>w.nova?'rayon + cadence':'NOUVELLE arme',ap:w=>w.nova++},
  {id:'novadmg',r:'rare',ic:'✸',t:'Embrasement',d:'L\'onde de lumière frappe plus fort.',can:w=>w.nova>0&&!w.novaEvo,get:()=>nextDmg('nova',1.45),ap:w=>w.novaDmg*=1.45},
  {id:'hp',r:'rare',ic:'❤',t:'Cœur de braise',d:'+25 vie max et soin complet.',can:()=>true,get:()=>'+25 PV max',ap:()=>{G.p.maxhp+=25;G.p.hp=G.p.maxhp;}},
  {id:'spd',r:'common',ic:'➤',t:'Pas léger',d:'Tu te déplaces plus vite.',can:()=>true,get:()=>'vitesse +12%',ap:()=>G.p.speed*=1.12},
@@ -740,27 +760,32 @@ const POOL=[
  {id:'regen',r:'rare',ic:'✚',t:'Régénération',d:'Tu récupères de la vie en continu.',can:()=>true,get:()=>'+0.8 PV/s',ap:()=>G.p.regen+=0.8},
  {id:'crit',r:'rare',ic:'❂',t:'Œil ardent',d:'Augmente tes chances de coup critique.',can:w=>w.crit<0.5,get:w=>'crit '+Math.round(w.crit*100)+'%→'+Math.round((w.crit+0.08)*100)+'%',ap:w=>w.crit=Math.min(0.5,w.crit+0.08)},
  {id:'critx',r:'epic',ic:'✸',t:'Exécution',d:'Tes coups critiques frappent encore plus fort.',can:()=>true,get:w=>'crit ×'+w.critMul.toFixed(1)+'→×'+(w.critMul+0.6).toFixed(1),ap:w=>w.critMul+=0.6},
- {id:'aura',r:'epic',ic:'✷',t:'Brasier',d:'Une aura ardente brûle les ennemis proches en continu.',can:w=>w.aura<7&&!w.auraEvo,get:w=>w.aura?'+ portée / dégâts':'NOUVELLE arme',ap:w=>w.aura++},
+ {id:'aura',r:'epic',ic:'✷',t:'Brasier',d:'Une aura ardente brûle les ennemis proches en continu.',can:w=>w.aura<5&&!w.auraEvo,get:w=>w.aura?'+ portée / dégâts':'NOUVELLE arme',ap:w=>w.aura++},
  {id:'auradmg',r:'rare',ic:'♨',t:'Fournaise vive',d:'Le brasier inflige plus de dégâts.',can:w=>w.aura>0&&!w.auraEvo,get:()=>nextDmg('aura',1.4)+'/s',ap:w=>w.auraDmg*=1.4},
- {id:'arc',r:'epic',ic:'⌁',t:'Arc de foudre',d:'La foudre frappe un ennemi puis rebondit sur ses voisins.',can:w=>w.arc<7&&!w.arcEvo,get:w=>w.arc?'+ rebonds / dégâts':'NOUVELLE arme',ap:w=>w.arc++},
+ {id:'arc',r:'epic',ic:'⌁',t:'Arc de foudre',d:'La foudre frappe un ennemi puis rebondit sur ses voisins.',can:w=>w.arc<5&&!w.arcEvo,get:w=>w.arc?'+ rebonds / dégâts':'NOUVELLE arme',ap:w=>w.arc++},
  {id:'arcdmg',r:'rare',ic:'⚡',t:'Haute tension',d:'La foudre frappe plus fort.',can:w=>w.arc>0&&!w.arcEvo,get:()=>nextDmg('arc',1.4),ap:w=>w.arcDmg*=1.4},
  {id:'evo_bolt',r:'epic',ic:'☄',t:'★ Comète',d:'ÉVOLUTION — tes projectiles transpercent et frappent bien plus fort.',can:w=>w.bolt>=5&&!w.boltEvo,get:()=>'ÉVOLUTION',ap:w=>{w.boltEvo=true;w.boltDmg*=1.6;}},
  {id:'evo_orb',r:'epic',ic:'❂',t:'★ Anneau solaire',d:'ÉVOLUTION — les braises s\'élargissent et brûlent davantage.',can:w=>w.orb>=5&&!w.orbEvo,get:()=>'ÉVOLUTION',ap:w=>{w.orbEvo=true;w.orbDmg*=1.7;}},
  {id:'evo_nova',r:'epic',ic:'✺',t:'★ Cataclysme',d:'ÉVOLUTION — l\'onde devient immense et frappe sans répit.',can:w=>w.nova>=5&&!w.novaEvo,get:()=>'ÉVOLUTION',ap:w=>{w.novaEvo=true;w.novaDmg*=1.6;}},
  {id:'evo_aura',r:'epic',ic:'✷',t:'★ Fournaise',d:'ÉVOLUTION — le brasier double de portée et de puissance.',can:w=>w.aura>=5&&!w.auraEvo,get:()=>'ÉVOLUTION',ap:w=>{w.auraEvo=true;w.auraDmg*=1.6;}},
  {id:'evo_arc',r:'epic',ic:'⚝',t:'★ Tempête',d:'ÉVOLUTION — la foudre rebondit bien plus loin et plus fort.',can:w=>w.arc>=5&&!w.arcEvo,get:()=>'ÉVOLUTION',ap:w=>{w.arcEvo=true;w.arcDmg*=1.7;}},
- {id:'turret',r:'epic',ic:'⌂',t:'Tourelle',d:'Déploie des tourelles fixes qui tirent toutes seules.',can:w=>w.turret<6&&!w.turretEvo,get:w=>w.turret?'+ cadence / durée':'NOUVELLE arme',ap:w=>w.turret++},
+ {id:'turret',r:'epic',ic:'⌂',t:'Tourelle',d:'Déploie des tourelles fixes qui tirent toutes seules.',can:w=>w.turret<5&&!w.turretEvo,get:w=>w.turret?'+ cadence / durée':'NOUVELLE arme',ap:w=>w.turret++},
  {id:'turretdmg',r:'rare',ic:'⌂',t:'Calibre lourd',d:'Les tourelles tirent plus fort.',can:w=>w.turret>0&&!w.turretEvo,get:()=>nextDmg('turret',1.4),ap:w=>w.turretDmg*=1.4},
- {id:'homing',r:'epic',ic:'➹',t:'Missiles traqueurs',d:'Lance des projectiles qui pourchassent les ennemis.',can:w=>w.homing<6&&!w.homingEvo,get:w=>w.homing?'+ missiles / dégâts':'NOUVELLE arme',ap:w=>w.homing++},
+ {id:'homing',r:'epic',ic:'➹',t:'Missiles traqueurs',d:'Lance des projectiles qui pourchassent les ennemis.',can:w=>w.homing<5&&!w.homingEvo,get:w=>w.homing?'+ missiles / dégâts':'NOUVELLE arme',ap:w=>w.homing++},
  {id:'homingdmg',r:'rare',ic:'➹',t:'Charge creuse',d:'Les missiles frappent plus fort.',can:w=>w.homing>0&&!w.homingEvo,get:()=>nextDmg('homing',1.4),ap:w=>w.homingDmg*=1.4},
  {id:'evo_turret',r:'epic',ic:'⌂',t:'★ Bastion',d:'ÉVOLUTION — tourelles bien plus durables et puissantes.',can:w=>w.turret>=5&&!w.turretEvo,get:()=>'ÉVOLUTION',ap:w=>{w.turretEvo=true;w.turretDmg*=1.6;}},
  {id:'evo_homing',r:'epic',ic:'➹',t:'★ Essaim',d:'ÉVOLUTION — bien plus de missiles, plus mortels.',can:w=>w.homing>=5&&!w.homingEvo,get:()=>'ÉVOLUTION',ap:w=>{w.homingEvo=true;w.homingDmg*=1.6;}},
 ];
+const WKEYS=['bolt','orb','nova','aura','arc','turret','homing'];
+const ADDER={orb:'orb',nova:'nova',aura:'aura',arc:'arc',turret:'turret',homing:'homing'};
+function ownedWeapons(w){let n=0;for(const k of WKEYS)if(w[k]>0)n++;return n;}
+function weaponSlots(){return 4+(loadMeta().slots||0);}
+function slotFull(o){const k=ADDER[o.id];return !!(k&&G.w[k]===0&&ownedWeapons(G.w)>=weaponSlots());}
 let current=[];
-function drawChoices(){const pool=POOL.filter(o=>!G.banished[o.id]&&o.can(G.w,G.p));current=[];
+function drawChoices(){const pool=POOL.filter(o=>!G.banished[o.id]&&o.can(G.w,G.p)&&!slotFull(o));current=[];
   for(let i=0;i<3&&pool.length;i++)current.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);}
 function replaceChoice(i){const used=new Set(current.map(c=>c&&c.id));
-  const pool=POOL.filter(o=>!G.banished[o.id]&&!used.has(o.id)&&o.can(G.w,G.p));
+  const pool=POOL.filter(o=>!G.banished[o.id]&&!used.has(o.id)&&o.can(G.w,G.p)&&!slotFull(o));
   current[i]=pool.length?pool[Math.floor(Math.random()*pool.length)]:current[i];}
 function renderLevelUp(){const box=document.getElementById('choices');box.innerHTML='';
   current.forEach((o,i)=>{if(!o)return;const el=document.createElement('div');el.className='choice';el.dataset.r=o.r;
@@ -773,6 +798,7 @@ function renderLevelUp(){const box=document.getElementById('choices');box.innerH
   const act=document.getElementById('luactions');
   act.innerHTML=`<button class="lubtn" id="rerollBtn" ${G.rerolls>0?'':'disabled'}>↻ Relancer (${G.rerolls})</button>`+
     `<button class="lubtn" id="skipBtn">→ Passer (+soin)</button>`+
+    `<span class="lutok">🗡 Armes ${ownedWeapons(G.w)}/${weaponSlots()}</span>`+
     (G.banishes>0?`<span class="lutok">✖ Bannir : ${G.banishes}</span>`:'');
   document.getElementById('rerollBtn').onclick=()=>{if(G.rerolls<=0)return;G.rerolls--;drawChoices();renderLevelUp();blip(660,.08,'square',.03);};
   document.getElementById('skipBtn').onclick=()=>{G.p.hp=Math.min(G.p.maxhp,G.p.hp+G.p.maxhp*0.1);banner('PASSÉ — +10% PV','#9bf5e4');closeLevelUp();};}
@@ -947,8 +973,8 @@ function update(dt){
   else if(ml>0){p.trail.push({x:p.x,y:p.y,t:0});if(p.trail.length>14)p.trail.shift();}
   for(const tr of p.trail)tr.t+=dt;
 
-  G.spawnT-=dt;const interval=Math.max(0.22,0.85-G.t*0.006);
-  if(G.spawnT<=0){G.spawnT=interval;const Bc=BIOMES[G.biome<0?0:G.biome];const n=Math.round((2+Math.floor(G.t/18))*Bc.countM);for(let i=0;i<n;i++)spawnEnemy();}
+  G.spawnT-=dt;const interval=Math.max(0.18,0.82-G.t*0.007);
+  if(G.spawnT<=0){G.spawnT=interval;const Bc=BIOMES[G.biome<0?0:G.biome];const n=Math.round((2+Math.floor(G.t/15))*Bc.countM);for(let i=0;i<n;i++)spawnEnemy();}
   G.surgeT-=dt;if(G.surgeT<=0){G.surgeT=rand(34,50);const c=6+Math.floor(G.t/40);for(let i=0;i<c;i++)spawnEnemy();if(G.t>30)banner('DÉFERLEMENT','#ff9a3c');}
 
   G.boltT-=dt;if(G.boltT<=0){G.boltT=0.6*G.w.boltRate*(G.overdrive>0?0.42:1);shootBolt();}
@@ -1038,7 +1064,7 @@ function update(dt){
     else{g.x+=g.vx*dt;g.y+=g.vy*dt;g.vx*=.9;g.vy*=.9;}
     if(d2<(p.r+11)**2){
       if(g.type==='xp')gainXP(g.value);
-      else if(g.type==='gold'){const add=Math.max(1,Math.round(g.value*G.run.goldMul*comboMul()));G.run.gold+=add;sfx.gold();floatTxt(p.x,p.y-22,'+'+add+' ◉','#ffcf4d');}
+      else if(g.type==='gold'){const add=Math.max(1,Math.round(g.value*G.run.goldMul*comboMul()*0.5));G.run.gold+=add;sfx.gold();floatTxt(p.x,p.y-22,'+'+add+' ◉','#ffcf4d');}
       else if(g.type==='vacuum'){activateVacuum();floatTxt(p.x,p.y-22,'VACUUM','#9bf5e4');}
       else if(g.type==='chest'){banner('COFFRE !','#ffd27a');sfx.over();openLevelUp();}
       else if(g.type==='bomb'){bombBlast();}
