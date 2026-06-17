@@ -32,23 +32,30 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
 .grp{display:flex;flex-direction:column;gap:6px}
 .grp>.glab{font:600 9px "JetBrains Mono",monospace;letter-spacing:.2em;text-transform:uppercase;color:#8d8aa0;padding-left:3px}
 .grp .grow{display:flex;gap:8px;align-items:stretch}
-.b{min-width:98px;background:linear-gradient(180deg,#1d1d2b,#15151f);border:1px solid rgba(255,255,255,.16);
-  border-radius:12px;padding:9px 11px;cursor:pointer;text-align:left;transition:.12s}
+.b{min-width:112px;background:linear-gradient(180deg,#1d1d2b,#15151f);border:1px solid rgba(255,255,255,.16);
+  border-radius:13px;padding:11px 13px;cursor:pointer;text-align:left;transition:.12s}
 .b:hover:not(:disabled){border-color:rgba(255,176,77,.55);transform:translateY(-2px)}
 .b:disabled{opacity:.36;cursor:default}
-.b .n{font:600 13.5px/1.1 "Space Grotesk",sans-serif;color:#fff}
-.b .c{font:600 12.5px "JetBrains Mono",monospace;color:#ffc061;margin-top:4px}
-.b .s{font:500 10px "JetBrains Mono",monospace;color:#bcb9cc;margin-top:4px}
+.b .n{font:600 15px/1.1 "Space Grotesk",sans-serif;color:#fff}
+.b .c{font:600 13.5px "JetBrains Mono",monospace;color:#ffc061;margin-top:5px}
+.b .s{font:500 11px "JetBrains Mono",monospace;color:#bcb9cc;margin-top:5px}
 .b.evo{border-color:rgba(95,227,200,.5)} .b.evo .c{color:#7fe9d6}
 .b.sp{border-color:rgba(255,93,108,.5)} .b.sp .c{color:#ff8b97}
-.tchips{display:flex;gap:6px;flex-wrap:wrap;max-width:260px;min-height:30px}
-.tchip{display:flex;align-items:center;gap:7px;background:rgba(95,227,200,.12);border:1px solid rgba(95,227,200,.32);
-  border-radius:9px;padding:6px 9px;font:600 11px "JetBrains Mono",monospace;color:#c6efe5}
-.tchip b{cursor:pointer;color:#ff8b97;font-size:14px;line-height:1}
-.tchip b:hover{color:#fff}
-.tchip.empty{opacity:.5;border-style:dashed;border-color:rgba(255,255,255,.18);background:none;color:#8d8aa0;cursor:default}
+.slots{display:flex;gap:7px;flex-wrap:wrap;max-width:300px;align-content:flex-start}
+.slot{display:flex;align-items:center;min-width:84px;border-radius:13px;padding:10px 11px;font:600 12.5px "JetBrains Mono",monospace}
+.slot.filled{background:rgba(95,227,200,.13);border:1px solid rgba(95,227,200,.38);color:#c6efe5;justify-content:space-between;gap:9px}
+.slot.filled b{cursor:pointer;color:#ff8b97;font-size:16px;line-height:1}
+.slot.filled b:hover{color:#fff}
+.slot.empty{flex-direction:column;align-items:flex-start;gap:4px;border:1px dashed rgba(255,255,255,.2);color:#8d8aa0;cursor:not-allowed}
+.slot.empty em{font-style:normal;font-size:11px;color:#bcb9cc}
+.slot.empty.ok{border-color:rgba(255,176,77,.5);color:#ffc061;cursor:pointer}
+.slot.empty.ok em{color:#ffc061}
+.slot.empty.ok:hover{background:rgba(255,176,77,.1)}
 #back{position:fixed;top:9px;left:12px;z-index:40;font:600 12px/1 "Space Grotesk";letter-spacing:.05em;color:#bfb9d6;
   background:rgba(8,8,14,.7);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:9px;padding:8px 12px;text-decoration:none}
+#sound{position:fixed;top:9px;right:12px;z-index:40;width:38px;height:34px;font-size:16px;cursor:pointer;
+  background:rgba(8,8,14,.7);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:9px;color:#ffb04d}
+#sound.off{color:#6b6878}
 #dailyBadge{display:none;position:fixed;top:9px;left:50%;transform:translateX(-50%);z-index:40;font:600 11px/1 "JetBrains Mono",monospace;
   letter-spacing:.12em;color:#ffd27a;background:rgba(8,8,14,.7);backdrop-filter:blur(8px);border:1px solid rgba(255,176,77,.35);border-radius:9px;padding:8px 12px}
 .overlay{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
@@ -69,6 +76,8 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
 </head>
 <body>
 <a id="back" href="/">← Arcade</a>
+<button id="sound" title="Musique">♪</button>
+<audio id="bgm" src="music.mp3" loop preload="auto"></audio>
 <div id="dailyBadge"></div>
 
 <div id="wrap">
@@ -143,9 +152,9 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
   const ROLES=['light','ranged','heavy'];
   function am(age){return Math.pow(1.85,age);}
   function unitStats(age,role){
-    const base={light:{cost:25,hp:62,dmg:8,rng:22,sp:48,rate:0.8,sz:12},
-                ranged:{cost:48,hp:40,dmg:11,rng:140,sp:42,rate:1.15,sz:12},
-                heavy:{cost:105,hp:185,dmg:21,rng:24,sp:30,rate:1.1,sz:18}}[role];
+    const base={light:{cost:25,hp:62,dmg:8,rng:22,sp:48,rate:0.8,sz:15},
+                ranged:{cost:48,hp:40,dmg:11,rng:140,sp:42,rate:1.15,sz:15},
+                heavy:{cost:105,hp:185,dmg:21,rng:24,sp:30,rate:1.1,sz:23}}[role];
     const m=am(age);
     return {cost:Math.round(base.cost*m),hp:Math.round(base.hp*m),dmg:base.dmg*m,
             rng:base.rng,sp:base.sp,rate:base.rate,sz:base.sz,
@@ -163,7 +172,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     const baseHp=1400;
     G={mode, t:0, gold:175, xp:0, age:0, kills:0, wave:0,
        pbHp:baseHp, pbMax:baseHp, ebHp:baseHp, ebMax:baseHp,
-       units:[], turrets:[], slots:2, tracers:[], parts:[],
+       units:[], turrets:[], slots:2, tracers:[], parts:[], floats:[],
        spawnCd:0, queue:[], spCd:0, special:0, shake:0,
        e:{gold:90, xp:0, age:0, buyCd:1.2},
        spawnT:2.0, state:'play'};
@@ -229,15 +238,14 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
   function aiUpdate(dt){
     const e=G.e;
     if(G.mode==='campaign'){
-      e.gold += (5 + G.t*0.03) * dt;
+      e.gold += (6 + G.t*0.04) * dt;
+      // évolution garantie dans le temps (palier toutes les ~48s) + plus tôt si riche
+      const target=Math.min(MAXAGE, Math.floor(G.t/48));
+      if(e.age<target) e.age=target;
       e.buyCd -= dt;
       if(e.buyCd<=0){
-        e.buyCd = Math.max(0.7, 1.6 - G.t*0.004);
-        // évolution IA
-        if(e.age<MAXAGE && e.xp>=evolveXp(e.age) && e.gold>=evolveCost(e.age)){
-          e.gold-=evolveCost(e.age); e.xp-=evolveXp(e.age); e.age++;
-        }
-        // achat : privilégie le lourd quand riche
+        e.buyCd = Math.max(0.6, 1.5 - G.t*0.005);
+        if(e.age<MAXAGE && e.gold>=evolveCost(e.age)*1.4){ e.gold-=evolveCost(e.age); e.age++; }
         const roll=Math.random(); let role = roll<0.5?0 : roll<0.8?1 : 2;
         const s=unitStats(e.age, ROLES[role]);
         if(e.gold>=s.cost){ e.gold-=s.cost; G.units.push(mkUnit('e', e.age, role, s)); }
@@ -317,13 +325,14 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     // morts
     for(let i=G.units.length-1;i>=0;i--){ const u=G.units[i]; if(u.hp<=0){
       for(let k=0;k<7;k++){const a=Math.random()*6.28,s=30+Math.random()*90;G.parts.push({x:u.x,y:laneY()-8,dx:Math.cos(a)*s,dy:Math.sin(a)*s-30,life:.5,t:0,col:u.side==='p'?'255,150,90':'255,110,120'});}
-      if(u.side==='e'){ G.gold+=u.gold; G.xp+=u.xp; G.kills++; }
+      if(u.side==='e'){ G.gold+=u.gold; G.xp+=u.xp; G.kills++; G.floats.push({x:u.x,y:laneY()-u.sz-10,txt:'+'+u.gold,t:0,life:.95}); }
       else { G.e.gold+=u.gold*0.8; G.e.xp+=u.xp; }
       G.units.splice(i,1);
     }}
-    // tracers & particules
+    // tracers & particules & textes flottants
     for(let i=G.tracers.length-1;i>=0;i--){G.tracers[i].t-=dt;if(G.tracers[i].t<=0)G.tracers.splice(i,1);}
     for(let i=G.parts.length-1;i>=0;i--){const p=G.parts[i];p.t+=dt;p.x+=p.dx*dt;p.y+=p.dy*dt;p.dy+=200*dt;if(p.t>=p.life)G.parts.splice(i,1);}
+    for(let i=G.floats.length-1;i>=0;i--){const f=G.floats[i];f.t+=dt;f.y-=26*dt;if(f.t>=f.life)G.floats.splice(i,1);}
     // cap
     if(G.units.length>90){ /* sécurité perf : stoppe les files */ G.queue.length=0; }
     // fin
@@ -350,6 +359,10 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     const sorted=G.units.slice().sort((a,b)=>a.x-b.x);
     for(const u of sorted) drawUnit(u,gy);
     for(const p of G.parts){const a=Math.max(0,1-p.t/p.life);ctx.fillStyle='rgba('+p.col+','+a+')';ctx.beginPath();ctx.arc(p.x,p.y,2.4*a+.5,0,6.28);ctx.fill();}
+    for(const f of G.floats){const a=Math.max(0,1-f.t/f.life);ctx.font='700 14px JetBrains Mono, monospace';ctx.textAlign='center';
+      ctx.fillStyle='rgba(0,0,0,'+(a*0.5)+')';ctx.fillText(f.txt,f.x+1,f.y+1);
+      ctx.fillStyle='rgba(255,206,97,'+a+')';ctx.fillText(f.txt,f.x,f.y);}
+    ctx.textAlign='left';
     ctx.restore();
     if(bannerT>0){ ctx.globalAlpha=Math.min(1,bannerT); ctx.fillStyle='#ffd27a'; ctx.font='700 26px Space Grotesk'; ctx.textAlign='center';
       ctx.fillText('ÈRE : '+AGES[G.age].toUpperCase(), W/2, H*0.30); ctx.globalAlpha=1; ctx.textAlign='left'; }
@@ -428,9 +441,10 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
 
   // -- unités : silhouettes mascotte animées --
   function drawUnit(u,gy){
+    // ombre au sol
+    ctx.save();ctx.translate(u.x,gy);ctx.fillStyle='rgba(0,0,0,0.28)';ctx.beginPath();ctx.ellipse(0,2,u.sz*1.1,u.sz*0.34,0,0,6.28);ctx.fill();ctx.restore();
     ctx.save(); ctx.translate(u.x,gy); if(u.side==='e')ctx.scale(-1,1);
     const atk=u.lunge>0;
-    const moving = !(atk) ;
     const walk=Math.sin(G.t*9 + u.x*0.3);
     const main=u.hit>0?'#ffffff':(u.side==='p'?'#ffb04d':'#ff8fa0');
     const dark=u.hit>0?'#dddddd':(u.side==='p'?'#b5631f':'#b34a5c');
@@ -537,14 +551,16 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
   function buildBar(){
     const bar=document.getElementById('bar'); bar.innerHTML='';
     bar.appendChild(mkGroup('Unités',[mkBtn('u0',null,true),mkBtn('u1',null,true),mkBtn('u2',null,true)]));
-    const def=mkGroup('Défense',[mkBtn('turret'),mkBtn('slot')]);
-    const chips=document.createElement('div'); chips.className='tchips'; chips.id='tchips'; def.appendChild(chips);
-    bar.appendChild(def);
+    // groupe Défense : rangée d'emplacements + bouton ajouter
+    const def=document.createElement('div'); def.className='grp';
+    const dl=document.createElement('div'); dl.className='glab'; dl.textContent='Tourelles'; def.appendChild(dl);
+    const dw=document.createElement('div'); dw.className='grow';
+    const slots=document.createElement('div'); slots.className='slots'; slots.id='slots'; dw.appendChild(slots);
+    dw.appendChild(mkBtn('slot')); def.appendChild(dw); bar.appendChild(def);
     bar.appendChild(mkGroup('Empire',[mkBtn('evo','evo'),mkBtn('sp','sp')]));
     document.getElementById('btn_u0').onclick=()=>{ac();buyUnit(0);};
     document.getElementById('btn_u1').onclick=()=>{ac();buyUnit(1);};
     document.getElementById('btn_u2').onclick=()=>{ac();buyUnit(2);};
-    document.getElementById('btn_turret').onclick=()=>{ac();buyTurret();};
     document.getElementById('btn_slot').onclick=()=>{ac();buySlot();};
     document.getElementById('btn_evo').onclick=()=>{ac();evolve();};
     document.getElementById('btn_sp').onclick=()=>{ac();castSpecial();};
@@ -572,20 +588,25 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     for(let i=0;i<3;i++){ const s=unitStats(G.age,ROLES[i]);
       const b=setBtn('u'+i, UNAMES[G.age][i], '◉ '+s.cost+'  ['+(i+1)+']', labels[i]+' · PV '+s.hp+' · DGT '+Math.round(s.dmg));
       b.disabled=G.gold<s.cost; }
-    const ts=turretStats(G.age);
-    setBtn('turret', TNAMES[G.age]+' '+G.turrets.length+'/'+G.slots, '◉ '+ts.cost+'  [T]').disabled=G.turrets.length>=G.slots||G.gold<ts.cost;
     setBtn('slot','+ Emplacement', G.slots>=MAXSLOTS?'max atteint':'◉ '+slotCost()).disabled=G.slots>=MAXSLOTS||G.gold<slotCost();
     if(G.age>=MAXAGE) setBtn('evo','Ère maximale','—').disabled=true;
     else setBtn('evo','Évoluer → '+AGES[G.age+1], '◉ '+evolveCost(G.age)+'  [E]').disabled=G.xp<need||G.gold<evolveCost(G.age);
     setBtn('sp', SPNAMES[G.age], G.spCd>0?Math.ceil(G.spCd)+'s  [Espace]':'PRÊT  [Espace]').disabled=G.spCd>0;
-    // puces de tourelles (vente individuelle)
-    const tc=document.getElementById('tchips'); tc.innerHTML='';
-    if(!G.turrets.length){ const e=document.createElement('div'); e.className='tchip empty'; e.textContent='aucune tourelle'; tc.appendChild(e); }
-    else G.turrets.forEach((tr,idx)=>{ const refund=Math.round(turretStats(tr.age).cost*0.5);
-      const c=document.createElement('div'); c.className='tchip';
-      c.innerHTML='<span>'+TNAMES[tr.age].split(' ')[0]+'</span><b title="Vendre (+'+refund+' or)">✕</b>';
-      c.querySelector('b').onclick=()=>{ ac(); sellTurretAt(idx); };
-      tc.appendChild(c); });
+    // rangée d'emplacements de tourelles : vides (construire) / occupés (vendre)
+    const ts=turretStats(G.age), sl=document.getElementById('slots'); sl.innerHTML='';
+    for(let i=0;i<G.slots;i++){
+      const c=document.createElement('div');
+      if(i<G.turrets.length){ const tr=G.turrets[i], refund=Math.round(turretStats(tr.age).cost*0.5);
+        c.className='slot filled';
+        c.innerHTML='<span>'+TNAMES[tr.age].split(' ')[0]+'</span><b title="Vendre (+'+refund+' or)">✕</b>';
+        c.querySelector('b').onclick=()=>{ ac(); sellTurretAt(i); };
+      } else { const can=G.gold>=ts.cost;
+        c.className='slot empty'+(can?' ok':'');
+        c.innerHTML='<span>+ '+TNAMES[G.age].split(' ')[0]+'</span><em>◉ '+ts.cost+'</em>';
+        if(can) c.onclick=()=>{ ac(); buyTurret(); };
+      }
+      sl.appendChild(c);
+    }
   }
 
   // ---------- boucle ----------
@@ -630,7 +651,19 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
   }
 
   // ---------- flow ----------
-  function start(mode){ ac(); reset(mode);
+  // ---------- musique de fond ----------
+  const bgm=document.getElementById('bgm'); bgm.volume=0.4;
+  let musicOn = localStorage.getItem('cda:music')!=='off';
+  function refreshSoundBtn(){ const b=document.getElementById('sound'); b.textContent=musicOn?'♪':'♪̸'; b.classList.toggle('off',!musicOn); }
+  function startMusic(){ if(musicOn){ bgm.play().catch(()=>{}); } }
+  document.getElementById('sound').onclick=()=>{
+    musicOn=!musicOn; localStorage.setItem('cda:music',musicOn?'on':'off');
+    if(musicOn) bgm.play().catch(()=>{}); else bgm.pause();
+    refreshSoundBtn();
+  };
+  refreshSoundBtn();
+
+  function start(mode){ ac(); startMusic(); reset(mode);
     if(DAILY) mode='endless';
     document.getElementById('menu').classList.add('hidden');
     document.getElementById('over').classList.add('hidden');
