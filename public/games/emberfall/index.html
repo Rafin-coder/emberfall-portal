@@ -353,6 +353,7 @@ const WINFO=[
  {k:'arc',ic:'⌁',evo:'arcEvo',name:'Foudre / Tempête',desc:'Éclair qui frappe puis rebondit entre ennemis.',syn:'Précision, foule dense'},
  {k:'turret',ic:'⌂',evo:'turretEvo',name:'Tourelle / Bastion',desc:'Déploie des tourelles fixes qui tirent seules.',syn:'Puissance, mobilité'},
  {k:'homing',ic:'➹',evo:'homingEvo',name:'Missiles / Essaim',desc:'Projectiles à tête chercheuse qui pourchassent.',syn:'Puissance, foule dense'},
+ {k:'meteor',ic:'☄',evo:'meteorEvo',name:'Pluie de météores / Déluge',desc:'Météores qui s\'abattent sur les ennemis proches.',syn:'Déflagration, Puissance'},
 ];
 const RELIC_SLOTS=5;
 function grantRelic(){const owned=RELICS.filter(r=>G.relics[r.id]).length,avail=RELICS.filter(r=>!G.relics[r.id]);
@@ -391,7 +392,7 @@ function spr(size){const c=document.createElement('canvas');c.width=c.height=siz
 function polyPath(g,r,n,rot,jit){g.beginPath();
   for(let i=0;i<n;i++){const a=rot+i/n*TAU;const rr=r*(1+(jit?Math.sin(a*3)*0.13:0));
     const x=Math.cos(a)*rr,y=Math.sin(a)*rr;i?g.lineTo(x,y):g.moveTo(x,y);}g.closePath();}
-const ETYPE={wraith:{r:14,col:'#8fb6ff'},swift:{r:10,col:'#c08bff'},splitter:{r:16,col:'#74e39a'},brute:{r:26,col:'#ff8a4a'},caster:{r:13,col:'#ff6ad5'},warden:{r:30,col:'#5fd0ff'},boss:{r:44,col:'#ff3b5c'}};
+const ETYPE={wraith:{r:14,col:'#8fb6ff'},swift:{r:10,col:'#c08bff'},splitter:{r:16,col:'#74e39a'},brute:{r:26,col:'#ff8a4a'},caster:{r:13,col:'#ff6ad5'},warden:{r:30,col:'#5fd0ff'},boss:{r:44,col:'#ff3b5c'},hound:{r:11,col:'#ffcf6a'},golem:{r:32,col:'#a07bff'}};
 const ESPRITE={};
 function buildEnemySprite(type,flash){
   const {r,col}=ETYPE[type];const pad=24,size=Math.ceil((r+pad)*2),c=spr(size),g=c.getContext('2d');
@@ -401,6 +402,7 @@ function buildEnemySprite(type,flash){
   else if(type==='boss'){polyPath(g,r,9,0,true);g.fill();}
   else if(type==='warden'){polyPath(g,r,8,0,false);g.fill();}
   else if(type==='brute'){polyPath(g,r,6,0,true);g.fill();}
+  else if(type==='golem'){polyPath(g,r,7,0,true);g.fill();}
   else{g.beginPath();g.arc(0,0,r,0,TAU);g.fill();}
   g.shadowBlur=0;g.strokeStyle=col;g.lineWidth=type==='boss'?3:2.2;g.stroke();
   if(type==='wraith'){g.fillStyle=col;g.beginPath();g.arc(-r*.25,-r*.2,2.2,0,TAU);g.arc(r*.25,-r*.2,2.2,0,TAU);g.fill();}
@@ -409,6 +411,7 @@ function buildEnemySprite(type,flash){
   if(type==='splitter'){g.strokeStyle=col;g.lineWidth=2;g.beginPath();g.moveTo(-r*.55,0);g.lineTo(r*.55,0);g.moveTo(0,-r*.55);g.lineTo(0,r*.55);g.stroke();}
   if(type==='boss'){g.fillStyle=col;g.beginPath();g.arc(0,0,r*.32,0,TAU);g.fill();}
   if(type==='brute'){g.fillStyle=col;g.globalAlpha=.5;g.beginPath();g.arc(0,0,r*.4,0,TAU);g.fill();g.globalAlpha=1;}
+  if(type==='golem'){g.fillStyle=col;g.globalAlpha=.45;polyPath(g,r*.5,7,0.3,true);g.fill();g.globalAlpha=1;}
   return {c,half:size/2};
 }
 function glowSprite(radius,inner,outer,blur){
@@ -519,10 +522,10 @@ const G={};const amb=[];
 function reset(){Object.assign(G,{state:'menu',t:0,last:0,spawnT:0,boltT:0,novaT:0,shake:0,dmgFlash:0,vacFlash:0,lastBoss:-99,
   combo:0,comboT:0,frenzy:0,overdrive:0,hitstop:0,banner:null,killCd:0,arcT:0,surgeT:30,
   dashCd:0,dashT:0,dashVX:1,dashVY:0,magBoost:0,bombFlash:0,lastDx:1,lastDy:0,
-  turretT:0,homingT:0,dmgTotal:0,biome:-1,dmgBy:{},relics:{},bossKills:0,dashCdMax:2.0,
+  turretT:0,homingT:0,meteorT:0,dmgTotal:0,biome:-1,dmgBy:{},relics:{},bossKills:0,dashCdMax:2.0,
   dmgTaken:1,relicHp:1,eventT:35,rerolls:0,banishes:2,banished:{},
   p:{x:0,y:0,r:14,hp:120,maxhp:120,speed:208,xp:0,xpNext:5,lvl:1,kills:0,invuln:0,regen:0,magnet:100,facing:0,trail:[]},
-  w:{bolt:1,boltRate:1,boltDmg:1,boltEvo:false,orb:0,orbDmg:1,orbEvo:false,nova:0,novaDmg:1,novaEvo:false,aura:0,auraDmg:1,auraEvo:false,arc:0,arcDmg:1,arcEvo:false,turret:0,turretDmg:1,turretEvo:false,homing:0,homingDmg:1,homingEvo:false,aoeMul:1,dmgMul:1,crit:0.08,critMul:2.2},
+  w:{bolt:1,boltRate:1,boltDmg:1,boltEvo:false,orb:0,orbDmg:1,orbEvo:false,nova:0,novaDmg:1,novaEvo:false,aura:0,auraDmg:1,auraEvo:false,arc:0,arcDmg:1,arcEvo:false,turret:0,turretDmg:1,turretEvo:false,homing:0,homingDmg:1,homingEvo:false,meteor:0,meteorDmg:1,meteorEvo:false,aoeMul:1,dmgMul:1,crit:0.08,critMul:2.2},
   run:{gold:0,goldMul:1,xpMul:1},
   enemies:[],shots:[],eshots:[],loot:[],parts:[],floats:[],rings:[],arcs:[],turrets:[],missiles:[],meteors:[],orbAng:0});}
 reset();
@@ -584,10 +587,12 @@ function spawnEnemy(){
   let casters=0;if(G.t>130)for(const e of G.enemies)if(e.t==='caster')casters++;
   const casterCap=Math.min(7,Math.floor(G.t/90));
   if(G.t>180&&roll>0.95){t='warden';hp=180;sp=42;dmg=14;}
+  else if(G.t>160&&roll>0.92){t='golem';hp=250;sp=32;dmg=16;}
+  else if(G.t>70&&roll>0.86){t='brute';hp=52;sp=40;dmg=11;}
   else if(G.t>100&&roll<0.12){t='splitter';hp=22;sp=60;dmg=7;}
   else if(G.t>130&&casters<casterCap&&roll<0.24){t='caster';hp=16;sp=70;dmg=6;}
-  else if(G.t>35&&roll<0.44){t='swift';hp=7;sp=124;dmg=4;}
-  else if(G.t>70&&roll>0.87){t='brute';hp=52;sp=40;dmg=11;}
+  else if(G.t>35&&roll<0.40){t='swift';hp=7;sp=124;dmg=4;}
+  else if(G.t>45&&roll>=0.46&&roll<0.58){t='hound';hp=13;sp=104;dmg=5;}
   G.enemies.push(mkEnemy(t,x,y,hp,sp,dmg,m));
 }
 function shootBolt(){const n=G.w.bolt,base=nearest(G.p.x,G.p.y,1000);
@@ -610,6 +615,16 @@ function castNova(){const R=(120+G.w.nova*28+(G.w.novaEvo?120:0))*G.w.aoeMul,dmg
   for(const e of G.enemies){if(dist2(G.p.x,G.p.y,e.x,e.y)<R*R){e.hp-=dmg;e.hit=.12;G.dmgTotal+=dmg;G.dmgBy.nova=(G.dmgBy.nova||0)+dmg;
     const a=Math.atan2(e.y-G.p.y,e.x-G.p.x);e.knock=.18;e.kx=Math.cos(a)*280;e.ky=Math.sin(a)*280;
     floatTxt(e.x,e.y,Math.round(dmg),'#ffd27a');}}sfx.nova();}
+function castMeteor(){const cnt=1+(G.w.meteorEvo?2:0),
+  R=(74+G.w.meteor*12)*G.w.aoeMul*(G.w.meteorEvo?1.4:1),
+  dmg=22*G.w.meteorDmg*G.w.dmgMul*(G.w.meteorEvo?1.4:1);
+  for(let c=0;c<cnt;c++){let tx,ty;const cand=[];
+    for(const e of G.enemies)if(dist2(G.p.x,G.p.y,e.x,e.y)<640*640)cand.push(e);
+    if(cand.length){const e=cand[(Math.random()*cand.length)|0];tx=e.x+rand(-26,26);ty=e.y+rand(-26,26);}
+    else{const a=rand(0,TAU),d=rand(90,260);tx=G.p.x+Math.cos(a)*d;ty=G.p.y+Math.sin(a)*d;}
+    G.rings.push({x:tx,y:ty,r:14,max:R,col:'255,150,80',life:.5,t:0});burst(tx,ty,'#ff9a3c',12);
+    for(const e of G.enemies)if(dist2(tx,ty,e.x,e.y)<R*R){dealDmg(e,dmg,'#ff9a3c','meteor');e.hit=.12;}}
+  sfx.nova();}
 function burst(x,y,col,n){if(G.parts.length>MAX_PARTS)return;
   for(let i=0;i<n;i++){const a=rand(0,TAU),s=rand(50,240);
     G.parts.push({x,y,dx:Math.cos(a)*s,dy:Math.sin(a)*s,r:rand(1.5,3.8),life:rand(.3,.65),t:0,col});}}
@@ -652,22 +667,22 @@ function dropLoot(e){
   const x=e.x,y=e.y;
   // XP orb by enemy type
   let tier=0,xpv=2;
-  if(e.t==='brute'){tier=1;xpv=8;} else if(e.t==='warden'){tier=1;xpv=14;} else if(e.t==='boss'){tier=2;xpv=45;}
+  if(e.t==='brute'){tier=1;xpv=8;} else if(e.t==='golem'){tier=1;xpv=13;} else if(e.t==='warden'){tier=1;xpv=14;} else if(e.t==='boss'){tier=2;xpv=45;}
   pushLoot({type:'xp',tier,value:xpv,x,y,vx:rand(-50,50),vy:rand(-50,50),forced:false});
   // gold
   const Bg=BIOMES[G.biome<0?0:G.biome];
-  const gc=e.t==='boss'?1:e.t==='warden'?0.7:e.t==='brute'?0.45:e.t==='caster'?0.18:0.07;
-  if(Math.random()<gc){let gv=e.t==='boss'?Math.round(rand(22,36)):e.t==='warden'?Math.round(rand(8,16)):e.t==='brute'?Math.round(rand(2,5)):1;
+  const gc=e.t==='boss'?1:e.t==='warden'?0.7:e.t==='golem'?0.5:e.t==='brute'?0.45:e.t==='caster'?0.18:0.07;
+  if(Math.random()<gc){let gv=e.t==='boss'?Math.round(rand(22,36)):e.t==='warden'?Math.round(rand(8,16)):e.t==='golem'?Math.round(rand(3,7)):e.t==='brute'?Math.round(rand(2,5)):1;
     gv=Math.max(1,Math.round(gv*Bg.goldM));
     pushLoot({type:'gold',value:gv,x:x+rand(-8,8),y:y+rand(-8,8),vx:rand(-60,60),vy:rand(-60,60),forced:false});}
   // vacuum (rare)
-  const vc=e.t==='boss'?0.6:e.t==='brute'?0.03:0.008;
+  const vc=e.t==='boss'?0.4:e.t==='brute'?0.01:0.0012;
   if(Math.random()<vc) pushLoot({type:'vacuum',value:0,x:x+rand(-6,6),y:y+rand(-6,6),vx:rand(-40,40),vy:rand(-40,40),forced:false});
   // power-ups (rare)
-  if(Math.random()<((e.t==='boss'||e.t==='warden')?0.06:0.002)) pushLoot({type:'bomb',value:0,x:x+rand(-6,6),y,vx:rand(-30,30),vy:rand(-30,30),forced:false});
-  if(Math.random()<0.004) pushLoot({type:'heart',value:0,x:x+rand(-6,6),y,vx:rand(-30,30),vy:rand(-30,30),forced:false});
-  if(Math.random()<0.003) pushLoot({type:'magnet',value:0,x:x+rand(-6,6),y,vx:rand(-30,30),vy:rand(-30,30),forced:false});
-  if((e.t==='boss'&&Math.random()<0.5)||(e.t==='warden'&&Math.random()<0.12)) pushLoot({type:'relic',value:0,x:x+rand(-8,8),y,vx:rand(-25,25),vy:rand(-25,25),forced:false});
+  if(Math.random()<((e.t==='boss'||e.t==='warden')?0.025:0.0006)) pushLoot({type:'bomb',value:0,x:x+rand(-6,6),y,vx:rand(-30,30),vy:rand(-30,30),forced:false});
+  if(Math.random()<0.0011) pushLoot({type:'heart',value:0,x:x+rand(-6,6),y,vx:rand(-30,30),vy:rand(-30,30),forced:false});
+  if(Math.random()<0.0008) pushLoot({type:'magnet',value:0,x:x+rand(-6,6),y,vx:rand(-30,30),vy:rand(-30,30),forced:false});
+  if((e.t==='boss'&&Math.random()<0.5)||(e.t==='warden'&&Math.random()<0.07)) pushLoot({type:'relic',value:0,x:x+rand(-8,8),y,vx:rand(-25,25),vy:rand(-25,25),forced:false});
 }
 function activateVacuum(){G.vacFlash=.35;sfx.vac();
   for(const it of G.loot){if(it.type==='xp'||it.type==='gold')it.forced=true;}}
@@ -686,6 +701,7 @@ function hitDmg(k){const w=G.w;switch(k){
   case 'arc': return 12*w.arcDmg*w.dmgMul;
   case 'turret': return 9*w.turretDmg*w.dmgMul;
   case 'homing': return 14*w.homingDmg*w.dmgMul;
+  case 'meteor': return 22*w.meteorDmg*w.dmgMul*(w.meteorEvo?1.4:1);
 } return 0;}
 function nextDmg(k,mult){const c=hitDmg(k);return Math.round(c)+' → '+Math.round(c*mult)+' dég.';}
 function renderPause(){
@@ -775,9 +791,12 @@ const POOL=[
  {id:'homingdmg',r:'rare',ic:'➹',t:'Charge creuse',d:'Les missiles frappent plus fort.',can:w=>w.homing>0&&!w.homingEvo,get:()=>nextDmg('homing',1.4),ap:w=>w.homingDmg*=1.4},
  {id:'evo_turret',r:'epic',ic:'⌂',t:'★ Bastion',d:'ÉVOLUTION — tourelles bien plus durables et puissantes.',can:w=>w.turret>=5&&!w.turretEvo,get:()=>'ÉVOLUTION',ap:w=>{w.turretEvo=true;w.turretDmg*=1.6;}},
  {id:'evo_homing',r:'epic',ic:'➹',t:'★ Essaim',d:'ÉVOLUTION — bien plus de missiles, plus mortels.',can:w=>w.homing>=5&&!w.homingEvo,get:()=>'ÉVOLUTION',ap:w=>{w.homingEvo=true;w.homingDmg*=1.6;}},
+ {id:'meteor',r:'epic',ic:'☄',t:'Pluie de météores',d:'Des météores s\'abattent régulièrement sur les ennemis.',can:w=>w.meteor<5&&!w.meteorEvo,get:w=>w.meteor?'+ cadence / zone':'NOUVELLE arme',ap:w=>w.meteor++},
+ {id:'meteordmg',r:'rare',ic:'☄',t:'Cœur de magma',d:'Les météores frappent plus fort.',can:w=>w.meteor>0&&!w.meteorEvo,get:()=>nextDmg('meteor',1.4),ap:w=>w.meteorDmg*=1.4},
+ {id:'evo_meteor',r:'epic',ic:'✴',t:'★ Déluge',d:'ÉVOLUTION — plus de météores, plus larges, plus mortels.',can:w=>w.meteor>=5&&!w.meteorEvo,get:()=>'ÉVOLUTION',ap:w=>{w.meteorEvo=true;w.meteorDmg*=1.5;}},
 ];
-const WKEYS=['bolt','orb','nova','aura','arc','turret','homing'];
-const ADDER={orb:'orb',nova:'nova',aura:'aura',arc:'arc',turret:'turret',homing:'homing'};
+const WKEYS=['bolt','orb','nova','aura','arc','turret','homing','meteor'];
+const ADDER={orb:'orb',nova:'nova',aura:'aura',arc:'arc',turret:'turret',homing:'homing',meteor:'meteor'};
 function ownedWeapons(w){let n=0;for(const k of WKEYS)if(w[k]>0)n++;return n;}
 function weaponSlots(){return 4+(loadMeta().slots||0);}
 function slotFull(o){const k=ADDER[o.id];return !!(k&&G.w[k]===0&&ownedWeapons(G.w)>=weaponSlots());}
@@ -913,7 +932,8 @@ function updateLoadout(){const l=document.getElementById('load');l.innerHTML='';
   if(G.w.aura>0)add('✷',G.w.aura,G.w.auraEvo);
   if(G.w.arc>0)add('⌁',G.w.arc,G.w.arcEvo);
   if(G.w.turret>0)add('⌂',G.w.turret,G.w.turretEvo);
-  if(G.w.homing>0)add('➹',G.w.homing,G.w.homingEvo);}
+  if(G.w.homing>0)add('➹',G.w.homing,G.w.homingEvo);
+  if(G.w.meteor>0)add('☄',G.w.meteor,G.w.meteorEvo);}
 refreshMenuGold();refreshDiff();refreshChar();
 
 /* ---------- update ---------- */
@@ -979,6 +999,7 @@ function update(dt){
 
   G.boltT-=dt;if(G.boltT<=0){G.boltT=0.6*G.w.boltRate*(G.overdrive>0?0.42:1);shootBolt();}
   if(G.w.nova>0){G.novaT-=dt;if(G.novaT<=0){G.novaT=Math.max(0.8,(2.6-G.w.nova*0.22)*(G.w.novaEvo?0.6:1));castNova();}}
+  if(G.w.meteor>0){G.meteorT-=dt;if(G.meteorT<=0){G.meteorT=Math.max(0.9,2.8-G.w.meteor*0.32);castMeteor();}}
   G.orbAng+=dt*2.5;
 
   for(let i=G.shots.length-1;i>=0;i--){const s=G.shots[i];s.px=s.x;s.py=s.y;s.x+=s.dx*dt;s.y+=s.dy*dt;s.life-=dt;
@@ -1068,7 +1089,7 @@ function update(dt){
       else if(g.type==='vacuum'){activateVacuum();floatTxt(p.x,p.y-22,'VACUUM','#9bf5e4');}
       else if(g.type==='chest'){banner('COFFRE !','#ffd27a');sfx.over();openLevelUp();}
       else if(g.type==='bomb'){bombBlast();}
-      else if(g.type==='heart'){G.p.hp=Math.min(G.p.maxhp,G.p.hp+G.p.maxhp*0.3);floatTxt(p.x,p.y-22,'+VIE','#ff8a9a');blip(700,.12,'sine',.04);}
+      else if(g.type==='heart'){G.p.hp=Math.min(G.p.maxhp,G.p.hp+G.p.maxhp*0.4);floatTxt(p.x,p.y-22,'+VIE','#ff8a9a');blip(700,.12,'sine',.04);}
       else if(g.type==='magnet'){G.magBoost=7;banner('AIMANT','#9bf5e4');floatTxt(p.x,p.y-22,'AIMANT','#9bf5e4');blip(900,.1,'sine',.03);}
       else if(g.type==='relic'){grantRelic();}
       G.loot.splice(i,1);}
