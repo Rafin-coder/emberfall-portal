@@ -57,7 +57,8 @@
 const FALLBACK_GAMES = [
   { id:'emberfall', title:'Emberfall' },
   { id:'lumen', title:'Lumen' },
-  { id:'ageofwar', title:'Conquête des Âges' }
+  { id:'ageofwar', title:'Conquête des Âges' },
+  { id:'emberhill', title:'Ember Hill' }
 ];
 const TIME_GAMES = new Set(['emberfall']);
 const brandName = (window.GAMEPORTAL_CONFIG&&GAMEPORTAL_CONFIG.PORTAL_NAME)||'EMBER ARCADE';
@@ -78,7 +79,8 @@ function emberfallConds(){
 const COND = {
   emberfall: emberfallConds,
   lumen: ()=> 'Séquence de braises partagée',
-  ageofwar: ()=> 'Mêmes vagues ennemies pour tous'
+  ageofwar: ()=> 'Mêmes vagues ennemies pour tous',
+  emberhill: ()=> 'Même terrain pour tous'
 };
 
 function cardHTML(g){

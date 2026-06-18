@@ -88,7 +88,8 @@
 const FALLBACK_GAMES = [
   { id:'emberfall', title:'Emberfall', tagline:'Tiens face à la nuit. Survivor roguelite.', enabled:true, sort:0 },
   { id:'lumen', title:'Lumen', tagline:'Guide la lumière, enchaîne les braises. Arcade nerveux.', enabled:true, sort:1 },
-  { id:'ageofwar', title:'Conquête des Âges', tagline:'De la préhistoire au futur. Stratégie de couloir.', enabled:true, sort:2 }
+  { id:'ageofwar', title:'Conquête des Âges', tagline:'De la préhistoire au futur. Stratégie de couloir.', enabled:true, sort:2 },
+  { id:'emberhill', title:'Ember Hill', tagline:'Grimpe sans fin, garde l\'équilibre, ne tombe pas en panne.', enabled:true, sort:3 }
 ];
 const SOON = [];
 
@@ -100,6 +101,8 @@ const GAME_INFO = {
     desc:'Un serpent de lumière à faire grandir sans se mordre. Récupère les braises, enchaîne les combos et explose ton score.' },
   ageofwar:{ genre:'Stratégie de couloir', meta:'Stratégie · Solo · campagne + endless',
     desc:'Mène ton armée à travers cinq ères, de la préhistoire au futur. Produis des unités, pose des tourelles, évolue d\'ère, déclenche ton pouvoir spécial et détruis la base adverse.' },
+  emberhill:{ genre:'Conduite physique', meta:'Réflexes · Solo · distance sans fin',
+    desc:'Pilote ta braise sur des collines générées sans fin. Dose le gaz et le frein, garde l\'équilibre dans les sauts, ramasse le carburant et va le plus loin possible sans te retourner.' },
 };
 
 const brandName = (window.GAMEPORTAL_CONFIG&&GAMEPORTAL_CONFIG.PORTAL_NAME)||'EMBER ARCADE';

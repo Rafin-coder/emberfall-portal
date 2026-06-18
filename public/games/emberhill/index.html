@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Ember Hill — Ember Arcade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;font-family:"Space Grotesk",system-ui,sans-serif}
+:root{--bg:#08080e;--text:#ece9f5;--muted:#8d8aa0;--ember:#ff7a3c;--ember2:#ffb04d;--cool:#5fe3c8;--danger:#ff5d6c;--line:rgba(255,255,255,.1)}
+html,body{height:100%;background:var(--bg);color:var(--text);overflow:hidden;touch-action:none;user-select:none}
+#wrap{position:fixed;inset:0}
+canvas{display:block;width:100%;height:100%}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;align-items:flex-start;gap:14px;padding:10px 14px 0 104px;pointer-events:none}
+.stat{display:flex;flex-direction:column;line-height:1.15}
+.stat .v{font:600 20px/1 "Space Grotesk";color:#fff}
+.stat .k{font:500 9px/1 "JetBrains Mono",monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.stat.dist .v{color:var(--ember2)}
+.fuelwrap{margin-left:auto;min-width:150px}
+.fuelbar{height:11px;border-radius:6px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:4px;border:1px solid var(--line)}
+.fuelbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff7a3c,#ffd27a);transition:width .1s}
+#back{position:fixed;top:9px;left:12px;z-index:40;font:600 12px/1 "Space Grotesk";letter-spacing:.05em;color:#bfb9d6;
+  background:rgba(8,8,14,.7);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:9px;padding:8px 12px;text-decoration:none}
+#sound{position:fixed;top:9px;right:12px;z-index:40;width:38px;height:34px;font-size:15px;cursor:pointer;
+  background:rgba(8,8,14,.7);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:9px;color:#ffb04d}
+#sound.off{color:#6b6878}
+#dailyBadge{display:none;position:fixed;top:46px;left:50%;transform:translateX(-50%);z-index:40;font:600 11px/1 "JetBrains Mono",monospace;
+  letter-spacing:.12em;color:#ffd27a;background:rgba(8,8,14,.7);backdrop-filter:blur(8px);border:1px solid rgba(255,176,77,.35);border-radius:9px;padding:7px 11px}
+#pedals{position:fixed;left:0;right:0;bottom:0;height:38%;display:flex;z-index:20;pointer-events:none}
+.pedal{flex:1;pointer-events:auto;display:flex;align-items:flex-end;justify-content:center;padding-bottom:20px;
+  font:700 14px "Space Grotesk";letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.pedal.gas{background:linear-gradient(0deg,rgba(255,122,60,.16),transparent 75%)}
+.pedal.brake{background:linear-gradient(0deg,rgba(95,227,200,.12),transparent 75%)}
+.pedal.on{color:#fff}
+.pedal.gas.on{background:linear-gradient(0deg,rgba(255,122,60,.32),transparent 75%)}
+.pedal.brake.on{background:linear-gradient(0deg,rgba(95,227,200,.26),transparent 75%)}
+.overlay{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(700px 400px at 50% 36%,rgba(255,122,60,.12),transparent 70%),rgba(6,6,12,.84);backdrop-filter:blur(6px)}
+.overlay.hidden{display:none}
+.panel{text-align:center;padding:30px 32px;max-width:400px}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--ember);margin-bottom:14px}
+.panel h1{font-size:46px;font-weight:700;line-height:1;background:linear-gradient(120deg,#fff,var(--ember2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.panel p{color:var(--muted);margin-top:14px;font-size:14px;line-height:1.55}
+.panel .big{font-family:"JetBrains Mono",monospace;font-size:46px;color:var(--ember2);margin:4px 0}
+.modebtns{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.btn{font:600 15px/1 "Space Grotesk";letter-spacing:.03em;color:#0c0a08;cursor:pointer;background:linear-gradient(120deg,var(--ember),var(--ember2));border:none;border-radius:11px;padding:13px 22px}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:#bfb9d6;border:1px solid var(--line)}
+.keys{margin-top:16px;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted);line-height:1.7}
+#lbBox{margin:6px 0 2px}
+#netLine{font-size:12px}
+</style>
+</head>
+<body>
+<a id="back" href="/">← Arcade</a>
+<button id="sound" title="Son">♪</button>
+<div id="dailyBadge"></div>
+
+<div id="wrap">
+  <canvas id="c"></canvas>
+  <div id="hud">
+    <div class="stat dist"><span class="v" id="dist">0 m</span><span class="k">distance</span></div>
+    <div class="stat"><span class="v" id="spd">0</span><span class="k">km/h</span></div>
+    <div class="stat"><span class="v" id="best">0 m</span><span class="k">record</span></div>
+    <div class="fuelwrap"><div class="k" style="font:500 9px/1 'JetBrains Mono';letter-spacing:.16em;text-transform:uppercase;color:#8d8aa0">carburant</div><div class="fuelbar"><i id="fuel"></i></div></div>
+  </div>
+  <div id="pedals">
+    <div class="pedal brake" id="pBrake">◀ frein</div>
+    <div class="pedal gas" id="pGas">gaz ▶</div>
+  </div>
+</div>
+
+<div class="overlay" id="menu">
+  <div class="panel">
+    <div class="eyebrow">ember arcade</div>
+    <h1>Ember Hill</h1>
+    <p>Conduis ta braise sur des collines sans fin. Accélère, garde l'équilibre, ne te retourne pas — et surveille ton carburant. Va le plus loin possible.</p>
+    <div class="modebtns"><button class="btn" id="playBtn">Démarrer le moteur</button></div>
+    <div class="keys">→ / D ou côté droit : gaz · ← / Q ou côté gauche : frein/arrière<br>Ramasse les bidons ⛽ · ne retombe pas sur le toit</div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="over">
+  <div class="panel">
+    <div class="eyebrow" id="overTitle">épave</div>
+    <div class="big" id="overScore">0 m</div>
+    <div id="overSub" style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:13px"></div>
+    <p id="netLine"></p>
+    <div id="lbBox"></div>
+    <div class="modebtns"><button class="btn" id="retryBtn">Rejouer</button></div>
+  </div>
+</div>
+
+<script src="/config.js"></script>
+<script src="/sdk.js"></script>
+<script>
+(function(){
+  const cv=document.getElementById('c'), ctx=cv.getContext('2d');
+  let W=innerWidth,H=innerHeight,DPR=Math.min(2,devicePixelRatio||1);
+  function fit(){W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+  addEventListener('resize',fit); fit();
+
+  // ---------- audio ----------
+  let AC=null,eng=null,engGain=null,muted=localStorage.getItem('eh:mute')==='1';
+  function ac(){ if(AC)return; try{AC=new(window.AudioContext||window.webkitAudioContext)();
+    eng=AC.createOscillator();engGain=AC.createGain();eng.type='sawtooth';eng.frequency.value=70;
+    engGain.gain.value=0;eng.connect(engGain).connect(AC.destination);eng.start();}catch(e){} }
+  function blip(f,d,t,v){ if(!AC||muted)return; const n=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();
+    o.type=t||'sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,n);g.gain.exponentialRampToValueAtTime(v||.05,n+.01);
+    g.gain.exponentialRampToValueAtTime(.0001,n+d);o.connect(g).connect(AC.destination);o.start(n);o.stop(n+d+.02);}
+  function engineSound(speed){ if(!engGain)return; const tgt=muted||G.state!=='play'?0:0.04;
+    engGain.gain.value+=(tgt-engGain.gain.value)*0.1; if(eng)eng.frequency.value=60+Math.min(260,Math.abs(speed)*0.9); }
+  const sb=document.getElementById('sound');
+  function refreshSound(){sb.textContent=muted?'♪̸':'♪';sb.classList.toggle('off',muted);}
+  sb.onclick=()=>{muted=!muted;localStorage.setItem('eh:mute',muted?'1':'0');refreshSound();}; refreshSound();
+
+  // ---------- terrain ----------
+  let DAILY=null, SEED=Math.random()*1000;
+  let P1,P2,P3,P4;
+  function seedTerrain(rng){ P1=rng()*6.28;P2=rng()*6.28;P3=rng()*6.28;P4=rng()*6.28; }
+  function ground(x){
+    const amp=46+Math.min(150,x*0.011);
+    return H*0.60
+      - Math.sin(x*0.0042+P1)*amp
+      - Math.sin(x*0.0095+P2)*amp*0.42
+      - Math.sin(x*0.0200+P3)*amp*0.18
+      - Math.sin(x*0.0008+P4)*70;
+  }
+  function slopeAt(x){const d=6;return Math.atan2(ground(x+d)-ground(x-d),2*d);}
+  function clamp(v,a,b){return v<a?a:v>b?b:v;}
+  function angNorm(a){while(a>Math.PI)a-=6.283185;while(a<-Math.PI)a+=6.283185;return a;}
+
+  // ---------- état ----------
+  const REST=24, EF=1500, BF=1050, GRAV=1600, AIRROT=3.4, AIRACC=120;
+  let G={state:'menu'};
+  let cans=[];
+  function reset(){
+    G={state:'play',t:0,x:0,y:ground(0)-REST,vx:0,vy:0,angle:slopeAt(0),angVel:0,onGround:true,
+       fuel:100,dist:0,best:+(localStorage.getItem('eh:best')||0),wheel:0,dry:0,flips:0,airT:0,startAng:0};
+    cans=[]; let cx=900; for(let i=0;i<60;i++){cx+=700+(DAILY?DAILY.rng():Math.random())*900; cans.push({x:cx,got:false});}
+  }
+
+  let gas=false, brake=false;
+  function bindPedal(el,set){
+    const on=e=>{e.preventDefault();ac();set(true);el.classList.add('on');};
+    const off=e=>{e.preventDefault();set(false);el.classList.remove('on');};
+    el.addEventListener('pointerdown',on);el.addEventListener('pointerup',off);
+    el.addEventListener('pointerleave',off);el.addEventListener('pointercancel',off);
+  }
+  bindPedal(document.getElementById('pGas'),v=>gas=v);
+  bindPedal(document.getElementById('pBrake'),v=>brake=v);
+  addEventListener('keydown',e=>{const k=e.key.toLowerCase();
+    if(k==='arrowright'||k==='d'){gas=true;ac();} if(k==='arrowleft'||k==='q'){brake=true;ac();}});
+  addEventListener('keyup',e=>{const k=e.key.toLowerCase();
+    if(k==='arrowright'||k==='d')gas=false; if(k==='arrowleft'||k==='q')brake=false;});
+
+  // ---------- physique ----------
+  function physics(sdt){
+    const canGas = gas && G.fuel>0;
+    // intégration projectile
+    G.vy+=GRAV*sdt; G.x+=G.vx*sdt; G.y+=G.vy*sdt;
+    const restY=ground(G.x)-REST, slope=clamp(slopeAt(G.x),-1.1,1.1);
+    if(G.y>=restY){ // au sol
+      const wasAir=!G.onGround; G.onGround=true; G.y=restY;
+      let v=G.vx/Math.cos(slope);
+      if(canGas)v+=EF*sdt; if(brake)v-=BF*sdt;
+      v-=GRAV*Math.sin(slope)*sdt;     // gravité le long de la pente
+      v*=(1-0.5*sdt);                  // frottement
+      v=clamp(v,-180,560);
+      G.vx=v*Math.cos(slope); G.vy=v*Math.sin(slope);
+      const wheelie=canGas?-0.16:0;
+      G.angle+=(slope+wheelie-G.angle)*Math.min(1,sdt*11); G.angVel=0;
+      if(wasAir){ G.airT=0;
+        if(Math.abs(angNorm(G.angle-slope))>1.05){ crash('Atterrissage manqué'); return; }
+        else { blip(220,.05,'square',.03); }
+      }
+    } else { // en l'air
+      G.onGround=false; G.airT+=sdt;
+      if(canGas)G.vx+=AIRACC*sdt;
+      if(canGas)G.angVel-=AIRROT*sdt; if(brake)G.angVel+=AIRROT*sdt;
+      G.angVel=clamp(G.angVel,-5,5); G.angle+=G.angVel*sdt; G.vx*=(1-0.04*sdt);
+    }
+    G.wheel+=G.vx*sdt*0.06;
+    if(canGas)G.fuel=Math.max(0,G.fuel-(2.4)*sdt); else G.fuel=Math.max(0,G.fuel-0.9*sdt);
+    // bidons
+    for(const c of cans){ if(!c.got && Math.abs(c.x-G.x)<26 && Math.abs((ground(c.x)-34)-G.y)<70){
+      c.got=true; G.fuel=Math.min(100,G.fuel+38); blip(880,.12,'sine',.05); banner('+ CARBURANT','#ffd27a'); } }
+    // panne sèche
+    if(G.fuel<=0 && Math.abs(G.vx)<22 && G.onGround){ G.dry+=sdt; if(G.dry>1.3) crash('Panne sèche'); }
+    else if(G.fuel>0||Math.abs(G.vx)>=22) G.dry=0;
+  }
+
+  let bannerT=0,bannerTxt='',bannerCol='#fff';
+  function banner(t,c){bannerTxt=t;bannerCol=c||'#fff';bannerT=1.6;}
+  function crash(reason){ if(G.state!=='play')return; G.state='dead'; G.crashReason=reason||'Tonneau'; blip(150,.4,'sawtooth',.06);
+    endGame(); }
+
+  // ---------- rendu ----------
+  function render(){
+    const camX=G.x-W*0.30, camY=clamp(G.y-H*0.52,-H,H*1.5);
+    // ciel
+    const sky=ctx.createLinearGradient(0,0,0,H); sky.addColorStop(0,'#0c0a16'); sky.addColorStop(1,'#241326');
+    ctx.fillStyle=sky; ctx.fillRect(0,0,W,H);
+    // lune + parallaxe collines
+    ctx.fillStyle='rgba(255,200,120,0.25)'; ctx.beginPath();ctx.arc(W*0.8,H*0.22,40,0,6.28);ctx.fill();
+    for(let layer=0;layer<2;layer++){ const par=0.3+layer*0.25, off=camX*par;
+      ctx.fillStyle=layer?'rgba(60,40,70,0.5)':'rgba(40,28,52,0.6)';
+      ctx.beginPath(); ctx.moveTo(0,H);
+      for(let sx=0;sx<=W;sx+=18){ const wx=sx+off; const hy=H*0.5 - Math.sin(wx*0.0022+layer*2)*70 - layer*30 - Math.sin(wx*0.006)*24;
+        ctx.lineTo(sx,hy-camY*par*0.2); }
+      ctx.lineTo(W,H);ctx.closePath();ctx.fill(); }
+    // terrain
+    ctx.save(); ctx.translate(-camX,-camY);
+    ctx.beginPath(); const x0=camX-20,x1=camX+W+20;
+    ctx.moveTo(x0,ground(x0));
+    for(let wx=x0;wx<=x1;wx+=8) ctx.lineTo(wx,ground(wx));
+    ctx.lineTo(x1,camY+H+200);ctx.lineTo(x0,camY+H+200);ctx.closePath();
+    const tg=ctx.createLinearGradient(0,G.y-100,0,G.y+260); tg.addColorStop(0,'#3a2a44');tg.addColorStop(1,'#160f1e');
+    ctx.fillStyle=tg; ctx.fill();
+    ctx.strokeStyle='#ff7a3c'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(x0,ground(x0));
+    for(let wx=x0;wx<=x1;wx+=8) ctx.lineTo(wx,ground(wx)); ctx.stroke();
+    // bidons
+    for(const c of cans){ if(c.got||c.x<x0-40||c.x>x1+40)continue; const gy=ground(c.x)-34;
+      ctx.fillStyle='#ffb04d'; ctx.fillRect(c.x-9,gy-12,18,22); ctx.fillStyle='#0c0a08';
+      ctx.font='12px JetBrains Mono';ctx.textAlign='center';ctx.fillText('⛽',c.x,gy+4); }
+    // voiture
+    drawCar();
+    ctx.restore();
+    // bannière
+    if(bannerT>0){ ctx.globalAlpha=Math.min(1,bannerT/0.4); ctx.fillStyle=bannerCol; ctx.font='700 22px Space Grotesk';
+      ctx.textAlign='center';ctx.fillText(bannerTxt,W/2,H*0.22);ctx.globalAlpha=1;ctx.textAlign='left'; }
+  }
+  function drawCar(){
+    ctx.save(); ctx.translate(G.x,G.y); ctx.rotate(G.angle);
+    // ombre
+    // roues
+    const wb=24,wy=14,wr=14;
+    for(const sx of [-wb,wb]){ ctx.save();ctx.translate(sx,wy);
+      ctx.fillStyle='#1a1a22';ctx.beginPath();ctx.arc(0,0,wr,0,6.28);ctx.fill();
+      ctx.strokeStyle='#ff7a3c';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,wr,0,6.28);ctx.stroke();
+      ctx.rotate(G.wheel);ctx.strokeStyle='#5a5a66';ctx.lineWidth=2;
+      for(let k=0;k<4;k++){ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(k*1.57)*wr*0.8,Math.sin(k*1.57)*wr*0.8);ctx.stroke();}
+      ctx.restore(); }
+    // châssis
+    ctx.fillStyle='#ffb04d'; rr(-30,-6,60,20,7); ctx.fill();
+    ctx.fillStyle='#ff7a3c'; rr(-16,-22,34,18,6); ctx.fill();   // cabine
+    ctx.fillStyle='rgba(120,220,255,0.5)'; rr(-12,-19,26,12,4); ctx.fill(); // vitre
+    // pilote braise
+    ctx.fillStyle='#fff'; ctx.beginPath();ctx.arc(0,-13,5,0,6.28);ctx.fill();
+    ctx.fillStyle='#ffd27a'; ctx.beginPath();ctx.arc(0,-13,3,0,6.28);ctx.fill();
+    ctx.restore();
+  }
+  function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+  // ---------- HUD ----------
+  function updateHUD(){
+    G.dist=Math.max(G.dist,Math.floor(G.x/12));
+    document.getElementById('dist').textContent=G.dist+' m';
+    document.getElementById('spd').textContent=Math.round(Math.abs(G.vx)*0.16);
+    document.getElementById('best').textContent=Math.max(G.best,G.dist)+' m';
+    document.getElementById('fuel').style.width=G.fuel+'%';
+    document.getElementById('fuel').style.background=G.fuel<25?'linear-gradient(90deg,#ff5d6c,#ff9a3c)':'linear-gradient(90deg,#ff7a3c,#ffd27a)';
+  }
+
+  // ---------- boucle ----------
+  let last=performance.now();
+  function loop(now){
+    const dt=Math.min(.05,(now-last)/1000); last=now; requestAnimationFrame(loop);
+    if(G.state==='play'){ const STEPS=5,sdt=dt/STEPS;
+      for(let i=0;i<STEPS&&G.state==='play';i++) physics(sdt);
+      if(bannerT>0)bannerT-=dt; updateHUD(); engineSound(G.vx);
+    } else engineSound(0);
+    if(G.state==='play'||G.state==='dead') render();
+  }
+
+  // ---------- fin ----------
+  function endGame(){
+    const best=+(localStorage.getItem('eh:best')||0);
+    if(G.dist>best) localStorage.setItem('eh:best',G.dist);
+    document.getElementById('overTitle').textContent=G.crashReason;
+    document.getElementById('overScore').textContent=G.dist+' m';
+    document.getElementById('overSub').textContent='record : '+Math.max(best,G.dist)+' m';
+    submit();
+    setTimeout(()=>document.getElementById('over').classList.remove('hidden'),450);
+  }
+  function submit(){
+    const nl=document.getElementById('netLine'), box=document.getElementById('lbBox'); box.innerHTML='';
+    if(!window.GamePortal){nl.textContent='';return;}
+    const meta={dist:G.dist};
+    if(DAILY){ GamePortal.submitDaily(G.dist,meta); const st=GamePortal.getStreak();
+      nl.textContent=(GamePortal.online?'défi du jour envoyé':'hors-ligne — score local')+(st&&st.count>0?' · série '+st.count+' j':'');
+      if(GamePortal.online) setTimeout(()=>GamePortal.renderTop(box,{gameId:'emberhill',limit:5,daily:true,title:'Défi du jour'}),350);
+    } else { GamePortal.submitScore(G.dist,meta);
+      nl.textContent=GamePortal.online?'score envoyé au classement':'hors-ligne — score local';
+      if(GamePortal.online) setTimeout(()=>GamePortal.renderTop(box,{gameId:'emberhill',limit:5,title:'Classement'}),350);
+    }
+  }
+
+  function start(){ ac(); reset();
+    document.getElementById('menu').classList.add('hidden');
+    document.getElementById('over').classList.add('hidden');
+  }
+  document.getElementById('playBtn').onclick=start;
+  document.getElementById('retryBtn').onclick=start;
+
+  const PARAMS=new URLSearchParams(location.search);
+  if(PARAMS.get('daily')==='1' && window.GamePortal){
+    DAILY=GamePortal.daily(); seedTerrain(DAILY.rng);
+    const b=document.getElementById('dailyBadge'); b.textContent='DÉFI DU JOUR · '+DAILY.date; b.style.display='block';
+  } else { let s=SEED; const rng=()=>{s=(s*9301+49297)%233280;return s/233280;}; seedTerrain(rng); }
+  reset(); G.state='menu';
+  document.getElementById('best').textContent=(+(localStorage.getItem('eh:best')||0))+' m';
+  requestAnimationFrame(loop);
+  if(window.GamePortal) GamePortal.init({gameId:'emberhill'});
+})();
+</script>
+</body>
+</html>
