@@ -182,7 +182,9 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
   function pBaseX(){ return 58; }
   function eBaseX(){ return W-58; }
 
+  const QUEUE_MAX=5;
   function buyUnit(roleIdx){
+    if(G.queue.length>=QUEUE_MAX){ blip(150,.09,'square',.03); return; }   // file pleine : on ne débite pas
     const s=unitStats(G.age, ROLES[roleIdx]);
     if(G.gold<s.cost) return;
     G.gold-=s.cost; G.queue.push({age:G.age, role:roleIdx});
@@ -245,9 +247,12 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
       if(e.buyCd<=0){
         e.buyCd = Math.max(0.6, 1.5 - G.t*0.005);
         if(e.age<MAXAGE && e.gold>=evolveCost(e.age)*1.4){ e.gold-=evolveCost(e.age); e.age++; }
-        const roll=Math.random(); let role = roll<0.5?0 : roll<0.8?1 : 2;
-        const s=unitStats(e.age, ROLES[role]);
-        if(e.gold>=s.cost){ e.gold-=s.cost; G.units.push(mkUnit('e', e.age, role, s)); }
+        const eCount=G.units.reduce((n,u)=>n+(u.side==='e'?1:0),0);
+        if(eCount<9){
+          const roll=Math.random(); let role = roll<0.5?0 : roll<0.8?1 : 2;
+          const s=unitStats(e.age, ROLES[role]);
+          if(e.gold>=s.cost){ e.gold-=s.cost; G.units.push(mkUnit('e', e.age, role, s)); }
+        }
       }
     } else { // endless : vagues croissantes
       e.age=Math.min(MAXAGE, Math.floor(G.t/50));
@@ -295,18 +300,22 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
       const dir = u.side==='p'?1:-1;
       const baseX = u.side==='p'? eBaseX() : pBaseX();
       const tgt=frontEnemy(u);
-      let engaged=false, atkBase=false;
-      if(tgt){ const gap=Math.abs(tgt.x-u.x); if(gap<=u.rng+u.sz+tgt.sz){ engaged=true; } }
-      if(!engaged){ const gapB=Math.abs(baseX-u.x); if(gapB<=u.rng+u.sz+18 && (!tgt||Math.abs(tgt.x-u.x)>gapB)){ engaged=true; atkBase=true; } }
-      if(engaged){
-        if(u.atk<=0){
-          u.atk=u.rate; u.lunge=.12;
-          if(atkBase){ if(u.side==='p')G.ebHp-=u.dmg; else G.pbHp-=u.dmg; }
-          else { tgt.hp-=u.dmg; tgt.hit=.12;
-            if(u.rng>60) G.tracers.push({x1:u.x,y1:laneY()-10,x2:tgt.x,y2:laneY()-10,t:.1,col:u.side==='p'?'255,200,120':'255,120,120'}); }
-          if(u.rng>60)blip(u.side==='p'?700:420,.03,'square',.012);
-        }
-      } else {
+      const isRanged=u.rng>60;
+      let canFire=false, hold=false, atkBase=false;
+      if(tgt){ const gap=Math.abs(tgt.x-u.x);
+        if(gap<=u.rng+u.sz+tgt.sz) canFire=true;
+        if(gap<=(isRanged?(u.sz+tgt.sz+12):(u.rng+u.sz+tgt.sz))) hold=true; }   // mêlée s'arrête au contact ; distance avance jusqu'au contact
+      const gapB=Math.abs(baseX-u.x);
+      if(gapB<=u.rng+u.sz+18 && (!tgt||Math.abs(tgt.x-u.x)>gapB)){ canFire=true; atkBase=true;
+        if(gapB<=(isRanged?(u.sz+30):(u.rng+u.sz+18))) hold=true; }
+      if(canFire && u.atk<=0){
+        u.atk=u.rate; u.lunge=.12;
+        if(atkBase){ if(u.side==='p')G.ebHp-=u.dmg; else G.pbHp-=u.dmg; }
+        else if(tgt){ tgt.hp-=u.dmg; tgt.hit=.12;
+          if(isRanged) G.tracers.push({x1:u.x,y1:laneY()-10,x2:tgt.x,y2:laneY()-10,t:.1,col:u.side==='p'?'255,200,120':'255,120,120'}); }
+        if(isRanged)blip(u.side==='p'?700:420,.03,'square',.012);
+      }
+      if(!hold){
         let nx=u.x+dir*u.sp*dt;
         const ally=frontAlly(u);
         if(ally){ const minGap=u.sz+ally.sz+4; if(u.side==='p') nx=Math.min(nx, ally.x-minGap); else nx=Math.max(nx, ally.x+minGap); }
@@ -319,7 +328,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
       if(tr.cd<=0){ let best=null,bd=tr.rng*tr.rng;
         for(const o of G.units){ if(o.side!=='e')continue; const dx=o.x-pBaseX(); const d=dx*dx; if(dx>0&&d<bd){bd=d;best=o;} }
         if(best){ tr.cd=tr.rate; best.hp-=tr.dmg; best.hit=.12;
-          G.tracers.push({x1:pBaseX()+10,y1:laneY()-58-idx*16,x2:best.x,y2:laneY()-10,t:.1,col:'120,230,200'}); blip(620,.03,'square',.012); } }
+          G.tracers.push({x1:pBaseX()+14+idx*12,y1:laneY()-50-idx*30,x2:best.x,y2:laneY()-10,t:.1,col:'120,230,200'}); blip(620,.03,'square',.012); } }
     });
     // morts
     for(let i=G.units.length-1;i>=0;i--){ const u=G.units[i]; if(u.hp<=0){
@@ -352,7 +361,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     ctx.save();ctx.translate(sh,0);
     drawBuilding(pBaseX(),gy,G.age,'p');
     drawBuilding(eBaseX(),gy,G.e.age,'e');
-    G.turrets.forEach((tr,idx)=>drawTurret(pBaseX()+2, gy-58-idx*16, tr.age));
+    G.turrets.forEach((tr,idx)=>drawTurret(pBaseX()+6+idx*12, gy-50-idx*30, tr.age));
     for(const tc of G.tracers){ ctx.strokeStyle='rgba('+tc.col+','+Math.min(1,tc.t*10)+')';ctx.lineWidth=2;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(tc.x1,tc.y1);ctx.lineTo(tc.x2,tc.y2);ctx.stroke(); }
     // unités triées par x pour un bon recouvrement
     const sorted=G.units.slice().sort((a,b)=>a.x-b.x);
@@ -431,10 +440,29 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
   }
   function drawTurret(x,y,age){
     ctx.save();ctx.translate(x,y);
-    ctx.fillStyle='#3a4d49';ctx.fillRect(-9,-2,18,12);
-    ctx.fillStyle='#5fe3c8';ctx.fillRect(-7,-8,14,8);
-    ctx.fillStyle='#bdebe0';ctx.fillRect(4,-5,16,4);
-    if(age>=4){ctx.fillStyle='rgba(120,240,255,0.7)';ctx.fillRect(18,-4.5,4,3);}
+    ctx.fillStyle='#2a2730';ctx.fillRect(-9,5,18,7);            // socle commun
+    if(age===0){                                               // lanceur de pierres (bois)
+      ctx.fillStyle='#7a5630';ctx.fillRect(-8,-2,15,8);
+      ctx.strokeStyle='#9a6a38';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-5,4);ctx.lineTo(3,-9);ctx.stroke();
+      ctx.fillStyle='#8d8a90';ctx.beginPath();ctx.arc(4,-10,4,0,6.28);ctx.fill();
+    } else if(age===1){                                        // baliste (bronze)
+      ctx.fillStyle='#9a7b3a';ctx.fillRect(-8,-2,14,8);
+      ctx.strokeStyle='#d8b15a';ctx.lineWidth=2.4;ctx.beginPath();ctx.moveTo(-1,-7);ctx.lineTo(-1,7);ctx.stroke();
+      ctx.fillStyle='#caa05a';ctx.fillRect(0,-3,19,3);
+    } else if(age===2){                                        // canon médiéval
+      ctx.fillStyle='#55525c';ctx.fillRect(-9,-3,15,10);
+      ctx.fillStyle='#2b2b33';ctx.fillRect(2,-5,18,5);
+      ctx.fillStyle='#888';ctx.beginPath();ctx.arc(-2,2,5,0,6.28);ctx.fill();
+    } else if(age===3){                                        // mitrailleuse moderne
+      ctx.fillStyle='#3a3f3a';ctx.fillRect(-9,-3,16,10);
+      ctx.fillStyle='#1c1c22';ctx.fillRect(3,-5,21,3);ctx.fillRect(3,-1,21,3);
+      ctx.fillStyle='#9aa4a0';ctx.fillRect(-6,-8,10,6);
+    } else {                                                   // tourelle laser (futur)
+      ctx.fillStyle='#3a4d49';ctx.fillRect(-9,-2,18,12);
+      ctx.fillStyle='#5fe3c8';ctx.fillRect(-7,-8,14,8);
+      ctx.fillStyle='#bdebe0';ctx.fillRect(4,-5,16,4);
+      ctx.fillStyle='rgba(120,240,255,0.85)';ctx.fillRect(18,-4.5,6,3);
+    }
     ctx.restore();
   }
 
@@ -575,14 +603,14 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     document.getElementById('xpTxt').textContent=G.age>=MAXAGE?'ÈRE MAXIMALE':Math.floor(Math.min(G.xp,need))+' / '+need+' XP';
     document.getElementById('popTxt').textContent=G.units.filter(u=>u.side==='p').length;
     const pp=Math.max(0,Math.round(G.pbHp/G.pbMax*100));
-    document.getElementById('phpb').style.width=pp+'%'; document.getElementById('phpPct').textContent=pp+'%';
+    document.getElementById('phpb').style.width=pp+'%'; document.getElementById('phpPct').textContent=Math.max(0,Math.ceil(G.pbHp))+' / '+G.pbMax;
     const ew=document.getElementById('ehpwrap'), ei=document.getElementById('endlessInfo');
     if(G.mode==='endless'){ ew.style.display='none'; ei.style.display='flex';
       document.getElementById('waveTxt').textContent='Vague '+G.wave;
       document.getElementById('killTxt').textContent=G.kills+' détruits · ère IA '+AGES[G.e.age]; }
     else { ei.style.display='none'; ew.style.display='block';
       const ep=Math.max(0,Math.round(G.ebHp/G.ebMax*100));
-      document.getElementById('ehpb').style.width=ep+'%'; document.getElementById('ehpPct').textContent=ep+'%'; }
+      document.getElementById('ehpb').style.width=ep+'%'; document.getElementById('ehpPct').textContent=Math.max(0,Math.ceil(G.ebHp))+' / '+G.ebMax; }
     const labels=['Mêlée','Distance','Lourd'];
     for(let i=0;i<3;i++){ const s=unitStats(G.age,ROLES[i]);
       const b=setBtn('u'+i, UNAMES[G.age][i], '◉ '+s.cost+'  ['+(i+1)+']', labels[i]+' · PV '+s.hp+' · DGT '+Math.round(s.dmg));

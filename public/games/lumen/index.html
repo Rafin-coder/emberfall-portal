@@ -55,6 +55,13 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
     <div class="eyebrow">ember arcade</div>
     <h1>Lumen</h1>
     <p>Guide la lumière, ramasse les braises, fuis tes propres ténèbres. Plus tu enchaînes vite, plus le combo grimpe.</p>
+    <div style="text-align:left;max-width:340px;margin:14px auto 4px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;color:var(--muted)">
+      <div style="color:#bfb9d6;font-size:11px;letter-spacing:.12em;margin-bottom:6px">BRAISES SPÉCIALES (1 sur 7)</div>
+      <div><span style="color:#ffd27a">◆ Braise d'or</span> — +120 points</div>
+      <div><span style="color:#96e6ff">❄ Prisme</span> — ralentit pendant 5 s</div>
+      <div><span style="color:#ff8c5a">✦ Brasier</span> — points ×2 sur 6 braises</div>
+      <div><span style="color:#5fe3c8">◉ Halo</span> — survit à un choc (cumulable ×3)</div>
+    </div>
     <button class="btn" id="startBtn">Commencer</button>
     <div class="keys">flèches / ZQSD &nbsp;·&nbsp; ou glisse du doigt</div>
   </div>
@@ -103,12 +110,21 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
     g.gain.exponentialRampToValueAtTime(v||.05,n+.01); g.gain.exponentialRampToValueAtTime(.0001,n+d);
     o.connect(g).connect(AC.destination); o.start(n); o.stop(n+d+.02); }
 
-  // ---------- state ----------
+  // ---------- state + bonus ----------
   let S=null;
+  const SPECIALS=['gold','slow','double','shield'];
+  const SPECIAL_INFO={
+    gold:  {col:'255,210,122', icon:'◆', label:"Braise d'or", desc:'+120 points'},
+    slow:  {col:'150,230,255', icon:'❄', label:'Prisme',     desc:'ralentit 5 s'},
+    double:{col:'255,140,90',  icon:'✦', label:'Brasier',    desc:'points ×2 (6 braises)'},
+    shield:{col:'95,227,200',  icon:'◉', label:'Halo',       desc:"survit à 1 choc"},
+  };
+  function lumBanner(t,col){ if(!S)return; S.banner=t; S.bannerCol=col||'255,255,255'; S.bannerT=1.4; }
   function reset(){
     S={ snake:[{x:11,y:11},{x:10,y:11},{x:9,y:11}], prev:[], dir:{x:1,y:0}, queue:[],
         food:null, acc:0, interval:0.16, score:0, combo:1, comboT:0, parts:[], shake:0,
-        state:'play', foodPulse:0, eaten:0 };
+        state:'play', foodPulse:0, eaten:0, placed:0,
+        shield:0, slowT:0, dbl:0, banner:'', bannerCol:'255,255,255', bannerT:0 };
     placeFood();
     document.getElementById('score').textContent='0';
     setCombo(1);
@@ -119,6 +135,8 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
     let idx=(RNG()*GRID*GRID)|0, guard=0;
     while(guard<GRID*GRID && S.snake.some(s=>s.x===(idx%GRID)&&s.y===((idx/GRID)|0))){ idx=(idx+1)%(GRID*GRID); guard++; }
     S.food={x:idx%GRID, y:(idx/GRID)|0}; S.foodPulse=0;
+    S.placed=(S.placed||0)+1;
+    S.food.special = (S.placed%7===0) ? SPECIALS[(Math.floor(S.placed/7)-1)%SPECIALS.length] : null;
   }
   function setCombo(c){ const el=document.getElementById('combo'); el.textContent='×'+c; el.classList.toggle('on', c>1); }
 
@@ -146,22 +164,38 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
   function step(){
     if(S.queue.length) S.dir=S.queue.shift();
     const head=S.snake[0], nh={x:head.x+S.dir.x, y:head.y+S.dir.y};
-    if(nh.x<0||nh.x>=GRID||nh.y<0||nh.y>=GRID){ return die(); }
+    if(nh.x<0||nh.x>=GRID||nh.y<0||nh.y>=GRID){
+      if(S.shield>0){ S.shield--; S.queue=[]; lumBanner('Halo consommé','95,227,200'); blip(520,.12,'square',.05); return; }
+      return die(); }
     const eat = S.food && nh.x===S.food.x && nh.y===S.food.y;
     S.prev = S.snake.map(s=>({x:s.x,y:s.y}));
     S.snake.unshift(nh);
     if(!eat) S.snake.pop();
-    for(let i=1;i<S.snake.length;i++) if(S.snake[i].x===nh.x&&S.snake[i].y===nh.y) return die();
+    for(let i=1;i<S.snake.length;i++){ if(S.snake[i].x===nh.x&&S.snake[i].y===nh.y){
+      if(S.shield>0){ S.shield--; S.snake=S.prev.map(s=>({x:s.x,y:s.y})); S.queue=[]; lumBanner('Halo consommé','95,227,200'); blip(520,.12,'square',.05); return; }
+      return die(); } }
     if(eat){
       S.eaten++;
       if(S.comboT>0) S.combo=Math.min(9,S.combo+1); else S.combo=1;
       S.comboT=2.4; setCombo(S.combo);
-      S.score += 10*S.combo;
+      const sp=S.food.special;
+      let gain=10*S.combo;
+      if(S.dbl>0){ gain*=2; S.dbl--; }
+      if(sp==='gold') gain+=120;
+      S.score += gain;
       document.getElementById('score').textContent=S.score;
       S.interval=Math.max(0.07, 0.16 - S.eaten*0.0025);
       burst(S.food.x, S.food.y);
       S.shake=Math.min(7, 3+S.combo*0.5);
-      blip(420+S.combo*70,.09,'triangle',.05); if(S.combo>1) blip(900+S.combo*60,.05,'sine',.03);
+      if(sp){
+        if(sp==='slow') S.slowT=5;
+        else if(sp==='double') S.dbl=6;
+        else if(sp==='shield') S.shield=Math.min(3,S.shield+1);
+        lumBanner(SPECIAL_INFO[sp].label+' !', SPECIAL_INFO[sp].col);
+        blip(660,.12,'sine',.05); blip(990,.10,'triangle',.04);
+      } else {
+        blip(420+S.combo*70,.09,'triangle',.05); if(S.combo>1) blip(900+S.combo*60,.05,'sine',.03);
+      }
       placeFood();
     }
   }
@@ -198,7 +232,9 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
     if(S.state==='play'){
       S.acc+=dt; S.foodPulse+=dt;
       if(S.comboT>0){ S.comboT-=dt; if(S.comboT<=0){ S.combo=1; setCombo(1); } }
-      while(S.acc>=S.interval){ S.acc-=S.interval; if(S.state==='play') step(); }
+      if(S.slowT>0) S.slowT-=dt; if(S.bannerT>0) S.bannerT-=dt;
+      const iv=S.interval*(S.slowT>0?1.7:1);
+      while(S.acc>=iv){ S.acc-=iv; if(S.state==='play') step(); }
     }
     if(S.shake>0) S.shake=Math.max(0,S.shake-dt*30);
     for(let i=S.parts.length-1;i>=0;i--){ const p=S.parts[i]; p.t+=dt; p.x+=p.dx*dt; p.y+=p.dy*dt; p.dx*=.92; p.dy*=.92; if(p.t>=p.life) S.parts.splice(i,1); }
@@ -214,9 +250,13 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
       ctx.beginPath();ctx.moveTo(0,i*CELL);ctx.lineTo(SIZE,i*CELL);ctx.stroke(); }
     // food
     if(S.food){ const cx=(S.food.x+.5)*CELL, cy=(S.food.y+.5)*CELL, pr=CELL*0.30*(1+Math.sin(S.foodPulse*6)*0.12);
-      const g=ctx.createRadialGradient(cx,cy,0,cx,cy,CELL*1.1); g.addColorStop(0,'rgba(255,176,77,.55)'); g.addColorStop(1,'rgba(255,176,77,0)');
+      const info=S.food.special?SPECIAL_INFO[S.food.special]:null;
+      const col=info?info.col:'255,176,77';
+      const g=ctx.createRadialGradient(cx,cy,0,cx,cy,CELL*1.1); g.addColorStop(0,'rgba('+col+',.55)'); g.addColorStop(1,'rgba('+col+',0)');
       ctx.fillStyle=g; ctx.fillRect(cx-CELL*1.1,cy-CELL*1.1,CELL*2.2,CELL*2.2);
-      ctx.fillStyle='#ffd27a'; ctx.beginPath(); ctx.arc(cx,cy,pr,0,6.283); ctx.fill(); }
+      ctx.fillStyle='rgb('+col+')'; ctx.beginPath(); ctx.arc(cx,cy,info?pr*1.15:pr,0,6.283); ctx.fill();
+      if(info){ ctx.fillStyle='#0a0a12'; ctx.font='700 '+Math.round(CELL*0.46)+'px "JetBrains Mono",monospace';
+        ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(info.icon,cx,cy+1); ctx.textAlign='left'; ctx.textBaseline='alphabetic'; } }
     // snake (interpolé)
     const prog = S.state==='play' ? Math.min(1, S.acc/S.interval) : 1;
     const n=S.snake.length;
@@ -233,7 +273,21 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
     // particles
     for(const p of S.parts){ const a=Math.max(0,1-p.t/p.life); ctx.fillStyle='rgba('+p.col+','+a+')';
       ctx.beginPath(); ctx.arc(p.x,p.y,2.4*a+0.6,0,6.283); ctx.fill(); }
+    // bannière bonus
+    if(S.bannerT>0){ ctx.globalAlpha=Math.min(1,S.bannerT/0.4); ctx.fillStyle='rgb('+(S.bannerCol||'255,255,255')+')';
+      ctx.font='700 '+Math.round(CELL*0.85)+'px "Space Grotesk",sans-serif'; ctx.textAlign='center';
+      ctx.fillText(S.banner,SIZE/2,SIZE*0.17); ctx.textAlign='left'; ctx.globalAlpha=1; }
     ctx.restore();
+    // chips d'effets actifs (espace écran)
+    const chips=[];
+    if(S.shield>0) chips.push(['◉ '+S.shield,'95,227,200']);
+    if(S.slowT>0)  chips.push(['❄ '+S.slowT.toFixed(1)+'s','150,230,255']);
+    if(S.dbl>0)    chips.push(['✦ ×2 ('+S.dbl+')','255,140,90']);
+    let bx=10; ctx.font='600 12px "JetBrains Mono",monospace'; ctx.textBaseline='middle';
+    for(const ch of chips){ const w=ctx.measureText(ch[0]).width+16;
+      ctx.fillStyle='rgba(8,8,14,.62)'; ctx.fillRect(bx,SIZE-26,w,18);
+      ctx.fillStyle='rgb('+ch[1]+')'; ctx.fillText(ch[0],bx+8,SIZE-17); bx+=w+6; }
+    ctx.textBaseline='alphabetic';
   }
 
   // ---------- flow ----------

@@ -210,7 +210,7 @@ canvas{display:block;width:100%;height:100%}
   // ---------- état / stats ----------
   const REST=22, BF=1100;
   let G={state:'menu'}, cans=[], coins=[], decos=[], pops=[], up={};
-  let BIOME=currentBiome(), VEH=currentVehicle();
+  let BIOME=BIOMES[0], VEH=VEHICLES[0];  // valeurs sûres ; applyLoadout() met les vraies avant tout usage
   let EF=1450, TOP=540, FUELMAX=100, GRIPK=1, AIRROT=3.2, GRAV=1650;
   function applyLoadout(){ up=loadUp(); VEH=currentVehicle(); BIOME=currentBiome();
     EF=VEH.ef+(up.engine||0)*150; TOP=VEH.top+(up.engine||0)*38;

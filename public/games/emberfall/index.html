@@ -368,14 +368,14 @@ const WINFO=[
  {k:'homing',ic:'➹',evo:'homingEvo',name:'Missiles / Essaim',desc:'Projectiles à tête chercheuse qui pourchassent.',syn:'Puissance, foule dense'},
  {k:'meteor',ic:'☄',evo:'meteorEvo',name:'Pluie de météores / Déluge',desc:'Météores qui s\'abattent sur les ennemis proches.',syn:'Déflagration, Puissance'},
 ];
-const RELIC_SLOTS=5;
+const RELIC_BASE=3;
 function grantRelic(){const owned=RELICS.filter(r=>G.relics[r.id]).length,avail=RELICS.filter(r=>!G.relics[r.id]);
-  if(owned>=RELIC_SLOTS||!avail.length){G.run.gold+=200;banner('RELIQUE → +200 ◉','#ffd27a');return;}
+  if(owned>=G.relicCap||!avail.length){G.run.gold+=200;banner('RELIQUE → +200 ◉','#ffd27a');return;}
   const r=avail[Math.floor(Math.random()*avail.length)];G.relics[r.id]=true;if(r.apply)r.apply();
   banner('RELIQUE : '+r.name,'#c08bff');sfx.over();}
 let pendingRelic=null;
 function offerRelic(){const avail=RELICS.filter(r=>!G.relics[r.id]);
-  if(!avail.length||RELICS.filter(r=>G.relics[r.id]).length>=RELIC_SLOTS){G.run.gold+=200;banner('RELIQUE → +200 ◉','#ffd27a','Reliques au maximum — convertie en or.');return;}
+  if(!avail.length||RELICS.filter(r=>G.relics[r.id]).length>=G.relicCap){G.run.gold+=200;banner('RELIQUE → +200 ◉','#ffd27a','Reliques au maximum — convertie en or.');return;}
   pendingRelic=avail[Math.floor(Math.random()*avail.length)];
   document.getElementById('relicIc').textContent=pendingRelic.ic;
   document.getElementById('relicT').textContent=pendingRelic.name;
@@ -516,7 +516,7 @@ function blip(f,d,t,v,ch){if(muted||!AC)return;const vol=(v||.06)*(ch==='m'?musi
   g.gain.exponentialRampToValueAtTime(vol,n+.01);g.gain.exponentialRampToValueAtTime(.0001,n+d);
   o.connect(g).connect(AC.destination);o.start(n);o.stop(n+d+.02);}
 let sfxBudget=0;
-const sfx={shoot:()=>blip(rand(620,720),.05,'square',.016),
+const sfx={shoot:()=>blip(rand(620,720),.05,'square',.03),
   hit:()=>{if(sfxBudget>0)return;sfxBudget=3;blip(rand(180,240),.05,'sawtooth',.028);},
   die:()=>{blip(120,.18,'triangle',.05);setTimeout(()=>blip(80,.22,'sine',.05),60);},
   xp:()=>blip(rand(900,1100),.04,'sine',.016),
@@ -526,7 +526,7 @@ const sfx={shoot:()=>blip(rand(620,720),.05,'square',.016),
   nova:()=>blip(160,.3,'sine',.05),hurt:()=>blip(90,.18,'sawtooth',.07),
   over:()=>{[440,660,880,1320].forEach((f,i)=>setTimeout(()=>blip(f,.2,'square',.05),i*55));},
   buy:()=>{blip(700,.1,'triangle',.05);setTimeout(()=>blip(1050,.12,'triangle',.05),60);}};
-const bgm=document.getElementById('bgm');
+const bgm=document.getElementById('bgm');if(bgm)try{bgm.load();}catch(e){}
 const hudVol=document.getElementById('hudVol');
 hudVol.value=Math.round(musicVol*100);
 function applyMusicVol(){ if(bgm) bgm.volume=Math.min(1,Math.max(0,musicVol)); }
@@ -553,9 +553,9 @@ function reset(){Object.assign(G,{state:'menu',t:0,last:0,spawnT:0,boltT:0,novaT
   combo:0,comboT:0,frenzy:0,overdrive:0,hitstop:0,banner:null,killCd:0,arcT:0,surgeT:30,
   dashCd:0,dashT:0,dashVX:1,dashVY:0,magBoost:0,bombFlash:0,lastDx:1,lastDy:0,
   turretT:0,homingT:0,meteorT:0,dmgTotal:0,biome:-1,dmgBy:{},relics:{},bossKills:0,dashCdMax:2.0,
-  dmgTaken:1,relicHp:1,eventT:35,rerolls:0,banishes:2,banished:{},
+  dmgTaken:1,relicHp:1,eventT:35,rerolls:0,banishes:2,banished:{},relicCap:3,
   p:{x:0,y:0,r:14,hp:120,maxhp:120,speed:208,xp:0,xpNext:5,lvl:1,kills:0,invuln:0,regen:0,magnet:100,facing:0,trail:[]},
-  w:{bolt:1,boltRate:1,boltDmg:1,boltEvo:false,orb:0,orbDmg:1,orbEvo:false,nova:0,novaDmg:1,novaEvo:false,aura:0,auraDmg:1,auraEvo:false,arc:0,arcDmg:1,arcEvo:false,turret:0,turretDmg:1,turretEvo:false,homing:0,homingDmg:1,homingEvo:false,meteor:0,meteorDmg:1,meteorEvo:false,aoeMul:1,dmgMul:1,crit:0.08,critMul:2.2},
+  w:{bolt:1,boltRate:1,boltDmg:1,boltEvo:false,orb:0,orbDmg:1,orbEvo:false,nova:0,novaDmg:1,novaEvo:false,aura:0,auraDmg:1,auraEvo:false,arc:0,arcDmg:1,arcEvo:false,turret:0,turretDmg:1,turretEvo:false,homing:0,homingDmg:1,homingEvo:false,meteor:0,meteorDmg:1,meteorEvo:false,multishot:0,aoeMul:1,dmgMul:1,crit:0.08,critMul:2.2},
   run:{gold:0,goldMul:1,xpMul:1},
   enemies:[],shots:[],eshots:[],loot:[],parts:[],floats:[],rings:[],arcs:[],turrets:[],missiles:[],meteors:[],orbAng:0});}
 reset();
@@ -565,8 +565,8 @@ for(let i=0;i<70;i++)amb.push({x:rand(0,1),y:rand(0,1),s:rand(.3,1.4),sp:rand(6,
 const META=[
  {id:'vit',ic:'❤',name:'Vitalité',desc:'+18 PV max au départ',max:8,cost:l=>Math.round(90*Math.pow(1.6,l))},
  {id:'pow',ic:'⚡',name:'Puissance',desc:'+7% dégâts',max:8,cost:l=>Math.round(120*Math.pow(1.6,l))},
- {id:'aoe',ic:'✺',name:'Déflagration',desc:'+8% taille des zones (onde & brasier)',max:6,cost:l=>Math.round(130*Math.pow(1.65,l))},
- {id:'proj',ic:'✦',name:'Salve',desc:'+1 projectile au départ',max:3,cost:l=>Math.round(450*Math.pow(1.8,l))},
+ {id:'aoe',ic:'✺',name:'Déflagration',desc:'+8% taille de toutes les zones (onde, brasier, météores)',max:6,cost:l=>Math.round(130*Math.pow(1.65,l))},
+ {id:'proj',ic:'✦',name:'Salve',desc:'+1 projectile pour TOUTES les armes',max:4,cost:l=>Math.round(450*Math.pow(1.8,l))},
  {id:'xpg',ic:'✧',name:'Sagesse',desc:'+10% XP gagné en jeu',max:6,cost:l=>Math.round(120*Math.pow(1.6,l))},
  {id:'crit',ic:'❂',name:'Précision',desc:'+3% de critique au départ',max:6,cost:l=>Math.round(140*Math.pow(1.6,l))},
  {id:'cel',ic:'➤',name:'Célérité',desc:'+4% vitesse',max:6,cost:l=>Math.round(110*Math.pow(1.6,l))},
@@ -575,19 +575,21 @@ const META=[
  {id:'for',ic:'◉',name:'Fortune',desc:'+12% or trouvé',max:6,cost:l=>Math.round(120*Math.pow(1.6,l))},
  {id:'reroll',ic:'↻',name:'Clairvoyance',desc:'+1 relance de choix par partie',max:5,cost:l=>Math.round(200*Math.pow(1.7,l))},
  {id:'slots',ic:'🗡',name:'Arsenal',desc:'+1 emplacement d\'arme (4 de base, 7 max)',max:3,cost:l=>Math.round(800*Math.pow(2.0,l))},
+ {id:'relics',ic:'✦',name:'Reliquaire',desc:'+1 relique max (3 de base, 6 max)',max:3,cost:l=>Math.round(500*Math.pow(1.9,l))},
 ];
 function applyMeta(){const m=loadMeta(),p=G.p;
   p.maxhp+=18*(m.vit||0);p.hp=p.maxhp;
   G.w.dmgMul=1+0.07*(m.pow||0);
   G.w.aoeMul=1+0.08*(m.aoe||0);
-  G.w.bolt+=(m.proj||0);
+  G.w.multishot=(m.proj||0);
   G.run.xpMul=1+0.10*(m.xpg||0);
   G.w.crit=0.08+0.03*(m.crit||0);
   p.speed*=1+0.04*(m.cel||0);
   p.magnet*=1+0.12*(m.mag||0);
   p.regen+=0.3*(m.reg||0);
   G.run.goldMul=1+0.12*(m.for||0);
-  G.rerolls=(m.reroll||0);}
+  G.rerolls=(m.reroll||0);
+  G.relicCap=RELIC_BASE+(m.relics||0);}
 
 /* ---------- gameplay ---------- */
 function nearest(x,y,maxd){let best=null,bd=maxd?maxd*maxd:Infinity;
@@ -625,13 +627,13 @@ function spawnEnemy(){
   else if(G.t>45&&roll>=0.46&&roll<0.58){t='hound';hp=13;sp=104;dmg=5;}
   G.enemies.push(mkEnemy(t,x,y,hp,sp,dmg,m));
 }
-function shootBolt(){const n=G.w.bolt,base=nearest(G.p.x,G.p.y,1000);
+function shootBolt(){const n=G.w.bolt+G.w.multishot,base=nearest(G.p.x,G.p.y,1000);
   let a0=base?Math.atan2(base.y-G.p.y,base.x-G.p.x):G.p.facing;
   for(let i=0;i<n;i++){const a=a0+(i-(n-1)/2)*0.24;
     G.shots.push({x:G.p.x,y:G.p.y,px:G.p.x,py:G.p.y,dx:Math.cos(a)*460,dy:Math.sin(a)*460,r:G.w.boltEvo?7:5,pierce:G.w.boltEvo?3:0,hits:G.w.boltEvo?new Set():null,dmg:7*G.w.boltDmg*G.w.dmgMul*(G.overdrive>0?1.6:1),life:1.05});}
   sfx.shoot();}
 function castArc(){
-  const chains=2+G.w.arc+(G.w.arcEvo?2:0),range=190,dmg=12*G.w.arcDmg*G.w.dmgMul;
+  const chains=2+G.w.arc+(G.w.arcEvo?2:0)+G.w.multishot,range=190,dmg=12*G.w.arcDmg*G.w.dmgMul;
   let cx=G.p.x,cy=G.p.y;const seen=new Set();
   for(let i=0;i<chains;i++){let best=null,bd=range*range;
     for(const e of G.enemies){if(seen.has(e))continue;const d=dist2(cx,cy,e.x,e.y);if(d<bd){bd=d;best=e;}}
@@ -645,7 +647,7 @@ function castNova(){const R=(120+G.w.nova*28+(G.w.novaEvo?120:0))*G.w.aoeMul,dmg
   for(const e of G.enemies){if(dist2(G.p.x,G.p.y,e.x,e.y)<R*R){e.hp-=dmg;e.hit=.12;G.dmgTotal+=dmg;G.dmgBy.nova=(G.dmgBy.nova||0)+dmg;
     const a=Math.atan2(e.y-G.p.y,e.x-G.p.x);e.knock=.18;e.kx=Math.cos(a)*280;e.ky=Math.sin(a)*280;
     floatTxt(e.x,e.y,Math.round(dmg),'#ffd27a');}}sfx.nova();}
-function castMeteor(){const cnt=1+(G.w.meteorEvo?2:0),
+function castMeteor(){const cnt=1+(G.w.meteorEvo?2:0)+G.w.multishot,
   R=(74+G.w.meteor*12)*G.w.aoeMul*(G.w.meteorEvo?1.4:1),
   dmg=22*G.w.meteorDmg*G.w.dmgMul*(G.w.meteorEvo?1.4:1);
   for(let c=0;c<cnt;c++){let tx,ty;const cand=[];
@@ -1044,7 +1046,7 @@ function update(dt){
     if(dead)G.shots.splice(i,1);}
 
   if(G.w.orb>0){const orbR=112+(G.w.orbEvo?40:0),orbHit=13+(G.w.orbEvo?7:0);
-    for(let k=0;k<G.w.orb;k++){const a=G.orbAng+k*(TAU/G.w.orb);
+    for(let k=0;k<G.w.orb+G.w.multishot;k++){const a=G.orbAng+k*(TAU/(G.w.orb+G.w.multishot));
       const ox=p.x+Math.cos(a)*orbR,oy=p.y+Math.sin(a)*orbR;
       for(const e of G.enemies){if(e.orbCd>0)continue;
         if(dist2(ox,oy,e.x,e.y)<(e.r+orbHit)**2){dealDmg(e,10*G.w.orbDmg*G.w.dmgMul,'#ffd27a','orb');e.orbCd=.35;e.hit=.1;sfx.hit();
@@ -1063,13 +1065,13 @@ function update(dt){
     G.turrets.push({x:p.x,y:p.y,life:G.w.turretEvo?9:6,fireT:0.2});}}
   for(let i=G.turrets.length-1;i>=0;i--){const tu=G.turrets[i];tu.life-=dt;tu.fireT-=dt;
     if(tu.fireT<=0){const tg=nearest(tu.x,tu.y,440);if(tg){tu.fireT=0.34;const a=Math.atan2(tg.y-tu.y,tg.x-tu.x);
-      G.shots.push({x:tu.x,y:tu.y,px:tu.x,py:tu.y,dx:Math.cos(a)*520,dy:Math.sin(a)*520,r:5,pierce:0,hits:null,dmg:9*G.w.turretDmg*G.w.dmgMul,life:0.9,src:'turret'});}}
+      G.shots.push({x:tu.x,y:tu.y,px:tu.x,py:tu.y,dx:Math.cos(a)*520,dy:Math.sin(a)*520,r:5,pierce:0,hits:null,dmg:9*G.w.turretDmg*G.w.dmgMul,life:0.9,src:'turret'});blip(330,.04,'square',.02);}}
     if(tu.life<=0)G.turrets.splice(i,1);}
 
   // homing missiles
   if(G.w.homing>0){G.homingT-=dt;if(G.homingT<=0){G.homingT=Math.max(0.8,2.2-G.w.homing*0.18);
-    const cnt=1+Math.floor(G.w.homing/2)+(G.w.homingEvo?2:0);
-    for(let k=0;k<cnt;k++){const a=rand(0,TAU);G.missiles.push({x:p.x,y:p.y,vx:Math.cos(a)*140,vy:Math.sin(a)*140,dmg:14*G.w.homingDmg*G.w.dmgMul,life:2.4});}}}
+    const cnt=1+Math.floor(G.w.homing/2)+(G.w.homingEvo?2:0)+G.w.multishot;
+    for(let k=0;k<cnt;k++){const a=rand(0,TAU);G.missiles.push({x:p.x,y:p.y,vx:Math.cos(a)*140,vy:Math.sin(a)*140,dmg:14*G.w.homingDmg*G.w.dmgMul,life:2.4});}blip(760,.05,'sine',.022);}}
   for(let i=G.missiles.length-1;i>=0;i--){const ms=G.missiles[i];ms.life-=dt;
     const tg=nearest(ms.x,ms.y,720);
     if(tg){const a=Math.atan2(tg.y-ms.y,tg.x-ms.x),cur=Math.atan2(ms.vy,ms.vx);let da=a-cur;
@@ -1222,7 +1224,7 @@ function render(){
   for(const tu of G.turrets){const fade=tu.life<1?tu.life:1;ctx.globalAlpha=clamp(fade,0,1);blit(SP_TURRET,tu.x,tu.y,1);ctx.globalAlpha=1;}
   for(const ms of G.missiles)blit(SP_MISSILE,ms.x,ms.y,1);
   if(G.w.orb>0){const orbR=112+(G.w.orbEvo?40:0),os=G.w.orbEvo?1.5:1;
-    for(let k=0;k<G.w.orb;k++){const a=G.orbAng+k*(TAU/G.w.orb);
+    for(let k=0;k<G.w.orb+G.w.multishot;k++){const a=G.orbAng+k*(TAU/(G.w.orb+G.w.multishot));
       for(let tn=1;tn<=4;tn++){const ta=a-tn*0.13;blit(SP_ORB,p.x+Math.cos(ta)*orbR,p.y+Math.sin(ta)*orbR,(0.55*(4-tn)/4+0.2)*os);}
       blit(SP_ORB,p.x+Math.cos(a)*orbR,p.y+Math.sin(a)*orbR,os);}}
   for(const pt of G.parts){const al=Math.max(0,(pt.life-pt.t)/pt.life);
