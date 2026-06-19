@@ -176,12 +176,16 @@ canvas{display:block;width:100%;height:100%}
 
   // ---------- stages (décors) ----------
   const BIOMES=[
-    {id:'hills', name:'Collines', hint:'Le classique vallonné.', sky:['#0a0918','#1c1430','#3a2238'], gnd:['#46304f','#2a1c33','#140d1a'], rim:'#ff7a3c', star:'#dcdcff', grav:1650, ampMul:1.0, decor:'tree'},
-    {id:'desert',name:'Désert de braise', hint:'Dunes chaudes, bosses sèches.', sky:['#1a0c10','#3a1a16','#5a2c1c'], gnd:['#8a5232','#52301c','#23130a'], rim:'#ffb04d', star:'#ffe0b0', grav:1650, ampMul:0.85, decor:'cactus'},
-    {id:'moon',  name:'Lune morte', hint:'Faible gravité — sauts énormes.', sky:['#04050d','#0b1024','#171c38'], gnd:['#3c3c4c','#222230','#0f0f17'], rim:'#9fb8ff', star:'#ffffff', grav:620, ampMul:1.35, decor:'rock'},
+    {id:'hills', name:'Collines', hint:'Le classique vallonné.', sky:['#0a0918','#1c1430','#3a2238'], gnd:['#46304f','#2a1c33','#140d1a'], rim:'#ff7a3c', star:'#dcdcff', grav:1650, ampMul:1.0, decor:'tree',cost:0},
+    {id:'desert',name:'Désert de braise', hint:'Dunes chaudes, bosses sèches.', sky:['#1a0c10','#3a1a16','#5a2c1c'], gnd:['#8a5232','#52301c','#23130a'], rim:'#ffb04d', star:'#ffe0b0', grav:1650, ampMul:0.85, decor:'cactus',cost:800},
+    {id:'moon',  name:'Lune morte', hint:'Faible gravité — sauts énormes.', sky:['#04050d','#0b1024','#171c38'], gnd:['#3c3c4c','#222230','#0f0f17'], rim:'#9fb8ff', star:'#ffffff', grav:620, ampMul:1.35, decor:'rock',cost:2500},
   ];
+  function ownedStages(){try{return JSON.parse(localStorage.getItem('eh:stages'))||['hills'];}catch(e){return ['hills'];}}
+  function saveStages(a){localStorage.setItem('eh:stages',JSON.stringify(a));}
   function biomeIndex(){ if(DAILY){let h=0;for(const c of DAILY.date)h+=c.charCodeAt(0);return h%BIOMES.length;}
-    return clamp(+(localStorage.getItem('eh:stage')||0),0,BIOMES.length-1);}
+    let i=clamp(+(localStorage.getItem('eh:stage')||0),0,BIOMES.length-1);
+    if(!ownedStages().includes(BIOMES[i].id)) i=0;   // pas acheté -> Collines
+    return i; }
   function currentBiome(){return BIOMES[biomeIndex()];}
 
   // ---------- véhicules ----------
@@ -225,15 +229,19 @@ canvas{display:block;width:100%;height:100%}
   let DAILY=null, SEED=(Math.random()*99999)|0, P1=0,P2=0,P3=0,P4=0;
   function seedTerrain(rng){ P1=rng()*6.28;P2=rng()*6.28;P3=rng()*6.28;P4=rng()*6.28; }
   function flatStart(){let bx=40,bs=9;for(let x=40;x<460;x+=10){const s=Math.abs(slopeAt(x));if(s<bs){bs=s;bx=x;}}return bx;}
+  const COIN_TIERS=[{v:1,d:0},{v:2,d:150},{v:5,d:400},{v:10,d:800},{v:25,d:1500},{v:50,d:2500},{v:100,d:4000},{v:500,d:7000}];
+  function coinValue(x,rng){ const m=x/12, elig=COIN_TIERS.filter(t=>t.d<=m), rr=rng();
+    let idx = rr<0.55 ? elig.length-3 : rr<0.85 ? elig.length-2 : elig.length-1;
+    idx=Math.min(Math.max(0,idx),elig.length-1); return elig[idx].v; }
   function reset(){
     applyLoadout();
     const sx=flatStart();
-    G={state:'play',t:0,x:sx,y:ground(sx)-REST,vx:0,vy:0,angle:slopeAt(sx),angVel:0,onGround:true,
+    G={state:'play',t:0,x:sx,y:ground(sx)-VEH.wr,vx:0,vy:0,angle:slopeAt(sx),angVel:0,onGround:true,
        fuel:FUELMAX,dist:0,best:+(localStorage.getItem('eh:best')||0),wheel:0,dry:0,flipT:0,coins:0,air:0};
     pops=[];
     const r=DAILY?DAILY.rng:lrng(SEED);
     cans=[]; let cx=820; for(let i=0;i<80;i++){cx+=720+r()*900; cans.push({x:cx,got:false});}
-    coins=[]; let px=420; for(let i=0;i<800;i++){px+=110+r()*230; coins.push({x:px,got:false});}
+    coins=[]; let px=420; for(let i=0;i<800;i++){px+=110+r()*230; coins.push({x:px,got:false,val:coinValue(px,r)});}
     decos=[]; let dx=180; for(let i=0;i<500;i++){dx+=150+r()*280; decos.push({x:dx,h:0.6+r()*0.8});}
   }
 
@@ -254,29 +262,40 @@ canvas{display:block;width:100%;height:100%}
 
   // ---------- physique ----------
   function physics(sdt){
-    const canGas = gas && G.fuel>0;
-    G.vy+=GRAV*sdt; G.x+=G.vx*sdt; G.y+=G.vy*sdt;
-    const surf=ground(G.x), restY=surf-REST, slope=clamp(slopeAt(G.x),-1.2,1.2);
-    if(G.y>=restY-0.5){
-      const wasAir=!G.onGround; G.onGround=true;
-      G.y+=(restY-G.y)*Math.min(1,sdt*18);
-      let v=G.vx/Math.max(0.25,Math.cos(slope));
-      if(canGas)v+=EF*sdt; if(brake)v-=BF*sdt;
-      v-=GRAV*Math.sin(slope)*GRIPK*sdt; v*=(1-0.45*sdt); v=clamp(v,-200,TOP);
-      G.vx=v*Math.cos(slope); G.vy=v*Math.sin(slope);
-      const wheelie=canGas?-0.13:0;
-      G.angle+=(angNorm(slope+wheelie-G.angle))*Math.min(1,sdt*9); G.angVel=0;
-      if(wasAir){ const hard=Math.abs(angNorm(G.angle-slope))>1.4; G.air=0; blip(hard?170:230,.05,hard?'sawtooth':'square',.03); }
+    const canGas = gas && G.fuel>0, wb=VEH.wb, wr=VEH.wr;
+    // gravité + intégration : la voiture est un vrai corps qui tombe
+    G.vy+=GRAV*sdt; G.x+=G.vx*sdt; G.y+=G.vy*sdt; G.angle+=G.angVel*sdt;
+    // échantillonnage du sol sous CHAQUE roue
+    const c=Math.cos(G.angle), s=Math.sin(G.angle);
+    const rx=G.x-c*wb, ry=G.y-s*wb, fx=G.x+c*wb, fy=G.y+s*wb;
+    const rg=ground(rx), fg=ground(fx);
+    const rOn=(ry+wr)>=rg-1, fOn=(fy+wr)>=fg-1;
+    if(rOn||fOn){
+      const wasAir=!G.onGround; G.onGround=true; G.air=0;
+      const gAng=clamp(Math.atan2(fg-rg,2*wb),-1.3,1.3);
+      const targetY=(rg+fg)/2 - wr;
+      G.y += (targetY-G.y)*Math.min(1,sdt*14);          // suspension : on suit le terrain en douceur
+      G.angle += angNorm(gAng-G.angle)*Math.min(1,sdt*9); G.angVel=0;
+      let v=G.vx/Math.max(0.25,Math.cos(gAng));
+      if(canGas) v+=EF*sdt;
+      if(brake)  v-=BF*sdt;
+      v -= GRAV*Math.sin(gAng)*GRIPK*sdt;               // grimper coûte -> moteur/adhérence utiles
+      v *= (1-0.8*sdt);
+      v = clamp(v,-240,TOP);
+      G.vx=v*Math.cos(gAng); G.vy=v*Math.sin(gAng);
+      if(wasAir){ const hard=Math.abs(angNorm(G.angle-gAng))>1.3; blip(hard?170:240,.05,hard?'sawtooth':'square',.03); }
     } else {
+      // EN L'AIR : balistique + rotation contrôlée
       G.onGround=false; G.air+=sdt;
-      if(canGas){G.vx+=110*sdt; G.angVel-=AIRROT*sdt;}
-      if(brake)G.angVel+=AIRROT*sdt;
-      G.angVel=clamp(G.angVel,-5.5,5.5); G.angle+=G.angVel*sdt; G.vx*=(1-0.03*sdt);
+      if(canGas) G.angVel-=AIRROT*sdt;
+      if(brake)  G.angVel+=AIRROT*sdt;
+      G.angVel=clamp(G.angVel,-6,6);
+      G.vx*=(1-0.02*sdt);
     }
-    G.wheel+=G.vx*sdt*0.06; G.t+=sdt;
-    G.fuel=Math.max(0,G.fuel-(canGas?2.2:0.8)*sdt);
-    for(const c of coins){ if(c.got)continue; if(c.x<G.x-60)continue; if(c.x>G.x+60)break;
-      if(Math.abs(c.x-G.x)<24 && Math.abs((ground(c.x)-40)-G.y)<60){c.got=true;G.coins++;pops.push({x:c.x,y:ground(c.x)-46,t:1,txt:'+1'});blip(1180,.05,'square',.03);} }
+    G.wheel+=G.vx*sdt*0.07; G.t+=sdt;
+    G.fuel=Math.max(0,G.fuel-(canGas?3.6:1.2)*sdt);     // conso plus rapide
+    for(const c of coins){ if(c.got)continue; if(c.x<G.x-70)continue; if(c.x>G.x+70)break;
+      if(Math.abs(c.x-G.x)<26 && Math.abs((ground(c.x)-40)-G.y)<66){c.got=true;G.coins+=c.val;pops.push({x:c.x,y:ground(c.x)-46,t:1,txt:'+'+c.val});blip(1100+Math.min(900,c.val*6),.05,'square',.03);} }
     for(const c of cans){ if(c.got)continue; if(Math.abs(c.x-G.x)<26 && Math.abs((ground(c.x)-36)-G.y)<70){
       c.got=true; G.fuel=Math.min(FUELMAX,G.fuel+40); blip(880,.12,'sine',.05); banner('+ CARBURANT','#ffd27a'); } }
     if(Math.abs(angNorm(G.angle))>2.35){ G.flipT+=sdt; if(G.flipT>0.22){ crash('Tonneau !'); return; } } else G.flipT=0;
@@ -351,8 +370,10 @@ canvas{display:block;width:100%;height:100%}
     for(let m=Math.max(250,Math.floor((x0/12)/250)*250);m*12<x1;m+=250){const wx=m*12;if(wx<x0)continue;const gy=ground(wx);
       ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(wx,gy);ctx.lineTo(wx,gy-26);ctx.stroke();
       ctx.fillStyle='#ffd27a';ctx.font='10px JetBrains Mono';ctx.textAlign='center';ctx.fillText(m+'m',wx,gy-30);}
-    for(const c of coins){ if(c.got||c.x<x0-30||c.x>x1+30)continue; const gy=ground(c.x)-40;
-      ctx.fillStyle='#ffd27a';ctx.shadowColor='#ffd27a';ctx.shadowBlur=8;ctx.beginPath();ctx.arc(c.x,gy+Math.sin(G.t*4+c.x)*3,6,0,6.28);ctx.fill();ctx.shadowBlur=0; }
+    for(const c of coins){ if(c.got||c.x<x0-30||c.x>x1+30)continue; const gy=ground(c.x)-40, yb=gy+Math.sin(G.t*4+c.x)*3;
+      const col=c.val>=100?'#9fe8ff':c.val>=25?'#ffd27a':c.val>=5?'#ffe6b0':'#ffd27a', rad=c.val>=100?11:c.val>=25?9:c.val>=5?7.5:6;
+      ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=8;ctx.beginPath();ctx.arc(c.x,yb,rad,0,6.28);ctx.fill();ctx.shadowBlur=0;
+      if(c.val>=5){ctx.fillStyle='#0a0a12';ctx.font='700 '+(c.val>=100?10:9)+'px JetBrains Mono';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(c.val,c.x,yb+1);ctx.textAlign='left';ctx.textBaseline='alphabetic';} }
     for(const c of cans){ if(c.got||c.x<x0-40||c.x>x1+40)continue; const gy=ground(c.x)-36;
       ctx.fillStyle='#ff7a3c';ctx.fillRect(c.x-9,gy-14,18,24);ctx.fillStyle='#ffe6b0';ctx.fillRect(c.x-6,gy-10,12,5); }
     // pop-ups
@@ -474,14 +495,18 @@ canvas{display:block;width:100%;height:100%}
       wrap.appendChild(c);});
   }
   function renderStage(){
-    const wrap=document.getElementById('stageCards'); wrap.innerHTML=''; const sel=biomeIndex();
-    BIOMES.forEach((b,i)=>{const isSel=i===sel; const c=document.createElement('div');c.className='card'+(isSel?' sel':'');
+    const wrap=document.getElementById('stageCards'); wrap.innerHTML='';
+    if(DAILY){wrap.innerHTML='<div class="st" style="padding:10px">Le défi du jour impose le stage <b style="color:#ffd27a">'+BIOME.name+'</b> à tous les joueurs.</div>';return;}
+    const sel=biomeIndex(), owned=ownedStages();
+    BIOMES.forEach((b,i)=>{const own=owned.includes(b.id), isSel=i===sel, afford=getCoins()>=(b.cost||0);
+      const c=document.createElement('div');c.className='card'+(isSel?' sel':'');
       c.innerHTML='<div class="nm">'+b.name+'</div><div class="st" style="margin:7px 0 10px">'+b.hint+'</div>'+
-        '<button class="'+(isSel?'owned':'')+'">'+(isSel?'✓ Choisi':'Choisir')+'</button>';
+        (own?'<button class="'+(isSel?'owned':'')+'">'+(isSel?'✓ Choisi':'Choisir')+'</button>'
+            :'<button '+(afford?'':'disabled')+'>◉ '+b.cost+'</button>');
       const btn=c.querySelector('button');
-      if(!isSel)btn.onclick=()=>{localStorage.setItem('eh:stage',i);BIOME=currentBiome();renderStage();renderPlay();blip(700,.08,'triangle',.04);};
+      if(own&&!isSel)btn.onclick=()=>{localStorage.setItem('eh:stage',i);BIOME=currentBiome();renderStage();renderPlay();blip(700,.08,'triangle',.04);};
+      else if(!own&&afford)btn.onclick=()=>{setCoins(getCoins()-(b.cost||0));const o=ownedStages();o.push(b.id);saveStages(o);localStorage.setItem('eh:stage',i);BIOME=currentBiome();renderStage();renderPlay();blip(900,.12,'triangle',.05);};
       wrap.appendChild(c);});
-    if(DAILY){wrap.innerHTML='<div class="st" style="padding:10px">Le défi du jour impose le stage <b style="color:#ffd27a">'+BIOME.name+'</b> à tous les joueurs.</div>';}
   }
   function renderGarage(){
     const up2=loadUp(), list=document.getElementById('upList'); list.innerHTML='';
@@ -500,9 +525,9 @@ canvas{display:block;width:100%;height:100%}
   const NAV={play:'navPlay',veh:'navVeh',stage:'navStage',garage:'navGarage'};
   function showScreen(s){ for(const k in SCREENS){document.getElementById(SCREENS[k]).classList.toggle('on',k===s);document.getElementById(NAV[k]).classList.toggle('on',k===s);}
     if(s==='veh')renderVeh(); else if(s==='stage')renderStage(); else if(s==='garage')renderGarage(); else renderPlay(); }
-  document.getElementById('navVeh').onclick=()=>showScreen('veh');
-  document.getElementById('navStage').onclick=()=>showScreen('stage');
-  document.getElementById('navGarage').onclick=()=>showScreen('garage');
+  document.getElementById('navVeh').onclick=()=>{ac();blip(560,.04,'triangle',.03);showScreen('veh');};
+  document.getElementById('navStage').onclick=()=>{ac();blip(560,.04,'triangle',.03);showScreen('stage');};
+  document.getElementById('navGarage').onclick=()=>{ac();blip(560,.04,'triangle',.03);showScreen('garage');};
 
   function start(){ ac(); reset();
     document.getElementById('menu').classList.add('hidden');

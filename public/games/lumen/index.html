@@ -49,6 +49,7 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
   <span class="best" id="best">record —</span>
 </div>
 <div id="stage"><canvas id="c"></canvas></div>
+<div id="keysHud" style="position:fixed;bottom:10px;left:50%;transform:translateX(-50%);z-index:8;font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:rgba(255,255,255,.38);pointer-events:none">↑ ↓ ← →&nbsp; ·&nbsp; ZQSD&nbsp; ·&nbsp; glisse du doigt</div>
 
 <div class="overlay" id="menu">
   <div class="panel">
@@ -75,6 +76,7 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
     <p id="netLine" style="font-size:12px"></p>
     <div id="lbBox" style="margin:10px 0 2px"></div>
     <button class="btn" id="retryBtn">Rejouer</button>
+    <button id="toMenuBtn" style="margin-top:9px;background:transparent;border:1px solid rgba(255,255,255,.18);color:#bfb9d6;font:600 14px 'Space Grotesk';border-radius:11px;padding:11px 22px;cursor:pointer">Menu principal</button>
     <div class="keys"><a href="/leaderboard.html" style="color:var(--cool);text-decoration:none">voir le classement →</a></div>
   </div>
 </div>
@@ -292,8 +294,12 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
 
   // ---------- flow ----------
   function startGame(){ ac(); reset(); document.getElementById('menu').classList.add('hidden'); document.getElementById('over').classList.add('hidden'); }
+  function toMenu(){ document.getElementById('over').classList.add('hidden'); reset(); S.state='menu';
+    document.getElementById('best').textContent='record '+(+(localStorage.getItem('gp:lumen:best')||0));
+    document.getElementById('menu').classList.remove('hidden'); }
   document.getElementById('startBtn').onclick=startGame;
   document.getElementById('retryBtn').onclick=startGame;
+  document.getElementById('toMenuBtn').onclick=toMenu;
 
   reset(); S.state='menu';
   document.getElementById('best').textContent='record '+(+(localStorage.getItem('gp:lumen:best')||0));

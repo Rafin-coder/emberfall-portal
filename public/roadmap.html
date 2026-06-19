@@ -55,13 +55,15 @@
       </ul>
     </div>
 
-    <div class="phase now">
-      <div class="tag">en cours</div>
+    <div class="phase">
+      <div class="tag">en parallèle — à activer avec l'audience</div>
       <h3>Fondations : fiabiliser & exploiter les données</h3>
+      <p style="color:var(--muted);font-size:13px;margin:0 0 8px">Important mais pas bloquant tant qu'il y a peu de joueurs — on avance sur le contenu en priorité et on branche ça dès que le trafic le justifie.</p>
       <ul>
         <li>Lire les analytics régulièrement : combien de joueurs, où ils décrochent, ce qui accroche, le taux de retour.</li>
         <li>Suivi d'erreurs (alertes quand un jeu plante chez un joueur).</li>
         <li>Sauvegardes automatiques de la base de données.</li>
+        <li>Audit de sécurité (protection des clés, RLS Supabase, validation des scores, en-têtes HTTP).</li>
       </ul>
     </div>
 
@@ -69,7 +71,9 @@
       <div class="tag">prévu — rétention</div>
       <h3>Donner envie de revenir</h3>
       <ul>
-        <li>Niveau de compte global (XP gagnée dans tous les jeux).</li>
+        <li><b style="color:var(--text)">Niveau de compte global</b> — de l'XP gagnée après chaque partie, dans n'importe quel jeu, qui fait monter un niveau de profil commun.</li>
+        <li><b style="color:var(--text)">Succès par jeu</b> récompensés en Ember Coins.</li>
+        <li>Afficher la <b style="color:var(--text)">durée de vie</b> de chaque jeu (temps estimé pour le finir à 100 %), mise à jour à chaque ajout de contenu.</li>
         <li>Classements hebdomadaires et entre amis, pas seulement all-time.</li>
         <li>Quêtes quotidiennes & hebdomadaires avec récompenses.</li>
         <li>Saisons : le défi du jour agrégé en classement saisonnier.</li>
@@ -94,7 +98,8 @@
       <ul>
         <li><b style="color:var(--text)">Conquête des Âges</b> : équilibrage continu, plus d'unités/tourelles par ère, meilleurs effets visuels.</li>
         <li>Emberfall : <b style="color:var(--text)">arme Pluie de météores</b> + ennemis <b style="color:var(--text)">Colosse</b> et <b style="color:var(--text)">Limier</b> ajoutés. À venir : encore des armes/ennemis, vrais boss par biome, évolutions conditionnelles, codex, arbre de talents.</li>
-        <li><b style="color:var(--text)">2ᵉ carte</b> à débloquer en atteignant 10 min sur la première.</li>
+        <li>Emberfall : <b style="color:var(--text)">plusieurs cartes aux terrains variés</b> (pas un seul décor vide), à débloquer en progressant.</li>
+        <li>Ember Hill : <b style="color:var(--text)">plus de stages et véhicules</b>, terrains plus travaillés.</li>
         <li>Template de jeu vide branché au SDK pour aller plus vite.</li>
       </ul>
     </div>

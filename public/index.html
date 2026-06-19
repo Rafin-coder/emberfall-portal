@@ -150,5 +150,38 @@ document.getElementById('userChip').addEventListener('click', async ()=>{
 
 boot();
 </script>
+<!-- Signaler / Suggérer -->
+<button id="fbBtn" title="Signaler un bug ou proposer une idée" style="position:fixed;right:16px;bottom:16px;z-index:60;border:none;border-radius:999px;padding:12px 16px;font:600 13px 'Space Grotesk',sans-serif;color:#0c0a08;background:linear-gradient(120deg,#ff7a3c,#ffb04d);box-shadow:0 6px 20px rgba(0,0,0,.4);cursor:pointer">💬 Signaler / Suggérer</button>
+<div id="fbModal" style="display:none;position:fixed;inset:0;z-index:61;background:rgba(6,6,12,.7);backdrop-filter:blur(5px);align-items:center;justify-content:center">
+  <div style="background:#12101a;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:22px;max-width:440px;width:92%">
+    <div style="font:700 18px 'Space Grotesk',sans-serif;color:#fff;margin-bottom:4px">Ton retour</div>
+    <div style="font:400 13px 'Space Grotesk',sans-serif;color:#8d8aa0;margin-bottom:14px">Un bug, une idée d'amélioration ou de jeu ? Dis-moi tout.</div>
+    <div style="display:flex;gap:14px;margin-bottom:10px">
+      <label style="font:600 12px 'JetBrains Mono',monospace;color:#bfb9d6"><input type="radio" name="fbtype" value="Bug" checked> Bug</label>
+      <label style="font:600 12px 'JetBrains Mono',monospace;color:#bfb9d6"><input type="radio" name="fbtype" value="Idée"> Idée / amélioration</label>
+    </div>
+    <textarea id="fbText" rows="5" placeholder="Décris ici…" style="width:100%;background:#0a0a12;border:1px solid rgba(255,255,255,.14);border-radius:10px;color:#ece9f5;padding:10px;font:400 14px 'Space Grotesk',sans-serif;resize:vertical"></textarea>
+    <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end">
+      <button id="fbCancel" style="background:transparent;border:1px solid rgba(255,255,255,.18);color:#bfb9d6;border-radius:10px;padding:10px 16px;font:600 13px 'Space Grotesk',sans-serif;cursor:pointer">Annuler</button>
+      <button id="fbSend" style="background:linear-gradient(120deg,#ff7a3c,#ffb04d);border:none;color:#0c0a08;border-radius:10px;padding:10px 18px;font:600 13px 'Space Grotesk',sans-serif;cursor:pointer">Envoyer</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  /* ⬇️ Mets TON adresse e-mail ici pour recevoir les retours : */
+  const FEEDBACK_EMAIL = 'ton-email@exemple.com';
+  const btn=document.getElementById('fbBtn'), modal=document.getElementById('fbModal'), txt=document.getElementById('fbText');
+  btn.onclick=()=>{modal.style.display='flex';txt.focus();};
+  document.getElementById('fbCancel').onclick=()=>{modal.style.display='none';};
+  modal.onclick=e=>{if(e.target===modal)modal.style.display='none';};
+  document.getElementById('fbSend').onclick=()=>{
+    const type=document.querySelector('input[name=fbtype]:checked').value;
+    const body=encodeURIComponent((txt.value||'')+'\n\n— envoyé depuis '+location.href);
+    location.href='mailto:'+FEEDBACK_EMAIL+'?subject='+encodeURIComponent('[Ember Arcade] '+type)+'&body='+body;
+    modal.style.display='none'; txt.value='';
+  };
+})();
+</script>
 </body>
 </html>

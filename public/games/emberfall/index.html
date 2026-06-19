@@ -339,7 +339,7 @@ function getGold(){return +(localStorage.getItem('ember_gold')||0);}
 function setGold(v){localStorage.setItem('ember_gold',Math.max(0,Math.floor(v)));}
 function loadMeta(){try{return JSON.parse(localStorage.getItem('ember_meta'))||{};}catch(e){return {};}}
 function saveMeta(m){localStorage.setItem('ember_meta',JSON.stringify(m));}
-const DIFFS={normal:{hp:1,dmg:1,gold:1,label:'NORMAL',name:'Normal'},nightmare:{hp:1.65,dmg:1.4,gold:1.7,label:'CAUCHEMAR',name:'Cauchemar'},inferno:{hp:2.5,dmg:1.85,gold:2.5,label:'ENFER',name:'Enfer'}};
+const DIFFS={normal:{hp:1,dmg:1,gold:1,label:'NORMAL',name:'Normal'},nightmare:{hp:1.9,dmg:1.55,gold:1.85,label:'CAUCHEMAR',name:'Cauchemar'},inferno:{hp:3.0,dmg:2.1,gold:2.8,label:'ENFER',name:'Enfer'}};
 const DIFFORDER=['normal','nightmare','inferno'];
 function diffGet(){if(window.__DAILY)return window.__DAILY.diff;return localStorage.getItem('ember_diff')||'normal';}
 const BIOMES=[
@@ -526,12 +526,22 @@ const sfx={shoot:()=>blip(rand(620,720),.05,'square',.03),
   nova:()=>blip(160,.3,'sine',.05),hurt:()=>blip(90,.18,'sawtooth',.07),
   over:()=>{[440,660,880,1320].forEach((f,i)=>setTimeout(()=>blip(f,.2,'square',.05),i*55));},
   buy:()=>{blip(700,.1,'triangle',.05);setTimeout(()=>blip(1050,.12,'triangle',.05),60);}};
-const bgm=document.getElementById('bgm');if(bgm)try{bgm.load();}catch(e){}
+// ---- musique via Web Audio (même moteur que les effets => fiable, pas de blocage <audio>) ----
+let musicGain=null, musicBuf=null, musicSrc=null, musicReq=false, musicWant=false;
+function ensureMusicGain(){ if(AC && !musicGain){ musicGain=AC.createGain(); musicGain.gain.value=Math.min(1,Math.max(0,musicVol)); musicGain.connect(AC.destination); } }
+function loadMusic(){ if(musicReq||!AC) return; musicReq=true;
+  fetch('music.mp3').then(r=>r.arrayBuffer()).then(b=>AC.decodeAudioData(b))
+    .then(buf=>{ musicBuf=buf; if(musicWant) playMusic(); })
+    .catch(()=>{ musicReq=false; }); }
+function playMusic(){ musicWant=true; if(!AC) return; ensureMusicGain();
+  if(!musicBuf){ loadMusic(); return; }
+  try{ if(musicSrc) musicSrc.stop(); }catch(e){}
+  musicSrc=AC.createBufferSource(); musicSrc.buffer=musicBuf; musicSrc.loop=true; musicSrc.connect(musicGain); musicSrc.start(0); }
+function stopMusic(){ musicWant=false; try{ if(musicSrc) musicSrc.stop(); }catch(e){} musicSrc=null; }
+function applyMusicVol(){ if(musicGain) musicGain.gain.value=Math.min(1,Math.max(0,musicVol)); }
 const hudVol=document.getElementById('hudVol');
 hudVol.value=Math.round(musicVol*100);
-function applyMusicVol(){ if(bgm) bgm.volume=Math.min(1,Math.max(0,musicVol)); }
 hudVol.oninput=()=>{musicVol=hudVol.value/100;localStorage.setItem('ember_musicvol',musicVol);applyMusicVol();};
-applyMusicVol();
 
 /* ---------- input ---------- */
 const keys={};
@@ -594,8 +604,8 @@ function applyMeta(){const m=loadMeta(),p=G.p;
 /* ---------- gameplay ---------- */
 function nearest(x,y,maxd){let best=null,bd=maxd?maxd*maxd:Infinity;
   for(const e of G.enemies){const d=dist2(x,y,e.x,e.y);if(d<bd){bd=d;best=e;}}return best;}
-function diffMul(){const t=G.t,D=DIFFS[diffGet()],B=BIOMES[G.biome<0?0:G.biome],late=1+Math.max(0,(t-180)/180)+Math.max(0,(t-420)/130);
-  return {hp:(1+0.66*(t/60)*(t/60))*late*D.hp*B.hpM, dmg:(1+t/180)*Math.sqrt(late)*D.dmg*B.dmgM, spd:(1+Math.min(1.4,t/260))*B.spdM};}
+function diffMul(){const t=G.t,D=DIFFS[diffGet()],B=BIOMES[G.biome<0?0:G.biome],late=1+Math.max(0,(t-160)/170)+Math.max(0,(t-380)/120);
+  return {hp:(1+0.78*(t/60)*(t/60))*late*D.hp*B.hpM, dmg:(1+t/165)*Math.sqrt(late)*D.dmg*B.dmgM, spd:(1+Math.min(1.4,t/260))*B.spdM};}
 function maxEnemies(){return Math.min(640,240+Math.floor(G.t/22)*28);}
 function mkEnemy(t,x,y,baseHp,baseSp,baseDmg,m){
   return {x,y,r:ETYPE[t].r,hp:baseHp*m.hp*G.relicHp*1.35,maxhp:baseHp*m.hp*G.relicHp*1.35,sp:Math.min(196,baseSp*m.spd),dmg:baseDmg*m.dmg,
@@ -954,7 +964,7 @@ function renderShop(){
     b.onclick=()=>{const id=b.dataset.id,m2=loadMeta(),lvl=m2[id]||0,u=META.find(x=>x.id===id),cost=u.cost(lvl);
       if(lvl>=u.max||getGold()<cost)return;setGold(getGold()-cost);m2[id]=lvl+1;saveMeta(m2);sfx.buy();renderShop();};});
 }
-function start(){ensureAudio();if(bgm){applyMusicVol();bgm.play().catch(()=>{});}reset();applyMeta();applyChar();applyAchv();G.run.goldMul*=DIFFS[diffGet()].gold;G.state='playing';mStep=0;mAcc=0;
+function start(){ensureAudio();playMusic();reset();applyMeta();applyChar();applyAchv();G.run.goldMul*=DIFFS[diffGet()].gold;G.state='playing';mStep=0;mAcc=0;
   document.getElementById('diffTag').textContent=DIFFS[diffGet()].label;
   hide('menu');hide('gameover');hide('levelup');hide('shop');hide('pause');
   document.getElementById('hud').classList.remove('hidden');updateLoadout();G.last=performance.now();}
@@ -1290,7 +1300,7 @@ function menuRender(){mt+=0.016;
 const MSCALE=[220.00,261.63,293.66,329.63,392.00,440.00];
 const BASS=[55.00,55.00,73.42,82.41];
 let mStep=0,mAcc=0;
-function music(rdt){ if(bgm) bgm.volume=Math.min(1,Math.max(0,musicVol)); }
+function music(rdt){ /* musique gérée par Web Audio */ }
 function loop(now){requestAnimationFrame(loop);
   if(G.state==='playing'){let rdt=(now-G.last)/1000;G.last=now;if(rdt>0.05)rdt=0.05;
     music(rdt);
@@ -1303,7 +1313,6 @@ requestAnimationFrame(loop);
 </script>
 <a href="/" id="backArcade" style="position:fixed;top:10px;left:12px;z-index:60;font:600 12px/1 system-ui,sans-serif;letter-spacing:.06em;color:#bfb9d6;background:rgba(10,10,16,.66);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:8px 12px;text-decoration:none">← Arcade</a>
 <div id="dailyBadge" style="display:none;position:fixed;top:11px;left:50%;transform:translateX(-50%);z-index:60;font:600 11px/1 monospace;letter-spacing:.12em;color:#ffd27a;background:rgba(10,10,16,.7);backdrop-filter:blur(8px);border:1px solid rgba(255,176,77,.35);border-radius:9px;padding:8px 12px;text-align:center"></div>
-<audio id="bgm" src="music.mp3" loop preload="auto"></audio>
 <script src="/config.js"></script>
 <script src="/sdk.js"></script>
 <script>

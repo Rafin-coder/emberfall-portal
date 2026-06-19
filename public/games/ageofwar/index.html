@@ -245,7 +245,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
       if(e.age<target) e.age=target;
       e.buyCd -= dt;
       if(e.buyCd<=0){
-        e.buyCd = Math.max(0.6, 1.5 - G.t*0.005);
+        e.buyCd = Math.max(0.5, (1.5 - G.t*0.005)) * (0.6+Math.random()*0.8);
         if(e.age<MAXAGE && e.gold>=evolveCost(e.age)*1.4){ e.gold-=evolveCost(e.age); e.age++; }
         const eCount=G.units.reduce((n,u)=>n+(u.side==='e'?1:0),0);
         if(eCount<9){
@@ -264,7 +264,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
         for(let i=0;i<cnt;i++){
           const role=(RNG()*3)|0; const s=unitStats(e.age, ROLES[role]);
           // bonus PV pour la pression en endless
-          const u=mkUnit('e', e.age, role, s); u.hp*=1+G.t*0.004; u.maxhp=u.hp; u.x=eBaseX()-24-i*22;
+          const u=mkUnit('e', e.age, role, s); u.hp*=1+G.t*0.004; u.maxhp=u.hp; u.x=eBaseX()-24-(i%6)*20;
           G.units.push(u);
         }
       }
@@ -319,7 +319,8 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
         let nx=u.x+dir*u.sp*dt;
         const ally=frontAlly(u);
         if(ally){ const minGap=u.sz+ally.sz+4; if(u.side==='p') nx=Math.min(nx, ally.x-minGap); else nx=Math.max(nx, ally.x+minGap); }
-        if(u.side==='p') nx=Math.min(nx, eBaseX()-u.sz-14); else nx=Math.max(nx, pBaseX()+u.sz+14);
+        if(u.side==='p') nx=Math.max(pBaseX()+u.sz+8, Math.min(nx, eBaseX()-u.sz-14));
+        else               nx=Math.min(eBaseX()-u.sz-8, Math.max(nx, pBaseX()+u.sz+14));
         u.x=nx;
       }
     }
@@ -328,7 +329,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
       if(tr.cd<=0){ let best=null,bd=tr.rng*tr.rng;
         for(const o of G.units){ if(o.side!=='e')continue; const dx=o.x-pBaseX(); const d=dx*dx; if(dx>0&&d<bd){bd=d;best=o;} }
         if(best){ tr.cd=tr.rate; best.hp-=tr.dmg; best.hit=.12;
-          G.tracers.push({x1:pBaseX()+14+idx*12,y1:laneY()-50-idx*30,x2:best.x,y2:laneY()-10,t:.1,col:'120,230,200'}); blip(620,.03,'square',.012); } }
+          const tp=turretPos(idx); G.tracers.push({x1:tp.x+9,y1:tp.y,x2:best.x,y2:laneY()-10,t:.1,col:'120,230,200'}); blip(620,.03,'square',.012); } }
     });
     // morts
     for(let i=G.units.length-1;i>=0;i--){ const u=G.units[i]; if(u.hp<=0){
@@ -352,6 +353,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
   function rnd1(n){const x=Math.sin(n*99.71)*43758.5453;return x-Math.floor(x);}
   function cap(x1,y1,x2,y2,w,col){ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
 
+  function turretPos(idx){ return { x: pBaseX()-6+idx*20, y: laneY()-60 }; }
   function render(){
     const gy=laneY();
     ctx.clearRect(0,0,W,H);
@@ -361,7 +363,13 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     ctx.save();ctx.translate(sh,0);
     drawBuilding(pBaseX(),gy,G.age,'p');
     drawBuilding(eBaseX(),gy,G.e.age,'e');
-    G.turrets.forEach((tr,idx)=>drawTurret(pBaseX()+6+idx*12, gy-50-idx*30, tr.age));
+    // rempart dimensionné au nombre d'emplacements
+    { const n=Math.max(2,G.slots), x0=pBaseX()-16, w=n*20+10, ry=gy-58;
+      ctx.fillStyle='rgba(26,24,32,.96)'; ctx.fillRect(x0,ry,w,11);
+      ctx.fillStyle='rgba(255,154,77,.45)'; for(let i=0;i<n;i++) ctx.fillRect(x0+5+i*20,ry-4,3,5);
+      ctx.strokeStyle='rgba(255,255,255,.10)';ctx.lineWidth=1;
+      for(let i=G.turrets.length;i<G.slots;i++){ const p=turretPos(i); ctx.strokeRect(p.x-9,p.y-2,18,12); } } // emplacements libres
+    G.turrets.forEach((tr,idx)=>{ const p=turretPos(idx); drawTurret(p.x,p.y,tr.age); });
     for(const tc of G.tracers){ ctx.strokeStyle='rgba('+tc.col+','+Math.min(1,tc.t*10)+')';ctx.lineWidth=2;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(tc.x1,tc.y1);ctx.lineTo(tc.x2,tc.y2);ctx.stroke(); }
     // unités triées par x pour un bon recouvrement
     const sorted=G.units.slice().sort((a,b)=>a.x-b.x);
