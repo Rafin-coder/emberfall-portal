@@ -662,6 +662,13 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
   // ---------- fin ----------
   function endGame(win){
     G.state='done';
+    if(window.GamePortal&&GamePortal.addCoins){
+      GamePortal.addCoins(Math.floor(G.kills/3)+G.wave*4+(win?120:0),'ageofwar');
+      GamePortal.addXP(Math.floor(G.kills/4)+G.wave*3+(win?80:0),'ageofwar');
+      GamePortal.unlock('aw_first');
+      if(G.age>=MAXAGE)GamePortal.unlock('aw_age5');
+      if(win)GamePortal.unlock('aw_win');
+      if(G.turrets.length>=4)GamePortal.unlock('aw_turret'); }
     const ov=document.getElementById('over');
     if(G.mode==='endless'){
       document.getElementById('overTitle').textContent='base détruite';

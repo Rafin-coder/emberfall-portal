@@ -56,6 +56,7 @@
       }
       user = session.user;
       await loadProfile();
+      await loadWallet();
       track('open', { path: (typeof location !== 'undefined' && location.pathname) || '' });
     } catch (e) {
       console.warn("[GamePortal] mode hors-ligne :", e.message);
@@ -194,7 +195,17 @@
 .gp-row .gp-rk{color:#5b5870;width:26px}
 .gp-row .gp-name{color:#ece9f5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gp-row .gp-val{margin-left:auto;color:#ffb04d}
-.gp-row.gp-me{background:rgba(255,122,60,.10);border-color:rgba(255,122,60,.3)}`;
+.gp-row.gp-me{background:rgba(255,122,60,.10);border-color:rgba(255,122,60,.3)}
+.gp-toasts{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:100000;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.gp-toast{min-width:210px;max-width:88vw;background:linear-gradient(180deg,#1c1a28,#15131e);border:1px solid rgba(255,176,77,.4);border-radius:12px;padding:10px 16px;color:#ece9f5;font-family:"Space Grotesk",system-ui,sans-serif;box-shadow:0 14px 40px -18px rgba(0,0,0,.85);opacity:0;transform:translateY(12px);transition:opacity .35s,transform .35s;text-align:center}
+.gp-toast.in{opacity:1;transform:translateY(0)}
+.gp-toast-main{font-weight:600;font-size:14px;display:flex;gap:7px;align-items:center;justify-content:center}
+.gp-toast-ic{font-size:15px}
+.gp-toast-sub{font-size:11.5px;color:#9c98b0;margin-top:3px}
+.gp-toast-ach{border-color:rgba(255,210,122,.75)}
+.gp-toast-level{border-color:rgba(159,232,255,.7)}
+.gp-toast-coin{border-color:rgba(255,176,77,.55)}
+`;
     const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
   }
 
@@ -303,6 +314,107 @@
     return s;
   }
 
+  // ================= Ember Coins · Niveau global · Succès =================
+  // Stockage local : même origine => partagé entre le portail et TOUS les jeux.
+  const W = { coins:'gp:coins', xp:'gp:xp', ach:'gp:ach' };
+  function _int(k){ return Math.max(0, Math.floor(+(localStorage.getItem(k)||0))); }
+  function getCoins(){ return _int(W.coins); }
+  function getXP(){ return _int(W.xp); }
+  function _achMap(){ try { return JSON.parse(localStorage.getItem(W.ach)) || {}; } catch(e){ return {}; } }
+
+  function emitWallet(){ try { window.dispatchEvent(new CustomEvent('gp:wallet', { detail:{ coins:getCoins(), xp:getXP(), level:getLevel() } })); } catch(e){} }
+
+  let _syncT = 0;
+  function syncWallet(){ // sauvegarde best-effort (table progress existante)
+    if (!sb || !user) return;
+    clearTimeout(_syncT);
+    _syncT = setTimeout(() => {
+      try { sb.from('progress').upsert({ user_id:user.id, game_id:'_portal', key:'wallet',
+        data:{ coins:getCoins(), xp:getXP(), ach:_achMap() } }); } catch(e){}
+    }, 800);
+  }
+  async function loadWallet(){ if(!sb||!user) return;
+    try {
+      const { data } = await sb.from('progress').select('data')
+        .eq('user_id',user.id).eq('game_id','_portal').eq('key','wallet').maybeSingle();
+      if (data && data.data){ const s=data.data; // adopte le meilleur (pas de perte entre appareils)
+        if ((s.coins||0) > getCoins()) localStorage.setItem(W.coins, Math.floor(s.coins));
+        if ((s.xp||0) > getXP()) localStorage.setItem(W.xp, Math.floor(s.xp));
+        const m=_achMap(), sm=s.ach||{}; let ch=false;
+        for (const k in sm){ if(!m[k]){ m[k]=sm[k]; ch=true; } }
+        if (ch) localStorage.setItem(W.ach, JSON.stringify(m));
+        emitWallet();
+      }
+    } catch(e){}
+  }
+
+  function setCoins(v){ localStorage.setItem(W.coins, Math.max(0, Math.floor(v||0))); emitWallet(); syncWallet(); }
+  function addCoins(n, reason, opts){ n=Math.floor(n||0); if(n<=0) return getCoins();
+    setCoins(getCoins()+n);
+    if(!(opts&&opts.silent)) toast('+'+n+' Ember Coins', { kind:'coin', icon:'◉' });
+    track('coins', { n:n, reason:reason||'' });
+    return getCoins(); }
+  function spendCoins(n){ n=Math.floor(n||0); if(getCoins()<n) return { ok:false, balance:getCoins() };
+    setCoins(getCoins()-n); return { ok:true, balance:getCoins() }; }
+
+  // Courbe de niveau : passer du niveau n à n+1 coûte 100 + 60*(n-1) XP.
+  function levelFromXP(xp){ let lvl=1, need=100, acc=0;
+    while (xp >= acc+need) { acc+=need; lvl++; need=100+(lvl-1)*60; }
+    return { level:lvl, into:xp-acc, need:need, pct:Math.max(0,Math.min(1,(xp-acc)/need)), xp:xp }; }
+  function getLevel(){ return levelFromXP(getXP()); }
+  function addXP(n, reason){ n=Math.floor(n||0); if(n<=0) return getLevel();
+    const before=getLevel().level;
+    localStorage.setItem(W.xp, getXP()+n); emitWallet(); syncWallet();
+    const after=getLevel().level;
+    if (after>before) toast('Niveau '+after+' atteint', { kind:'level', icon:'★' });
+    track('xp', { n:n, reason:reason||'' });
+    return getLevel(); }
+
+  // ---- Registre des succès (partagé portail + jeux) ----
+  const ACHIEVEMENTS = [
+    { id:'ef_first',  game:'emberfall', name:'Première étincelle', desc:'Terminer une partie d\'Emberfall',          coin:10 },
+    { id:'ef_5min',   game:'emberfall', name:'Survivant',          desc:'Survivre 5 minutes',                        coin:30 },
+    { id:'ef_10min',  game:'emberfall', name:'Increvable',         desc:'Survivre 10 minutes',                       coin:60 },
+    { id:'ef_biome',  game:'emberfall', name:'Explorateur',        desc:'Atteindre un nouveau biome',                coin:25 },
+    { id:'ef_kills',  game:'emberfall', name:'Moissonneur',        desc:'Vaincre 500 ennemis en une partie',         coin:35 },
+    { id:'ef_hard',   game:'emberfall', name:'Bravoure',           desc:'Terminer une partie en Cauchemar ou plus',  coin:40 },
+    { id:'lu_first',  game:'lumen',     name:'Premier éclat',      desc:'Terminer une partie de Lumen',              coin:10 },
+    { id:'lu_combo',  game:'lumen',     name:'En cadence',         desc:'Atteindre le combo maximum (x9)',                    coin:25 },
+    { id:'lu_score',  game:'lumen',     name:'Lumineux',           desc:'Marquer 1000 points',                       coin:30 },
+    { id:'lu_daily',  game:'lumen',     name:'Rituel',             desc:'Jouer le défi du jour',                     coin:15 },
+    { id:'aw_first',  game:'ageofwar',  name:'Première bataille',  desc:'Terminer une partie de Conquête',           coin:10 },
+    { id:'aw_age5',   game:'ageofwar',  name:'À travers les âges', desc:'Atteindre l\'ère Futur',                     coin:40 },
+    { id:'aw_win',    game:'ageofwar',  name:'Conquérant',         desc:'Détruire la base ennemie',                  coin:50 },
+    { id:'aw_turret', game:'ageofwar',  name:'Forteresse',         desc:'Déployer 4 tourelles',                      coin:25 },
+    { id:'eh_first',  game:'emberhill', name:'Premier run',        desc:'Terminer un run d\'Ember Hill',              coin:10 },
+    { id:'eh_1km',    game:'emberhill', name:'Routier',            desc:'Parcourir 1000 m en un run',                coin:30 },
+    { id:'eh_5km',    game:'emberhill', name:'Cascadeur',          desc:'Parcourir 5000 m en un run',                coin:60 },
+    { id:'eh_flip',   game:'emberhill', name:'Salto',              desc:'Réussir un salto complet en l\'air',         coin:25 },
+    { id:'eh_moon',   game:'emberhill', name:'Sur la Lune',        desc:'Débloquer le stage Lune',                   coin:20 }
+  ];
+  const ACH_BY_ID = {}; ACHIEVEMENTS.forEach(a => ACH_BY_ID[a.id]=a);
+  function getAchievements(){ const m=_achMap(); return ACHIEVEMENTS.map(a => Object.assign({}, a, { unlocked: !!m[a.id], at: m[a.id]||null })); }
+  function isUnlocked(id){ return !!_achMap()[id]; }
+  function unlock(id){ const a=ACH_BY_ID[id]; if(!a) return { ok:false, error:'unknown' };
+    const m=_achMap(); if (m[id]) return { ok:true, already:true };
+    m[id]=new Date().toISOString(); localStorage.setItem(W.ach, JSON.stringify(m));
+    addCoins(a.coin, 'ach:'+id, { silent:true });
+    toast('Succès — '+a.name, { kind:'ach', icon:'🏆', sub:'+'+a.coin+' Ember Coins · '+a.desc });
+    emitWallet(); syncWallet(); track('achievement', { id:id });
+    return { ok:true, coin:a.coin }; }
+
+  // ---- Toasts (injectés ; marchent dans les jeux ET le portail) ----
+  let toastWrap=null;
+  function ensureToast(){ injectUI(); if(toastWrap) return;
+    toastWrap=document.createElement('div'); toastWrap.className='gp-toasts'; document.body.appendChild(toastWrap); }
+  function toast(text, opts){ opts=opts||{}; ensureToast();
+    const t=document.createElement('div'); t.className='gp-toast gp-toast-'+(opts.kind||'info');
+    t.innerHTML='<div class="gp-toast-main">'+(opts.icon?'<span class="gp-toast-ic">'+opts.icon+'</span>':'')+escapeHtml(text)+'</div>'+
+      (opts.sub?'<div class="gp-toast-sub">'+escapeHtml(opts.sub)+'</div>':'');
+    toastWrap.appendChild(t);
+    requestAnimationFrame(()=>t.classList.add('in'));
+    setTimeout(()=>{ t.classList.remove('in'); setTimeout(()=>t.remove(), 420); }, opts.kind==='ach'?4200:2700); }
+
   const GamePortal = {
     init, ready,
     getUsername, setUsername,
@@ -311,6 +423,9 @@
     promptUsername, renderTop,
     daily, submitDaily, getDailyLeaderboard, getStreak,
     track,
+    getCoins, addCoins, spendCoins, setCoins,
+    getXP, addXP, getLevel,
+    getAchievements, isUnlocked, unlock, toast,
     get user() { return user; },
     get profile() { return profile; },
     get online() { return !!sb; }

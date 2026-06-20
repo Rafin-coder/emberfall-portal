@@ -179,7 +179,7 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
     if(eat){
       S.eaten++;
       if(S.comboT>0) S.combo=Math.min(9,S.combo+1); else S.combo=1;
-      S.comboT=2.4; setCombo(S.combo);
+      S.comboT=2.4; setCombo(S.combo); S.peakCombo=Math.max(S.peakCombo||0,S.combo);
       const sp=S.food.special;
       let gain=10*S.combo;
       if(S.dbl>0){ gain*=2; S.dbl--; }
@@ -210,6 +210,13 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
     S.state='dead'; S.shake=12; blip(180,.3,'sawtooth',.06); blip(90,.45,'triangle',.05);
     const best=Math.max(+(localStorage.getItem('gp:lumen:best')||0), S.score);
     localStorage.setItem('gp:lumen:best', best);
+    if(window.GamePortal&&GamePortal.addCoins){
+      GamePortal.addCoins(Math.floor(S.score/20),'lumen');
+      GamePortal.addXP(Math.floor(S.score/12),'lumen');
+      GamePortal.unlock('lu_first');
+      if((S.peakCombo||0)>=9)GamePortal.unlock('lu_combo');
+      if(S.score>=1000)GamePortal.unlock('lu_score');
+      if(DAILY)GamePortal.unlock('lu_daily'); }
     document.getElementById('finalScore').textContent=S.score;
     document.getElementById('finalSub').textContent='longueur '+S.snake.length+' · '+S.eaten+' braises';
     const nl=document.getElementById('netLine');

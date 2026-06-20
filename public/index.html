@@ -18,6 +18,11 @@
     <a href="/leaderboard.html">Classement</a>
     <a href="/roadmap.html">Roadmap</a>
   </div>
+  <a class="chip" href="#profil" id="profilChip" title="Ton profil & tes succès" style="text-decoration:none">
+    <span style="font:700 12px 'JetBrains Mono',monospace;color:#ffd27a">Nv&nbsp;<b id="navLvl">1</b></span>
+    <span style="width:46px;height:6px;border-radius:3px;background:rgba(255,255,255,.13);overflow:hidden;display:inline-block"><span id="navXp" style="display:block;height:100%;width:0;background:linear-gradient(90deg,#9fe8ff,#7ad7ff)"></span></span>
+    <span style="font:700 12px 'JetBrains Mono',monospace;color:#ffb04d">◉&nbsp;<b id="navCoins">0</b></span>
+  </a>
   <div class="chip" id="userChip" title="Changer de pseudo">
     <span class="av"></span><span>Pseudo</span> <b id="uname">…</b>
   </div>
@@ -48,6 +53,30 @@
   <section class="sec" style="padding-top:18px">
     <div class="sechead"><h2>À jouer maintenant</h2><span class="c" id="gcount"></span><span class="line"></span></div>
     <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="sec" id="profil">
+    <div class="sechead"><h2>Profil &amp; succès</h2><span class="line"></span></div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px 18px;margin-bottom:16px">
+      <div style="text-align:center;min-width:74px">
+        <div style="font:700 30px 'Space Grotesk',sans-serif;color:#ffd27a;line-height:1" id="pLvl">1</div>
+        <div style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8d8aa0;text-transform:uppercase">Niveau</div>
+      </div>
+      <div style="flex:1;min-width:200px">
+        <div style="display:flex;justify-content:space-between;font:600 11px 'JetBrains Mono',monospace;color:#8d8aa0;margin-bottom:5px"><span>XP</span><span id="pXp">0 / 100</span></div>
+        <div style="height:9px;border-radius:5px;background:rgba(255,255,255,.1);overflow:hidden"><span id="pXpBar" style="display:block;height:100%;width:0;background:linear-gradient(90deg,#9fe8ff,#7ad7ff);transition:width .5s"></span></div>
+      </div>
+      <div style="text-align:center;min-width:96px">
+        <div style="font:700 24px 'Space Grotesk',sans-serif;color:#ffb04d;line-height:1.1">◉&nbsp;<span id="pCoins">0</span></div>
+        <div style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:.1em;color:#8d8aa0;text-transform:uppercase">Ember Coins</div>
+      </div>
+      <div style="text-align:center;min-width:74px">
+        <div style="font:700 24px 'Space Grotesk',sans-serif;color:#ece9f5;line-height:1.1"><span id="pAch">0</span><span style="color:#5b5870;font-size:16px">/<span id="pAchTot">0</span></span></div>
+        <div style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8d8aa0;text-transform:uppercase">Succès</div>
+      </div>
+    </div>
+    <div class="grid" id="achGrid" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))"></div>
+    <p style="color:var(--muted);font-size:12.5px;margin-top:14px;max-width:680px">Les <b style="color:var(--text)">Ember Coins</b> se gagnent en jouant à tous les jeux et en débloquant des succès. Tu peux déjà les dépenser dans le garage d'Ember Hill (véhicules, stages, améliorations) ; d'autres usages arrivent — skins, récompenses.</p>
   </section>
 
   <section class="sec">
@@ -95,13 +124,13 @@ const SOON = [];
 
 // Infos d'affichage par jeu (genre + description + format), utilisées par les fiches.
 const GAME_INFO = {
-  emberfall:{ genre:'Survivor roguelite', meta:'Action · Solo · parties ~5–15 min',
+  emberfall:{ genre:'Survivor roguelite', meta:'Action · Solo · parties ~5–15 min', life:'~3–4 h pour tout débloquer',
     desc:'Survis à des vagues d\'ennemis de plus en plus denses. Ramasse l\'XP, choisis tes armes et leurs évolutions, et va le plus loin possible avant d\'être submergé.' },
-  lumen:{ genre:'Arcade de réflexes', meta:'Nerveux · Solo · parties ~1–3 min',
+  lumen:{ genre:'Arcade de réflexes', meta:'Nerveux · Solo · parties ~1–3 min', life:'~1–2 h pour tout débloquer',
     desc:'Un serpent de lumière à faire grandir sans se mordre. Récupère les braises, enchaîne les combos et explose ton score.' },
-  ageofwar:{ genre:'Stratégie de couloir', meta:'Stratégie · Solo · campagne + endless',
+  ageofwar:{ genre:'Stratégie de couloir', meta:'Stratégie · Solo · campagne + endless', life:'~2–3 h pour tout débloquer',
     desc:'Mène ton armée à travers cinq ères, de la préhistoire au futur. Produis des unités, pose des tourelles, évolue d\'ère, déclenche ton pouvoir spécial et détruis la base adverse.' },
-  emberhill:{ genre:'Conduite physique', meta:'Réflexes · Solo · distance sans fin',
+  emberhill:{ genre:'Conduite physique', meta:'Réflexes · Solo · distance sans fin', life:'~2–3 h pour tout débloquer',
     desc:'Pilote ta braise sur des collines générées sans fin. Dose le gaz et le frein, garde l\'équilibre dans les sauts, ramasse le carburant et va le plus loin possible sans te retourner.' },
 };
 
@@ -122,15 +151,35 @@ function cartHTML(g){
   const best = +(localStorage.getItem('gp:'+g.id+':best')||0);
   const bestTxt = best ? `record local <b>${g.id==='emberfall'?fmtTime(best):best}</b>` : 'pas encore joué';
   const meta = info.meta ? `<div class="tag" style="opacity:.7;font-size:12px;margin-top:6px">${info.meta}</div>` : '';
+  const life = info.life ? `<div class="tag" style="font-size:11.5px;margin-top:4px;color:#9fe8ff;opacity:.85">⏱ Durée de vie : ${info.life}</div>` : '';
   return `<article class="cart"><div class="label"><span class="notch"></span>${genre}<span class="st">prêt</span></div>
-    <div class="body"><div class="ttl">${g.title}</div><div class="tag">${info.desc||g.tagline}</div>${meta}
+    <div class="body"><div class="ttl">${g.title}</div><div class="tag">${info.desc||g.tagline}</div>${meta}${life}
     <div class="foot"><span class="best">${bestTxt}</span>
     <a class="play" href="/games/${g.id}/index.html">Jouer ▸</a></div></div></article>`;
 }
 
+const GAMEN = { emberfall:'Emberfall', lumen:'Lumen', ageofwar:'Conquête', emberhill:'Ember Hill' };
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function renderProfile(){
+  const lv = GamePortal.getLevel(), coins = GamePortal.getCoins(), ach = GamePortal.getAchievements();
+  const got = ach.filter(a=>a.unlocked).length, set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set('navLvl',lv.level); set('navCoins',coins); set('pLvl',lv.level); set('pCoins',coins);
+  set('pXp', lv.into+' / '+lv.need); set('pAch',got); set('pAchTot',ach.length);
+  const nx=document.getElementById('navXp'); if(nx) nx.style.width=Math.round(lv.pct*100)+'%';
+  const px=document.getElementById('pXpBar'); if(px) px.style.width=Math.round(lv.pct*100)+'%';
+  const grid=document.getElementById('achGrid');
+  if(grid) grid.innerHTML = ach.map(a=>`<div class="cart" style="opacity:${a.unlocked?1:.5}"><div class="body">
+    <div class="ttl" style="font-size:15px;display:flex;align-items:center;gap:8px"><span>${a.unlocked?'🏆':'🔒'}</span><span>${esc(a.name)}</span></div>
+    <div class="tag">${esc(a.desc)}</div>
+    <div style="margin-top:8px;font:700 12px 'JetBrains Mono',monospace;color:${a.unlocked?'#ffb04d':'#5b5870'}">◉ ${a.coin}<span style="color:#8d8aa0;font-size:10px;text-transform:uppercase;margin-left:8px">${esc(GAMEN[a.game]||a.game)}</span></div>
+  </div></div>`).join('');
+}
+window.addEventListener('gp:wallet', renderProfile);
+
 async function boot(){
   await GamePortal.init({ gameId:'portal' });
   document.getElementById('uname').textContent = GamePortal.getUsername();
+  renderProfile();
   const online = GamePortal.online;
   document.getElementById('stStatus').textContent = online ? 'en ligne' : 'hors-ligne';
   document.getElementById('netState').textContent = online ? 'connecté à Supabase' : 'mode hors-ligne (scores locaux)';
