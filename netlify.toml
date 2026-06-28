@@ -5,13 +5,21 @@
   # En glisser-déposer, cette commande est ignorée et ton config.js local est utilisé tel quel.
   command = "node build-config.js"
 
-# En-têtes de sécurité raisonnables pour un portail de jeux.
+# En-têtes de sécurité pour un portail de jeux.
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+    Cross-Origin-Opener-Policy = "same-origin"
+    # CSP réglée sur les seules origines réellement utilisées :
+    #   - Google Fonts (style + font), Supabase (API REST + Realtime), esm.sh (client Supabase en module ES).
+    #   - 'unsafe-inline' est requis car les jeux embarquent leur JS/CSS inline ; le reste (connect-src,
+    #     object-src, base-uri, frame-ancestors) bloque l'exfiltration de données et le détournement.
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://esm.sh https://cdn.esm.sh; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://esm.sh https://cdn.esm.sh; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self' mailto:; frame-ancestors 'self'; upgrade-insecure-requests"
 
 # Le SDK et la config peuvent être mis en cache courtement.
 [[headers]]

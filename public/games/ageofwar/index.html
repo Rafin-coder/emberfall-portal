@@ -708,8 +708,9 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     if(vol>0 && bgm.paused) bgm.play().catch(()=>{}); };
   function startMusic(){ if(bgm.volume>0) bgm.play().catch(()=>{}); }
 
-  function start(mode){ ac(); startMusic(); reset(mode);
-    if(DAILY) mode='endless';
+  function start(mode){ ac(); startMusic();
+    if(DAILY) mode='endless';          // le défi force l'Endless AVANT l'init de la partie
+    reset(mode);
     document.getElementById('menu').classList.add('hidden');
     document.getElementById('over').classList.add('hidden');
     document.getElementById('overScore').style.fontSize='40px';

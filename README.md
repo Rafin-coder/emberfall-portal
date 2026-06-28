@@ -17,15 +17,18 @@ emberfall-portal/
 │   └── games/
 │       ├── emberfall/index.html   Survivor roguelite, branché au SDK
 │       ├── lumen/index.html       Arcade de lumière, branché au SDK
-│       └── ageofwar/index.html    Stratégie de couloir (campagne + endless), branché au SDK
+│       ├── ageofwar/index.html    Stratégie de couloir (campagne + endless), branché au SDK
+│       └── emberhill/index.html   Conduite physique façon Hill Climb (distance), branché au SDK
 ├── supabase/
-│   ├── schema.sql           Base de données + sécurité (RLS) + anti-triche
-│   ├── add_lumen.sql        Ajoute Lumen au catalogue en ligne (à exécuter une fois)
-│   ├── daily.sql            Active le Défi du jour (colonne + vue + série) — à exécuter une fois
-│   ├── analytics.sql        Journal d'événements privé (mesure d'audience) — à exécuter une fois
-│   └── analytics_queries.sql  Requêtes prêtes à l'emploi (DAU, entonnoir, rétention…)
-├── build-config.js          Génère config.js depuis les variables d'env (déploiement Git)
-└── netlify.toml             Config de déploiement
+│   ├── schema.sql                 Base de données + sécurité (RLS) + anti-triche
+│   ├── catalogue_sync.sql         Synchro du catalogue en ligne + plafonds anti-triche (idempotent ; remplace les add_*.sql)
+│   ├── fix_leaderboard_daily.sql  Exclut les runs du Défi du jour du classement all-time
+│   ├── daily.sql                  Active le Défi du jour (colonne + vue + série) — à exécuter une fois
+│   ├── analytics.sql              Journal d'événements privé (mesure d'audience) — à exécuter une fois
+│   └── analytics_queries.sql      Requêtes prêtes à l'emploi (DAU, entonnoir, rétention…)
+├── build-config.js                Génère config.js depuis les variables d'env (déploiement Git)
+└── netlify.toml                   Config de déploiement
+```
 
 ## Mesurer l'audience (analytics)
 
@@ -46,7 +49,6 @@ taux d'engagement par jeu, rétention J1, etc.).
    `SUPABASE_URL`, `SUPABASE_ANON_KEY`, et au besoin `PORTAL_NAME`.
 4. Chaque `git push` redéploie tout le monde, et `config.js` est régénéré
    depuis ces variables — tes clés ne sont jamais dans le code.
-```
 
 ## Ça marche tout de suite, même sans serveur
 

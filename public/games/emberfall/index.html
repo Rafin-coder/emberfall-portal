@@ -382,9 +382,9 @@ function offerRelic(){const avail=RELICS.filter(r=>!G.relics[r.id]);
   document.getElementById('relicD').textContent=pendingRelic.desc;
   G.state='relic';sfx.over();show('relicpick');}
 function takeRelic(){if(!pendingRelic)return;const r=pendingRelic;G.relics[r.id]=true;if(r.apply)r.apply();
-  banner('RELIQUE : '+r.name,'#c08bff',r.desc);pendingRelic=null;hide('relicpick');G.state='playing';G.last=performance.now();}
+  banner('RELIQUE : '+r.name,'#c08bff',r.desc);pendingRelic=null;hide('relicpick');G.state='playing';G.last=performance.now();tryOpenChoice();}
 function skipRelic(){pendingRelic=null;hide('relicpick');G.state='playing';G.last=performance.now();
-  banner('RELIQUE LAISSÉE','#9aa','Elle pourra réapparaître plus tard.');}
+  banner('RELIQUE LAISSÉE','#9aa','Elle pourra réapparaître plus tard.');tryOpenChoice();}
 function anyEvo(w){return w.boltEvo||w.orbEvo||w.novaEvo||w.auraEvo||w.arcEvo||w.turretEvo||w.homingEvo;}
 const CHARS=[
  {id:'ember',ic:'❂',name:'La Braise',desc:'Équilibrée, sans faiblesse. La survivante par défaut.',cost:0,apply:()=>{}},
@@ -589,7 +589,7 @@ addEventListener('pointerup',()=>ptr.active=false);addEventListener('pointercanc
 
 /* ---------- state ---------- */
 const G={};const amb=[];
-function reset(){Object.assign(G,{state:'menu',t:0,last:0,spawnT:0,boltT:0,novaT:0,shake:0,dmgFlash:0,vacFlash:0,lastBoss:-99,
+function reset(){Object.assign(G,{state:'menu',t:0,last:0,spawnT:0,boltT:0,novaT:0,shake:0,dmgFlash:0,vacFlash:0,lastBoss:-99,pendingChoices:0,
   combo:0,comboT:0,frenzy:0,overdrive:0,hitstop:0,banner:null,killCd:0,arcT:0,surgeT:30,
   dashCd:0,dashT:0,dashVX:1,dashVY:0,magBoost:0,bombFlash:0,lastDx:1,lastDy:0,
   turretT:0,homingT:0,meteorT:0,dmgTotal:0,biome:-1,dmgBy:{},relics:{},bossKills:0,dashCdMax:2.0,
@@ -725,7 +725,7 @@ function onKill(e){
       pushLoot({type:'gold',value:Math.round(rand(6,14)),x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,forced:false});}
     pushLoot({type:'chest',value:0,x:e.x,y:e.y,vx:0,vy:0,forced:false});
     if(e.guardian)pushLoot({type:'vacuum',value:0,x:e.x,y:e.y,vx:0,vy:0,forced:false});}
-  if(MILES.includes(G.p.kills)){banner(G.p.kills+' ÉLIMINÉS — RÉCOMPENSE','#9bf5e4','Palier d\'éliminations atteint : choix bonus.');openLevelUp();}
+  if(MILES.includes(G.p.kills)){banner(G.p.kills+' ÉLIMINÉS — RÉCOMPENSE','#9bf5e4','Palier d\'éliminations atteint : choix bonus.');queueLevelUp();}
   if(e.t==='splitter'){const m=diffMul();for(let s=0;s<2;s++){const a=rand(0,TAU);
     G.enemies.push(mkEnemy('swift',e.x+Math.cos(a)*14,e.y+Math.sin(a)*14,4,120,4,m));}}
   if(G.relics.lifesteal)G.p.hp=Math.min(G.p.maxhp,G.p.hp+1);
@@ -842,7 +842,7 @@ function die(){G.state='dead';sfx.die();
       if(GamePortal.online) setTimeout(()=>GamePortal.renderTop(box,{gameId:'emberfall',limit:3,title:'Classement en ligne',format:fmt}),350); } }
   show('gameover');}
 function gainXP(v){G.p.xp+=Math.round(v*comboMul()*G.run.xpMul);sfx.xp();
-  while(G.p.xp>=G.p.xpNext){G.p.xp-=G.p.xpNext;G.p.lvl++;G.p.xpNext=Math.round(G.p.xpNext*1.18+3);openLevelUp();}}
+  while(G.p.xp>=G.p.xpNext){G.p.xp-=G.p.xpNext;G.p.lvl++;G.p.xpNext=Math.round(G.p.xpNext*1.18+3);queueLevelUp();}}
 
 const POOL=[
  {id:'bolt+',r:'common',ic:'✦',t:'Tir multiple',d:'+1 projectile vers l\'ennemi le plus proche.',can:w=>w.bolt<5&&!w.boltEvo,get:()=>'→ '+(G.w.bolt+1)+' tirs',ap:w=>w.bolt++},
@@ -905,7 +905,10 @@ function renderLevelUp(){const box=document.getElementById('choices');box.innerH
   document.getElementById('skipBtn').onclick=()=>{G.p.hp=Math.min(G.p.maxhp,G.p.hp+G.p.maxhp*0.1);banner('PASSÉ — +10% PV','#9bf5e4');closeLevelUp();};}
 function banishChoice(i){if(G.banishes<=0||!current[i])return;G.banished[current[i].id]=true;G.banishes--;replaceChoice(i);renderLevelUp();blip(300,.1,'sawtooth',.03);}
 function openLevelUp(){G.state='levelup';sfx.level();drawChoices();renderLevelUp();show('levelup');}
-function closeLevelUp(){hide('levelup');G.state='playing';G.last=performance.now();updateLoadout();}
+// File d'attente : plusieurs niveaux gagnés d'un coup (ou coffre + palier) = un choix CHACUN.
+function queueLevelUp(){G.pendingChoices=(G.pendingChoices||0)+1;tryOpenChoice();}
+function tryOpenChoice(){if((G.pendingChoices||0)>0&&G.state==='playing'){G.pendingChoices--;openLevelUp();}}
+function closeLevelUp(){hide('levelup');G.state='playing';G.last=performance.now();updateLoadout();tryOpenChoice();}
 function pick(i){const o=current[i];if(!o)return;
   const isEvo=o.id.indexOf('evo_')===0, wasNew=/NOUVELLE/.test(o.get(G.w,G.p));
   o.ap(G.w,G.p);
@@ -1006,7 +1009,11 @@ function renderShop(){
     b.onclick=()=>{const id=b.dataset.id,m2=loadMeta(),lvl=m2[id]||0,u=META.find(x=>x.id===id),cost=u.cost(lvl);
       if(lvl>=u.max||getGold()<cost)return;setGold(getGold()-cost);m2[id]=lvl+1;saveMeta(m2);sfx.buy();renderShop();};});
 }
-function start(){ensureAudio();playMusic();reset();applyMeta();applyChar();applyAchv();G.run.goldMul*=DIFFS[diffGet()].gold;G.state='playing';mStep=0;mAcc=0;
+function start(){ensureAudio();playMusic();reset();
+  // Défi du jour = mêmes conditions pour tous : on n'applique NI la méta-progression NI les bonus de succès
+  // (seuls le personnage et la difficulté imposés du jour comptent). En partie normale, tout s'applique.
+  if(!window.__DAILY){applyMeta();applyAchv();}
+  applyChar();G.run.goldMul*=DIFFS[diffGet()].gold;G.state='playing';mStep=0;mAcc=0;
   document.getElementById('diffTag').textContent=DIFFS[diffGet()].label;
   hide('menu');hide('gameover');hide('levelup');hide('shop');hide('pause');
   document.getElementById('hud').classList.remove('hidden');updateLoadout();G.last=performance.now();}
@@ -1173,7 +1180,7 @@ function update(dt){
       if(g.type==='xp')gainXP(g.value);
       else if(g.type==='gold'){const add=Math.max(1,Math.round(g.value*G.run.goldMul*comboMul()*0.38));G.run.gold+=add;sfx.gold();floatTxt(p.x,p.y-22,'+'+add+' ◉','#ffcf4d');}
       else if(g.type==='vacuum'){activateVacuum();floatTxt(p.x,p.y-22,'VACUUM','#9bf5e4');}
-      else if(g.type==='chest'){banner('COFFRE !','#ffd27a','Choisis une amélioration bonus.');sfx.over();openLevelUp();}
+      else if(g.type==='chest'){banner('COFFRE !','#ffd27a','Choisis une amélioration bonus.');sfx.over();queueLevelUp();}
       else if(g.type==='bomb'){bombBlast();}
       else if(g.type==='heart'){G.p.hp=Math.min(G.p.maxhp,G.p.hp+G.p.maxhp*0.4);floatTxt(p.x,p.y-22,'+VIE','#ff8a9a');blip(700,.12,'sine',.04);}
       else if(g.type==='magnet'){G.magBoost=7;banner('AIMANT','#9bf5e4');floatTxt(p.x,p.y-22,'AIMANT','#9bf5e4');blip(900,.1,'sine',.03);}

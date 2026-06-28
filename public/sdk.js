@@ -86,7 +86,8 @@
   }
 
   async function setUsername(name) {
-    name = (name || "").trim().slice(0, 24);
+    // on retire les chevrons (défense en profondeur anti-XSS) ; l'échappement à l'affichage reste la vraie protection
+    name = (name || "").replace(/[<>]/g, "").trim().slice(0, 24);
     if (!name) return { ok: false, error: "Pseudo vide" };
     localStorage.setItem("gp:username", name);
     if (sb && user) {
@@ -248,7 +249,7 @@
       ? await getDailyLeaderboard({ gameId: opts.gameId, limit: 60 })
       : await getLeaderboard({ gameId: opts.gameId, limit: 60 });
     if (!data.length) {
-      el.innerHTML = `<div class="gp-lbtitle">${title}</div><div class="gp-muted">${online ? 'Sois le premier à inscrire ton score.' : 'Classement en ligne indisponible.'}</div>`;
+      el.innerHTML = `<div class="gp-lbtitle">${title}</div><div class="gp-muted">${sb ? 'Sois le premier à inscrire ton score.' : 'Classement en ligne indisponible.'}</div>`;
       return;
     }
     const me = data.find((r) => r.is_me);

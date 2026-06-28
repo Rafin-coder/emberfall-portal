@@ -149,3 +149,9 @@ grant select on public.v_leaderboard to anon, authenticated;
 insert into public.games (id, title, tagline, sort, max_value) values
   ('emberfall', 'Emberfall', 'Tiens face à la nuit. Survivor roguelite.', 0, 7200)
 on conflict (id) do nothing;
+
+-- Jeu interne : support du portefeuille global (Ember Coins, niveau, succès)
+-- stocké dans la table progress. enabled = false -> jamais affiché comme carte.
+insert into public.games (id, title, tagline, sort, enabled, max_value) values
+  ('_portal', 'Portail (interne)', 'Portefeuille global : Ember Coins, niveau, succès.', 999, false, 0)
+on conflict (id) do update set enabled = excluded.enabled;
