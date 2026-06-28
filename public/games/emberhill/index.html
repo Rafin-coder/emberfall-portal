@@ -222,7 +222,7 @@ canvas{display:block;width:100%;height:100%}
     up=DAILY?{}:loadUp(); VEH=DAILY?VEHICLES[0]:currentVehicle(); BIOME=currentBiome();
     EF=VEH.ef+(up.engine||0)*150; TOP=VEH.top+(up.engine||0)*38;
     FUELMAX=VEH.fuel+(up.tank||0)*22; GRIPK=VEH.grip*(1-(up.grip||0)*0.10);
-    AIRROT=VEH.air+(up.wing||0)*0.45; GRAV=BIOME.grav; }
+    AIRROT=(VEH.air+(up.wing||0)*0.45)*0.5; GRAV=BIOME.grav; }  // ×0.5 : rotation aérienne contrôlable
   function ground(x){
     const amp=(42+Math.min(140,x*0.010))*BIOME.ampMul;
     return H*0.62 - Math.sin(x*0.0040+P1)*amp - Math.sin(x*0.0091+P2)*amp*0.40
@@ -240,7 +240,7 @@ canvas{display:block;width:100%;height:100%}
     applyLoadout();
     const sx=flatStart();
     G={state:'play',t:0,x:sx,y:ground(sx)-VEH.wr,vx:0,vy:0,angle:slopeAt(sx),angVel:0,onGround:true,
-       fuel:FUELMAX,dist:0,best:+(localStorage.getItem('eh:best')||0),wheel:0,dry:0,flipT:0,coins:0,air:0,spin:0,flips:0};
+       fuel:FUELMAX,dist:0,best:+(localStorage.getItem('eh:best')||0),wheel:0,dry:0,flipT:0,coins:0,air:0,spin:0,flips:0,susY:0,susV:0};
     pops=[];
     const r=DAILY?DAILY.rng:lrng(SEED);
     cans=[]; let cx=820; for(let i=0;i<80;i++){cx+=720+r()*900; cans.push({x:cx,got:false});}
@@ -273,9 +273,15 @@ canvas{display:block;width:100%;height:100%}
     holdDamp: 12.0,    // freinage vers l'arrêt sur pente tenable
     revMax: 210,       // vitesse de marche arrière max (frein)
     align: 11,         // vitesse d'alignement du châssis sur le sol /s
-    crashTilt: 1.45,   // inclinaison max tolérée à l'atterrissage (rad) avant crash
+    crashTilt: 2.2,    // inclinaison max tolérée à l'atterrissage (rad) — tolérant (crash ~sur le toit seulement)
     airDrag: 0.03,     // traînée horizontale en l'air /s
-    bounce: 0.10       // rebond à l'impact (0 = sec, 1 = trampoline)
+    bounce: 0.10,      // rebond à l'impact (0 = sec, 1 = trampoline)
+    airLevel: 3.0,     // auto-stabilisation en l'air quand on ne touche à rien
+    airRotMax: 5.0,    // vitesse de rotation aérienne max (rad/s)
+    susK: 80,          // raideur ressort de suspension (visuel)
+    susD: 10,          // amortissement suspension (sous-amorti -> rebond)
+    susImpact: 0.4,    // compression par unité de vitesse d'impact
+    susRest: 2         // compression de repos (la voiture est "chargée" sur ses suspensions)
   };
   function physics(sdt){
     const canGas = gas && G.fuel>0, wb=VEH.wb, wr=VEH.wr;
@@ -311,7 +317,7 @@ canvas{display:block;width:100%;height:100%}
       }
       vt = clamp(vt, -PHYS.revMax, TOP);
       // réponse normale : on absorbe l'enfoncement mais on GARDE l'élan vers le haut -> vrais tremplins
-      if(vn < 0) vn = -vn*PHYS.bounce;
+      if(vn < 0){ G.susV += Math.min(260,-vn)*PHYS.susImpact; vn = -vn*PHYS.bounce; }  // compresse la suspension (visuel)
       // alignement du châssis sur la pente (instantané à l'atterrissage, lissé sinon)
       if(wasAir){
         const tilt = Math.abs(angNorm(G.angle - slope));
@@ -328,14 +334,21 @@ canvas{display:block;width:100%;height:100%}
     } else {
       // ---- EN L'AIR ----
       G.onGround = false; G.air += sdt;
-      if(canGas) G.angVel -= AIRROT*sdt;            // gaz = pique du nez
-      if(brake)  G.angVel += AIRROT*sdt;            // frein = cabre
-      G.angVel = clamp(G.angVel, -6, 6);
+      if(canGas)      G.angVel -= AIRROT*sdt;        // gaz = bascule en arrière (backflip contrôlé)
+      else if(brake)  G.angVel += AIRROT*sdt;        // frein = bascule en avant
+      else {                                          // aucun input : auto-stabilisation vers l'horizontale
+        G.angVel -= G.angVel*Math.min(1, PHYS.airLevel*sdt);
+        G.angle  += angNorm(0 - G.angle)*Math.min(1, PHYS.airLevel*0.4*sdt);
+      }
+      G.angVel = clamp(G.angVel, -PHYS.airRotMax, PHYS.airRotMax);
       G.spin = (G.spin||0) + G.angVel*sdt;
       if(Math.abs(G.spin) >= 6.2832){ G.spin -= Math.sign(G.spin)*6.2832; G.flips=(G.flips||0)+1; banner('SALTO !','#9fe8ff'); blip(880,.12,'triangle',.04); }
       G.vx *= (1 - PHYS.airDrag*sdt);
     }
-    // 4) usure roue, conso, ramassages, retournement, panne sèche
+    // 4) suspension visuelle (ressort amorti vers une compression de repos, n'affecte pas la collision)
+    G.susV += (-PHYS.susK*((G.susY||0)-PHYS.susRest) - PHYS.susD*(G.susV||0))*sdt;
+    G.susY = clamp((G.susY||0) + G.susV*sdt, -7, 11);
+    // usure roue, conso, ramassages, retournement, panne sèche
     G.wheel += G.vx*sdt*0.07; G.t += sdt;
     G.fuel = Math.max(0, G.fuel - (canGas?3.6:1.2)*sdt);
     for(const cc of coins){ if(cc.got)continue; if(cc.x<G.x-70)continue; if(cc.x>G.x+70)break;
@@ -352,7 +365,7 @@ canvas{display:block;width:100%;height:100%}
   function crash(reason){ if(G.state!=='play')return; G.state='dead'; G.crashReason=reason; blip(150,.4,'sawtooth',.06); endGame(); }
 
   // ---------- dessin véhicule (un seul rendu, partagé jeu + aperçu menu) ----------
-  function drawVehicleOn(g,v,spin){
+  function drawVehicleOn(g,v,spin,dip){
     function R(x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
     function wheel(sx){g.save();g.translate(sx,14);
       g.fillStyle='#16161e';g.beginPath();g.arc(0,0,v.wr,0,6.28);g.fill();
@@ -361,6 +374,7 @@ canvas{display:block;width:100%;height:100%}
       for(let k=0;k<4;k++){g.beginPath();g.moveTo(0,0);g.lineTo(Math.cos(k*1.57)*v.wr*0.8,Math.sin(k*1.57)*v.wr*0.8);g.stroke();}
       g.restore();}
     wheel(-v.wb); wheel(v.wb);
+    g.save(); g.translate(0, dip||0);            // débattement de suspension : le corps plonge/rebondit, roues au sol
     const bg=g.createLinearGradient(0,-12,0,14); bg.addColorStop(0,'#ffd27a');bg.addColorStop(1,'#ff7a3c'); g.fillStyle=bg;
     if(v.body==='buggy'){ R(-30,-6,60,20,7);g.fill(); g.fillStyle='#ff7a3c';R(-16,-22,34,18,6);g.fill();
       g.fillStyle='rgba(150,230,255,0.55)';R(-12,-19,26,12,4);g.fill();
@@ -373,6 +387,7 @@ canvas{display:block;width:100%;height:100%}
       g.fillStyle='rgba(150,230,255,0.5)';R(-26,-26,22,12,3);g.fill();
       g.fillStyle='#22222e';R(2,-26,30,18,4);g.fill();
       g.fillStyle='#fff';g.beginPath();g.arc(-15,-20,5,0,6.28);g.fill();g.fillStyle='#ffd27a';g.beginPath();g.arc(-15,-20,3,0,6.28);g.fill(); }
+    g.restore();
   }
 
   // ---------- rendu monde ----------
@@ -423,7 +438,7 @@ canvas{display:block;width:100%;height:100%}
       ctx.fillText(p.txt,p.x,p.y-(1-p.t)*26);ctx.globalAlpha=1; }
     ctx.save(); ctx.translate(G.x,G.y); ctx.rotate(G.angle);
     ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(0,18,34,8,0,0,6.28);ctx.fill();
-    drawVehicleOn(ctx,VEH,G.wheel); ctx.restore();
+    drawVehicleOn(ctx,VEH,G.wheel,G.susY); ctx.restore();
     ctx.restore();
     drawGauges();
     if(bannerT>0){ ctx.globalAlpha=Math.min(1,bannerT/0.4); ctx.fillStyle=bannerCol; ctx.font='700 22px Space Grotesk';
