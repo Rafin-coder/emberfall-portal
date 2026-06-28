@@ -159,7 +159,7 @@ function cartHTML(g){
 }
 
 const GAMEN = { emberfall:'Emberfall', lumen:'Lumen', ageofwar:'Conquête', emberhill:'Ember Hill' };
-function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+const esc = GamePortal.esc;  // échappement HTML partagé (défini dans le SDK)
 function renderProfile(){
   const lv = GamePortal.getLevel(), coins = GamePortal.getCoins(), ach = GamePortal.getAchievements();
   const got = ach.filter(a=>a.unlocked).length, set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};

@@ -50,7 +50,7 @@ function fmtTime(s){ s=Math.floor(s||0); const m=Math.floor(s/60); return m+':'+
 const UNIT={lumen:'pts',ageofwar:'pts',emberhill:'m'};
 function fmtVal(gid,v){ if(TIME_GAMES.has(gid))return fmtTime(v); return String(v)+' '+(UNIT[gid]||'pts'); }
 // Échappe tout ce qui vient du joueur (pseudo, méta) avant insertion en HTML — anti-XSS.
-function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+const esc = GamePortal.esc;  // échappement HTML partagé (défini dans le SDK)
 function fmtMeta(m){ if(!m) return ''; const p=[]; if(m.char)p.push(esc(m.char)); if(m.diff)p.push(esc(m.diff)); if(m.lvl)p.push('niv '+(parseInt(m.lvl,10)||0)); return p.join(' · '); }
 
 async function render(gid){

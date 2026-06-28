@@ -263,6 +263,27 @@
     el.innerHTML = html;
   }
 
+  // Fin de partie standardisée : envoie le score (normal OU défi), met à jour la
+  // ligne réseau (+ série), puis affiche le top. Remplace le copier-coller des 4 jeux.
+  //   opts = { daily, gameId, netEl, lbEl, limit, title, format }
+  async function finishRun(value, meta, opts){
+    opts = opts || {};
+    const isDaily = !!opts.daily;
+    const r = isDaily ? await submitDaily(value, meta) : await submitScore(value, meta);
+    if (opts.netEl){
+      let txt = sb ? (isDaily ? 'défi du jour envoyé' : 'score envoyé au classement')
+                   : (isDaily ? 'hors-ligne — score local' : 'hors-ligne — score gardé en local');
+      if (isDaily){ const st = getStreak(); if (st && st.count > 0) txt += ' · série ' + st.count + ' j'; }
+      opts.netEl.textContent = txt;
+    }
+    if (opts.lbEl && sb){
+      const o = { gameId: opts.gameId || gameId, limit: opts.limit || 5, daily: isDaily,
+                  title: opts.title || (isDaily ? 'Défi du jour' : 'Classement en ligne'), format: opts.format };
+      setTimeout(() => renderTop(opts.lbEl, o), 350);
+    }
+    return r;
+  }
+
   // ---------- Défi du jour ----------
   function dayStr(d){ d = d || new Date(); return d.toISOString().slice(0, 10); } // UTC YYYY-MM-DD
   function hashStr(s){ let h = 2166136261 >>> 0; for (let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
@@ -421,7 +442,7 @@
     getUsername, setUsername,
     submitScore, getLeaderboard, getGames,
     saveProgress, loadProgress,
-    promptUsername, renderTop,
+    promptUsername, renderTop, finishRun, esc: escapeHtml,
     daily, submitDaily, getDailyLeaderboard, getStreak,
     track,
     getCoins, addCoins, spendCoins, setCoins,

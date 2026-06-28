@@ -220,17 +220,10 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
     document.getElementById('finalScore').textContent=S.score;
     document.getElementById('finalSub').textContent='longueur '+S.snake.length+' · '+S.eaten+' braises';
     const nl=document.getElementById('netLine');
-    if(window.GamePortal){ const box=document.getElementById('lbBox');
-      if(DAILY){
-        GamePortal.submitDaily(S.score,{len:S.snake.length,embers:S.eaten});
-        const st=GamePortal.getStreak();
-        nl.textContent=(GamePortal.online?'défi du jour envoyé':'hors-ligne — score local')+(st&&st.count>0?' · série '+st.count+' j':'');
-        if(GamePortal.online) setTimeout(()=>GamePortal.renderTop(box,{gameId:'lumen',limit:5,daily:true,title:'Défi du jour'}),350);
-      } else {
-        GamePortal.submitScore(S.score, {len:S.snake.length, embers:S.eaten});
-        nl.textContent = GamePortal.online ? 'score envoyé au classement' : 'hors-ligne — score gardé en local';
-        if(GamePortal.online) setTimeout(()=>GamePortal.renderTop(box,{gameId:'lumen',limit:3,title:'Classement en ligne'}),350);
-      } }
+    if(window.GamePortal){
+      GamePortal.finishRun(S.score, {len:S.snake.length, embers:S.eaten},
+        {daily:!!DAILY, gameId:'lumen', netEl:nl, lbEl:document.getElementById('lbBox')});
+    }
     setTimeout(()=>document.getElementById('over').classList.remove('hidden'), 420);
   }
 

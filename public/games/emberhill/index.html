@@ -312,30 +312,28 @@ canvas{display:block;width:100%;height:100%}
   function banner(t,c){bannerTxt=t;bannerCol=c||'#fff';bannerT=1.6;}
   function crash(reason){ if(G.state!=='play')return; G.state='dead'; G.crashReason=reason; blip(150,.4,'sawtooth',.06); endGame(); }
 
-  // ---------- dessin véhicule ----------
-  function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
-    ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
-  function drawWheel(sx,wy,wr,spin){ ctx.save();ctx.translate(sx,wy);
-    ctx.fillStyle='#16161e';ctx.beginPath();ctx.arc(0,0,wr,0,6.28);ctx.fill();
-    ctx.strokeStyle='#ff7a3c';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,wr,0,6.28);ctx.stroke();
-    ctx.rotate(spin);ctx.strokeStyle='#6a6a76';ctx.lineWidth=2;
-    for(let k=0;k<4;k++){ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(k*1.57)*wr*0.8,Math.sin(k*1.57)*wr*0.8);ctx.stroke();}
-    ctx.restore(); }
-  function drawVehicle(v,spin){
-    const wy=14;
-    drawWheel(-v.wb,wy,v.wr,spin); drawWheel(v.wb,wy,v.wr,spin);
-    const bg=ctx.createLinearGradient(0,-12,0,14); bg.addColorStop(0,'#ffd27a');bg.addColorStop(1,'#ff7a3c'); ctx.fillStyle=bg;
-    if(v.body==='buggy'){ rr(-30,-6,60,20,7);ctx.fill(); ctx.fillStyle='#ff7a3c';rr(-16,-22,34,18,6);ctx.fill();
-      ctx.fillStyle='rgba(150,230,255,0.55)';rr(-12,-19,26,12,4);ctx.fill();
-      ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,-13,5,0,6.28);ctx.fill();ctx.fillStyle='#ffd27a';ctx.beginPath();ctx.arc(0,-13,3,0,6.28);ctx.fill(); }
-    else if(v.body==='moto'){ ctx.strokeStyle='#ff7a3c';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-v.wb,14);ctx.lineTo(0,-6);ctx.lineTo(v.wb,14);ctx.moveTo(0,-6);ctx.lineTo(8,-2);ctx.stroke();
-      rr(-8,-10,20,8,3);ctx.fill();
-      ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-2,-20,5,0,6.28);ctx.fill();ctx.fillStyle='#ffd27a';ctx.beginPath();ctx.arc(-2,-20,3,0,6.28);ctx.fill();
-      ctx.strokeStyle='#ffd27a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-2,-16);ctx.lineTo(6,-4);ctx.stroke(); }
-    else { rr(-34,-10,68,24,6);ctx.fill(); ctx.fillStyle='#ff7a3c';rr(-30,-30,30,22,5);ctx.fill();
-      ctx.fillStyle='rgba(150,230,255,0.5)';rr(-26,-26,22,12,3);ctx.fill();
-      ctx.fillStyle='#22222e';rr(2,-26,30,18,4);ctx.fill();
-      ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-15,-20,5,0,6.28);ctx.fill();ctx.fillStyle='#ffd27a';ctx.beginPath();ctx.arc(-15,-20,3,0,6.28);ctx.fill(); }
+  // ---------- dessin véhicule (un seul rendu, partagé jeu + aperçu menu) ----------
+  function drawVehicleOn(g,v,spin){
+    function R(x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
+    function wheel(sx){g.save();g.translate(sx,14);
+      g.fillStyle='#16161e';g.beginPath();g.arc(0,0,v.wr,0,6.28);g.fill();
+      g.strokeStyle='#ff7a3c';g.lineWidth=3;g.beginPath();g.arc(0,0,v.wr,0,6.28);g.stroke();
+      g.rotate(spin);g.strokeStyle='#6a6a76';g.lineWidth=2;
+      for(let k=0;k<4;k++){g.beginPath();g.moveTo(0,0);g.lineTo(Math.cos(k*1.57)*v.wr*0.8,Math.sin(k*1.57)*v.wr*0.8);g.stroke();}
+      g.restore();}
+    wheel(-v.wb); wheel(v.wb);
+    const bg=g.createLinearGradient(0,-12,0,14); bg.addColorStop(0,'#ffd27a');bg.addColorStop(1,'#ff7a3c'); g.fillStyle=bg;
+    if(v.body==='buggy'){ R(-30,-6,60,20,7);g.fill(); g.fillStyle='#ff7a3c';R(-16,-22,34,18,6);g.fill();
+      g.fillStyle='rgba(150,230,255,0.55)';R(-12,-19,26,12,4);g.fill();
+      g.fillStyle='#fff';g.beginPath();g.arc(0,-13,5,0,6.28);g.fill();g.fillStyle='#ffd27a';g.beginPath();g.arc(0,-13,3,0,6.28);g.fill(); }
+    else if(v.body==='moto'){ g.strokeStyle='#ff7a3c';g.lineWidth=4;g.beginPath();g.moveTo(-v.wb,14);g.lineTo(0,-6);g.lineTo(v.wb,14);g.moveTo(0,-6);g.lineTo(8,-2);g.stroke();
+      R(-8,-10,20,8,3);g.fill();
+      g.fillStyle='#fff';g.beginPath();g.arc(-2,-20,5,0,6.28);g.fill();g.fillStyle='#ffd27a';g.beginPath();g.arc(-2,-20,3,0,6.28);g.fill();
+      g.strokeStyle='#ffd27a';g.lineWidth=3;g.beginPath();g.moveTo(-2,-16);g.lineTo(6,-4);g.stroke(); }
+    else { R(-34,-10,68,24,6);g.fill(); g.fillStyle='#ff7a3c';R(-30,-30,30,22,5);g.fill();
+      g.fillStyle='rgba(150,230,255,0.5)';R(-26,-26,22,12,3);g.fill();
+      g.fillStyle='#22222e';R(2,-26,30,18,4);g.fill();
+      g.fillStyle='#fff';g.beginPath();g.arc(-15,-20,5,0,6.28);g.fill();g.fillStyle='#ffd27a';g.beginPath();g.arc(-15,-20,3,0,6.28);g.fill(); }
   }
 
   // ---------- rendu monde ----------
@@ -386,7 +384,7 @@ canvas{display:block;width:100%;height:100%}
       ctx.fillText(p.txt,p.x,p.y-(1-p.t)*26);ctx.globalAlpha=1; }
     ctx.save(); ctx.translate(G.x,G.y); ctx.rotate(G.angle);
     ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(0,18,34,8,0,0,6.28);ctx.fill();
-    drawVehicle(VEH,G.wheel); ctx.restore();
+    drawVehicleOn(ctx,VEH,G.wheel); ctx.restore();
     ctx.restore();
     drawGauges();
     if(bannerT>0){ ctx.globalAlpha=Math.min(1,bannerT/0.4); ctx.fillStyle=bannerCol; ctx.font='700 22px Space Grotesk';
@@ -458,13 +456,7 @@ canvas{display:block;width:100%;height:100%}
     const nl=document.getElementById('netLine'), box=document.getElementById('lbBox'); box.innerHTML='';
     if(!window.GamePortal){nl.textContent='';return;}
     const meta={dist:G.dist,coins:G.coins,veh:VEH.id,stage:BIOME.id};
-    if(DAILY){ GamePortal.submitDaily(G.dist,meta); const st=GamePortal.getStreak();
-      nl.textContent=(GamePortal.online?'défi du jour envoyé':'hors-ligne — score local')+(st&&st.count>0?' · série '+st.count+' j':'');
-      if(GamePortal.online) setTimeout(()=>GamePortal.renderTop(box,{gameId:'emberhill',limit:5,daily:true,title:'Défi du jour'}),350);
-    } else { GamePortal.submitScore(G.dist,meta);
-      nl.textContent=GamePortal.online?'score envoyé au classement':'hors-ligne — score local';
-      if(GamePortal.online) setTimeout(()=>GamePortal.renderTop(box,{gameId:'emberhill',limit:5,title:'Classement'}),350);
-    }
+    GamePortal.finishRun(G.dist, meta, {daily:!!DAILY, gameId:'emberhill', netEl:nl, lbEl:box});
   }
 
   // ---------- écrans du menu ----------
@@ -474,18 +466,7 @@ canvas{display:block;width:100%;height:100%}
     const p=pc.getContext('2d'); p.setTransform(DPR,0,0,DPR,0,0); p.clearRect(0,0,w,h);
     p.strokeStyle=BIOME.rim;p.lineWidth=2;p.beginPath();p.moveTo(0,h-30);p.lineTo(w,h-30);p.stroke();
     p.save();p.translate(w/2,h-44);p.scale(1.15,1.15);
-    // réutilise les primitives sur p
-    drawVehicleOn(p,VEH,0); p.restore();
-  }
-  function drawVehicleOn(p,v,spin){
-    function R(x,y,w,h,r){p.beginPath();p.moveTo(x+r,y);p.arcTo(x+w,y,x+w,y+h,r);p.arcTo(x+w,y+h,x,y+h,r);p.arcTo(x,y+h,x,y,r);p.arcTo(x,y,x+w,y,r);p.closePath();}
-    function wheel(sx){p.save();p.translate(sx,14);p.fillStyle='#16161e';p.beginPath();p.arc(0,0,v.wr,0,6.28);p.fill();
-      p.strokeStyle='#ff7a3c';p.lineWidth=3;p.beginPath();p.arc(0,0,v.wr,0,6.28);p.stroke();p.restore();}
-    wheel(-v.wb);wheel(v.wb);
-    const bg=p.createLinearGradient(0,-12,0,14);bg.addColorStop(0,'#ffd27a');bg.addColorStop(1,'#ff7a3c');p.fillStyle=bg;
-    if(v.body==='buggy'){R(-30,-6,60,20,7);p.fill();p.fillStyle='#ff7a3c';R(-16,-22,34,18,6);p.fill();p.fillStyle='rgba(150,230,255,.55)';R(-12,-19,26,12,4);p.fill();}
-    else if(v.body==='moto'){p.strokeStyle='#ff7a3c';p.lineWidth=4;p.beginPath();p.moveTo(-v.wb,14);p.lineTo(0,-6);p.lineTo(v.wb,14);p.stroke();R(-8,-10,20,8,3);p.fill();}
-    else{R(-34,-10,68,24,6);p.fill();p.fillStyle='#ff7a3c';R(-30,-30,30,22,5);p.fill();p.fillStyle='rgba(150,230,255,.5)';R(-26,-26,22,12,3);p.fill();p.fillStyle='#22222e';R(2,-26,30,18,4);p.fill();}
+    drawVehicleOn(p,VEH,0); p.restore();   // même rendu que le jeu (fonction unifiée)
   }
   function renderPlay(){
     document.getElementById('hdrCoins').textContent=getCoins();

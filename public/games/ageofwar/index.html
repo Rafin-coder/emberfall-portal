@@ -75,7 +75,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
 </head>
 <body>
 <a id="back" href="/">← Arcade</a>
-<audio id="bgm" src="music.mp3" loop preload="auto"></audio>
+<audio id="bgm" src="music.mp3" loop preload="none"></audio>
 <div id="dailyBadge"></div>
 
 <div id="wrap">
@@ -690,13 +690,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     const nl=document.getElementById('netLine'), box=document.getElementById('lbBox');
     if(!window.GamePortal){ nl.textContent=''; return; }
     const meta={wave:G.wave, age:AGES[G.age], t:Math.floor(G.t)};
-    if(DAILY){ GamePortal.submitDaily(G.kills, meta); const st=GamePortal.getStreak();
-      nl.textContent=(GamePortal.online?'défi du jour envoyé':'hors-ligne — score local')+(st&&st.count>0?' · série '+st.count+' j':'');
-      if(GamePortal.online) setTimeout(()=>GamePortal.renderTop(box,{gameId:'ageofwar',limit:5,daily:true,title:'Défi du jour'}),350);
-    } else { GamePortal.submitScore(G.kills, meta);
-      nl.textContent=GamePortal.online?'score envoyé au classement':'hors-ligne — score gardé en local';
-      if(GamePortal.online) setTimeout(()=>GamePortal.renderTop(box,{gameId:'ageofwar',limit:5,title:'Classement en ligne'}),350);
-    }
+    GamePortal.finishRun(G.kills, meta, {daily:!!DAILY, gameId:'ageofwar', netEl:nl, lbEl:box});
   }
 
   // ---------- flow ----------

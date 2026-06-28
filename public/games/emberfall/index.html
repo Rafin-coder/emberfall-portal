@@ -835,11 +835,8 @@ function die(){G.state='dead';sfx.die();
   document.getElementById('lbBox').innerHTML=lbh;
   if(window.GamePortal){const cn={ember:'Braise',pyro:'Pyro',gunner:'Artilleuse',wraith:'Spectre',midas:'Avare'};
     const meta={lvl:G.p.lvl,kills:G.p.kills,char:cn[getChar()]||getChar(),diff:DIFFS[diffGet()].name};
-    const box=document.getElementById('lbBox');
-    if(window.__DAILY){ GamePortal.submitDaily(Math.floor(G.t),meta);
-      if(GamePortal.online) setTimeout(()=>GamePortal.renderTop(box,{gameId:'emberfall',limit:5,daily:true,title:'Défi du jour',format:fmt}),350);
-    } else { GamePortal.submitScore(Math.floor(G.t),meta);
-      if(GamePortal.online) setTimeout(()=>GamePortal.renderTop(box,{gameId:'emberfall',limit:3,title:'Classement en ligne',format:fmt}),350); } }
+    GamePortal.finishRun(Math.floor(G.t), meta,
+      {daily:!!window.__DAILY, gameId:'emberfall', lbEl:document.getElementById('lbBox'), format:fmt}); }
   show('gameover');}
 function gainXP(v){G.p.xp+=Math.round(v*comboMul()*G.run.xpMul);sfx.xp();
   while(G.p.xp>=G.p.xpNext){G.p.xp-=G.p.xpNext;G.p.lvl++;G.p.xpNext=Math.round(G.p.xpNext*1.18+3);queueLevelUp();}}
