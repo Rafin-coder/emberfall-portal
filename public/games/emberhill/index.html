@@ -263,46 +263,85 @@ canvas{display:block;width:100%;height:100%}
   addEventListener('keyup',e=>{const k=e.key.toLowerCase();
     if(k==='arrowright'||k==='d')gas=false; if(k==='arrowleft'||k==='q')brake=false;});
 
-  // ---------- physique ----------
+  // ---------- physique (Hill-Climb : châssis balistique + appui par roue) ----------
+  const PHYS = {
+    drive: 1.0,        // facteur sur la puissance moteur (EF)
+    roll: 0.45,        // résistance au roulement /s
+    muS: 0.35,         // friction statique : à l'arrêt, tient jusqu'à ~19° de pente
+    muK: 0.22,         // friction cinétique au-delà (la voiture glisse)
+    idleStop: 22,      // en deçà de cette vitesse, on s'immobilise net (zéro creep)
+    holdDamp: 12.0,    // freinage vers l'arrêt sur pente tenable
+    revMax: 210,       // vitesse de marche arrière max (frein)
+    align: 11,         // vitesse d'alignement du châssis sur le sol /s
+    crashTilt: 1.45,   // inclinaison max tolérée à l'atterrissage (rad) avant crash
+    airDrag: 0.03,     // traînée horizontale en l'air /s
+    bounce: 0.10       // rebond à l'impact (0 = sec, 1 = trampoline)
+  };
   function physics(sdt){
     const canGas = gas && G.fuel>0, wb=VEH.wb, wr=VEH.wr;
-    // gravité + intégration : la voiture est un vrai corps qui tombe
-    G.vy+=GRAV*sdt; G.x+=G.vx*sdt; G.y+=G.vy*sdt; G.angle+=G.angVel*sdt;
-    // échantillonnage du sol sous CHAQUE roue
-    const c=Math.cos(G.angle), s=Math.sin(G.angle);
-    const rx=G.x-c*wb, ry=G.y-s*wb, fx=G.x+c*wb, fy=G.y+s*wb;
-    const rg=ground(rx), fg=ground(fx);
-    const rOn=(ry+wr)>=rg-1, fOn=(fy+wr)>=fg-1;
-    if(rOn||fOn){
-      const wasAir=!G.onGround; G.onGround=true; G.air=0;
-      const gAng=clamp(Math.atan2(fg-rg,2*wb),-1.3,1.3);
-      const targetY=(rg+fg)/2 - wr;
-      G.y += (targetY-G.y)*Math.min(1,sdt*14);          // suspension : on suit le terrain en douceur
-      G.angle += angNorm(gAng-G.angle)*Math.min(1,sdt*9); G.angVel=0;
-      let v=G.vx/Math.max(0.25,Math.cos(gAng));
-      if(canGas) v+=EF*sdt;
-      if(brake)  v-=BF*sdt;
-      v -= GRAV*Math.sin(gAng)*GRIPK*sdt;               // grimper coûte -> moteur/adhérence utiles
-      v *= (1-0.8*sdt);
-      v = clamp(v,-240,TOP);
-      G.vx=v*Math.cos(gAng); G.vy=v*Math.sin(gAng);
-      if(wasAir){ const tilt=Math.abs(angNorm(G.angle-gAng)); G.spin=0; if(tilt>1.7){ crash('Atterrissage sur le toit'); return; } blip(tilt>1.1?170:240,.05,tilt>1.1?'sawtooth':'square',.03); }
+    const wasAir = !G.onGround;
+    // 1) gravité + intégration balistique (le châssis est un vrai corps libre)
+    G.vy += GRAV*sdt;
+    G.x  += G.vx*sdt;
+    G.y  += G.vy*sdt;
+    G.angle += G.angVel*sdt;
+    // 2) sol sous chaque roue, pente locale et hauteur d'appui du châssis
+    const c=Math.cos(G.angle);
+    const rg=ground(G.x - c*wb), fg=ground(G.x + c*wb);
+    const slope = clamp(Math.atan2(fg-rg, 2*wb), -1.3, 1.3);
+    const supportY = (rg+fg)/2 - wr;
+    // 3) contact si le centre du châssis atteint la hauteur d'appui
+    if(G.y >= supportY - 0.5){
+      // ---- AU SOL ----
+      G.onGround = true; G.air = 0;
+      // décompose la vélocité : tangente (le long de la pente) + normale (perpendiculaire au sol)
+      let vt = G.vx*Math.cos(slope) + G.vy*Math.sin(slope);
+      let vn = G.vx*Math.sin(slope) - G.vy*Math.cos(slope);  // >0 = s'éloigne du sol (vers le haut)
+      if(canGas) vt += EF*GRIPK*PHYS.drive*sdt;     // moteur (l'adhérence aide à grimper)
+      if(brake)  vt -= BF*sdt;
+      vt += GRAV*Math.sin(slope)*sdt;               // gravité le long de la pente — signe correct : on descend, on freine en montée
+      vt *= (1 - PHYS.roll*sdt);                    // roulement
+      if(!canGas && !brake){                        // sans gaz ni frein : friction (tient sur pente modérée, glisse sur pente raide)
+        if(Math.abs(Math.tan(slope)) <= PHYS.muS){  // pente tenable -> on s'immobilise (pas de creep)
+          if(Math.abs(vt) < PHYS.idleStop) vt = 0;
+          else vt -= vt*Math.min(1, PHYS.holdDamp*sdt);
+        } else {                                     // pente trop raide -> glisse, friction cinétique
+          vt -= Math.sign(vt||Math.sin(slope))*PHYS.muK*GRAV*Math.cos(slope)*sdt;
+        }
+      }
+      vt = clamp(vt, -PHYS.revMax, TOP);
+      // réponse normale : on absorbe l'enfoncement mais on GARDE l'élan vers le haut -> vrais tremplins
+      if(vn < 0) vn = -vn*PHYS.bounce;
+      // alignement du châssis sur la pente (instantané à l'atterrissage, lissé sinon)
+      if(wasAir){
+        const tilt = Math.abs(angNorm(G.angle - slope));
+        if(tilt > PHYS.crashTilt){ crash('Atterrissage raté'); return; }
+        blip(tilt>0.9?180:250, .05, tilt>0.9?'sawtooth':'square', .03);
+        G.angle = slope; G.spin = 0;
+      } else {
+        G.angle += angNorm(slope - G.angle) * Math.min(1, PHYS.align*sdt);
+      }
+      G.angVel = 0;
+      if(G.y > supportY) G.y = supportY;            // anti-pénétration (sans coller quand on s'élève)
+      G.vx = vt*Math.cos(slope) + vn*Math.sin(slope);
+      G.vy = vt*Math.sin(slope) - vn*Math.cos(slope);
     } else {
-      // EN L'AIR : balistique + rotation contrôlée
-      G.onGround=false; G.air+=sdt;
-      if(canGas) G.angVel-=AIRROT*sdt;
-      if(brake)  G.angVel+=AIRROT*sdt;
-      G.angVel=clamp(G.angVel,-6,6);
-      G.spin=(G.spin||0)+G.angVel*sdt;
-      if(Math.abs(G.spin)>=6.2832){ G.spin=0; G.flips=(G.flips||0)+1; banner('SALTO !','#9fe8ff'); blip(880,.12,'triangle',.04); }
-      G.vx*=(1-0.02*sdt);
+      // ---- EN L'AIR ----
+      G.onGround = false; G.air += sdt;
+      if(canGas) G.angVel -= AIRROT*sdt;            // gaz = pique du nez
+      if(brake)  G.angVel += AIRROT*sdt;            // frein = cabre
+      G.angVel = clamp(G.angVel, -6, 6);
+      G.spin = (G.spin||0) + G.angVel*sdt;
+      if(Math.abs(G.spin) >= 6.2832){ G.spin -= Math.sign(G.spin)*6.2832; G.flips=(G.flips||0)+1; banner('SALTO !','#9fe8ff'); blip(880,.12,'triangle',.04); }
+      G.vx *= (1 - PHYS.airDrag*sdt);
     }
-    G.wheel+=G.vx*sdt*0.07; G.t+=sdt;
-    G.fuel=Math.max(0,G.fuel-(canGas?3.6:1.2)*sdt);     // conso plus rapide
-    for(const c of coins){ if(c.got)continue; if(c.x<G.x-70)continue; if(c.x>G.x+70)break;
-      if(Math.abs(c.x-G.x)<26 && Math.abs((ground(c.x)-40)-G.y)<66){c.got=true;G.coins+=c.val;pops.push({x:c.x,y:ground(c.x)-46,t:1,txt:'+'+c.val});blip(1100+Math.min(900,c.val*6),.05,'square',.03);} }
-    for(const c of cans){ if(c.got)continue; if(Math.abs(c.x-G.x)<26 && Math.abs((ground(c.x)-36)-G.y)<70){
-      c.got=true; G.fuel=Math.min(FUELMAX,G.fuel+40); blip(880,.12,'sine',.05); banner('+ CARBURANT','#ffd27a'); } }
+    // 4) usure roue, conso, ramassages, retournement, panne sèche
+    G.wheel += G.vx*sdt*0.07; G.t += sdt;
+    G.fuel = Math.max(0, G.fuel - (canGas?3.6:1.2)*sdt);
+    for(const cc of coins){ if(cc.got)continue; if(cc.x<G.x-70)continue; if(cc.x>G.x+70)break;
+      if(Math.abs(cc.x-G.x)<26 && Math.abs((ground(cc.x)-40)-G.y)<66){cc.got=true;G.coins+=cc.val;pops.push({x:cc.x,y:ground(cc.x)-46,t:1,txt:'+'+cc.val});blip(1100+Math.min(900,cc.val*6),.05,'square',.03);} }
+    for(const cn of cans){ if(cn.got)continue; if(Math.abs(cn.x-G.x)<26 && Math.abs((ground(cn.x)-36)-G.y)<70){
+      cn.got=true; G.fuel=Math.min(FUELMAX,G.fuel+40); blip(880,.12,'sine',.05); banner('+ CARBURANT','#ffd27a'); } }
     if(G.onGround && Math.abs(angNorm(G.angle))>2.0){ G.flipT+=sdt; if(G.flipT>0.4){ crash('Sur le toit !'); return; } } else G.flipT=0;
     if(G.fuel<=0 && Math.abs(G.vx)<20 && G.onGround){ G.dry+=sdt; if(G.dry>1.4) crash('Panne sèche'); }
     else if(G.fuel>0||Math.abs(G.vx)>=20) G.dry=0;
