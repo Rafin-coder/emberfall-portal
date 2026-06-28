@@ -221,8 +221,14 @@ canvas{display:block;width:100%;height:100%}
   ];
   function getCoins(){ return (window.GamePortal&&GamePortal.getCoins)?GamePortal.getCoins():+(localStorage.getItem('eh:coins')||0); }
   function setCoins(v){ v=Math.max(0,Math.round(v)); if(window.GamePortal&&GamePortal.setCoins)GamePortal.setCoins(v); else localStorage.setItem('eh:coins',v); }
-  function loadUp(){try{return JSON.parse(localStorage.getItem('eh:up'))||{};}catch(e){return {};}}
-  function saveUp(u){localStorage.setItem('eh:up',JSON.stringify(u));}
+  // Améliorations stockées PAR véhicule : { buggy:{engine:..}, moto:{..}, truck:{..} }
+  function loadAllUp(){ try{ const o=JSON.parse(localStorage.getItem('eh:up'))||{};
+    // migration de l'ancien format plat (partagé) -> rattaché au véhicule courant
+    if(o.engine!==undefined||o.tank!==undefined||o.grip!==undefined||o.wing!==undefined){
+      const mig={}; mig[selVehId()]=o; localStorage.setItem('eh:up',JSON.stringify(mig)); return mig; }
+    return o; }catch(e){ return {}; } }
+  function loadUp(){ return loadAllUp()[selVehId()]||{}; }
+  function saveUp(u){ const all=loadAllUp(); all[selVehId()]=u; localStorage.setItem('eh:up',JSON.stringify(all)); }
 
   // ---------- état / stats ----------
   const REST=22, BF=1100;
@@ -233,8 +239,8 @@ canvas{display:block;width:100%;height:100%}
     // Défi du jour = mêmes conditions pour tous : véhicule de base + aucune amélioration garage.
     // Le stage est déjà imposé par biomeIndex(). En partie normale, on prend ton vrai loadout.
     up=DAILY?{}:loadUp(); VEH=DAILY?VEHICLES[0]:currentVehicle(); BIOME=currentBiome();
-    EF=VEH.ef+(up.engine||0)*150; TOP=VEH.top+(up.engine||0)*38;
-    FUELMAX=VEH.fuel+(up.tank||0)*22; GRIPK=VEH.grip*(1-(up.grip||0)*0.10);
+    EF=VEH.ef+(up.engine||0)*170; TOP=VEH.top+(up.engine||0)*42;
+    FUELMAX=VEH.fuel+(up.tank||0)*22; GRIPK=VEH.grip*(1+(up.grip||0)*0.10);  // adhérence : + de puissance pour grimper
     AIRROT=(VEH.air+(up.wing||0)*0.45)*0.4; GRAV=BIOME.grav; }  // ×0.4 : rotation aérienne douce et contrôlable
   function ground(x){
     const amp=(42+Math.min(140,x*0.010))*BIOME.ampMul;
@@ -278,7 +284,7 @@ canvas{display:block;width:100%;height:100%}
 
   // ---------- physique (Hill-Climb : châssis balistique + appui par roue) ----------
   const PHYS = {
-    drive: 1.0,        // facteur sur la puissance moteur (EF)
+    drive: 1.2,        // facteur sur la puissance moteur (EF) — marge pour grimper sans caler
     roll: 0.45,        // résistance au roulement /s
     muS: 0.35,         // friction statique : à l'arrêt, tient jusqu'à ~19° de pente
     muK: 0.22,         // friction cinétique au-delà (la voiture glisse)
@@ -586,7 +592,8 @@ canvas{display:block;width:100%;height:100%}
       wrap.appendChild(c);});
   }
   function renderGarage(){
-    const up2=loadUp(), list=document.getElementById('upList'); list.innerHTML='';
+    const up2=loadUp(), list=document.getElementById('upList');
+    list.innerHTML='<div style="font:600 12px/1.4 \'JetBrains Mono\',monospace;color:var(--muted);margin:2px 0 10px">Améliorations de <b style="color:var(--gold)">'+currentVehicle().name+'</b> <span style="color:var(--faint)">· propres à ce véhicule</span></div>';
     UPG.forEach(u=>{const lv=up2[u.id]||0,maxed=lv>=u.max,cost=u.cost(lv),afford=getCoins()>=cost;
       let bars='';for(let i=0;i<u.max;i++)bars+='<span class="'+(i<lv?'f':'')+'"></span>';
       const row=document.createElement('div');row.className='uprow';

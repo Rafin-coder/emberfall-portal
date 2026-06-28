@@ -36,7 +36,7 @@
         <li><b style="color:var(--text)">Emberfall</b> — survivor roguelite complet : 7 armes + évolutions, ennemis variés, boss, reliques, biomes, méta-progression, 5 personnages, succès, options, 3 difficultés.</li>
         <li><b style="color:var(--text)">Lumen</b> — arcade de lumière nerveux, combos et accélération.</li>
         <li><b style="color:var(--text)">Conquête des Âges</b> — stratégie de couloir à travers 5 ères : unités, tourelles, évolution d'ère, pouvoirs spéciaux, IA adverse, modes campagne + endless, musique de fond.</li>
-        <li><b style="color:var(--text)">Ember Hill</b> — conduite physique façon Hill Climb : collines sans fin, carburant, sauts &amp; équilibre, score à la distance, <b style="color:var(--text)">3 véhicules, 3 stages et un garage d'améliorations</b> achetés avec les pièces.</li>
+        <li><b style="color:var(--text)">Ember Hill</b> — conduite physique façon Hill Climb : <b style="color:var(--text)">physique revue</b> (suspension, tremplins, contrôle en l'air), collines sans fin, carburant, score à la distance, <b style="color:var(--text)">3 véhicules, 3 stages, garage d'améliorations</b> et <b style="color:var(--text)">menu pause</b> (terminer en enregistrant).</li>
       </ul>
     </div>
 
@@ -55,6 +55,18 @@
       </ul>
     </div>
 
+    <div class="phase done">
+      <div class="tag">livré</div>
+      <h3>Rétention &amp; économie — le socle</h3>
+      <ul>
+        <li><b style="color:var(--text)">Niveau de compte global</b> — XP gagnée dans n'importe quel jeu, un niveau de profil commun (barre du haut + page profil).</li>
+        <li><b style="color:var(--text)">Succès par jeu</b> récompensés en <b style="color:var(--text)">Ember Coins</b>, débloquables et suivis sur l'accueil.</li>
+        <li><b style="color:var(--text)">Ember Coins</b> — la monnaie unique du site, gagnée en jouant à <i>tous</i> les jeux, déjà dépensable dans le garage d'Ember Hill.</li>
+        <li><b style="color:var(--text)">Durée de vie</b> de chaque jeu affichée sur sa fiche.</li>
+        <li>Premier passage de sécurité : correctif XSS du classement, en-têtes CSP/HSTS, plafonds anti-triche resserrés.</li>
+      </ul>
+    </div>
+
     <div class="phase">
       <div class="tag">en parallèle — à activer avec l'audience</div>
       <h3>Fondations : fiabiliser & exploiter les données</h3>
@@ -63,7 +75,7 @@
         <li>Lire les analytics régulièrement : combien de joueurs, où ils décrochent, ce qui accroche, le taux de retour.</li>
         <li>Suivi d'erreurs (alertes quand un jeu plante chez un joueur).</li>
         <li>Sauvegardes automatiques de la base de données.</li>
-        <li>Audit de sécurité (protection des clés, RLS Supabase, validation des scores, en-têtes HTTP).</li>
+        <li>Approfondir la sécurité : <b style="color:var(--text)">validation des scores côté serveur</b> (rejeu / Edge Function) avant toute récompense réelle — un premier passage est fait (XSS, CSP/HSTS, plafonds anti-triche).</li>
       </ul>
     </div>
 
@@ -71,9 +83,6 @@
       <div class="tag">prévu — rétention</div>
       <h3>Donner envie de revenir</h3>
       <ul>
-        <li><b style="color:var(--text)">Niveau de compte global</b> — de l'XP gagnée après chaque partie, dans n'importe quel jeu, qui fait monter un niveau de profil commun.</li>
-        <li><b style="color:var(--text)">Succès par jeu</b> récompensés en Ember Coins.</li>
-        <li>Afficher la <b style="color:var(--text)">durée de vie</b> de chaque jeu (temps estimé pour le finir à 100 %), mise à jour à chaque ajout de contenu.</li>
         <li>Classements hebdomadaires et entre amis, pas seulement all-time.</li>
         <li>Quêtes quotidiennes & hebdomadaires avec récompenses.</li>
         <li>Saisons : le défi du jour agrégé en classement saisonnier.</li>
@@ -106,10 +115,10 @@
 
     <div class="phase">
       <div class="tag">prévu — économie</div>
-      <h3>Les Ember Coins</h3>
+      <h3>Les Ember Coins — la suite</h3>
       <ul>
-        <li><b style="color:var(--text)">Ember Coins</b> — une monnaie unique au site, gagnée en jouant à <i>tous</i> les jeux de l'arcade.</li>
-        <li>Échangeables contre des récompenses réelles : bons d'achat, cartes cadeaux, voire argent réel <span style="color:var(--muted)">(selon ce qui sera faisable légalement — converti en argent réel, ça touche à des règles strictes)</span>.</li>
+        <li><b style="color:var(--text)">Dépenser les Ember Coins partout</b> : étendre les achats au-delà du garage d'Ember Hill (tous les jeux).</li>
+        <li>Échangeables contre des récompenses réelles : bons d'achat, cartes cadeaux, voire argent réel <span style="color:var(--muted)">(selon ce qui sera faisable légalement — et seulement après la validation des scores côté serveur)</span>.</li>
         <li><b style="color:var(--text)">Skins &amp; cosmétiques</b> achetables en Ember Coins : apparences de personnages, véhicules, effets — toujours sans avantage de jeu.</li>
         <li><b style="color:var(--text)">Abonnement payant</b> : un tier premium avec des avantages encore à définir (ex. bonus d'Ember Coins, skins exclusifs, sans publicité).</li>
         <li>Publicité non-intrusive en tout dernier recours, jamais pendant une partie.</li>
