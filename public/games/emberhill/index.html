@@ -13,7 +13,7 @@
 html,body{height:100%;background:var(--bg);color:var(--text);overflow:hidden;touch-action:none;user-select:none}
 #wrap{position:fixed;inset:0}
 canvas{display:block;width:100%;height:100%}
-#hud{position:fixed;top:0;left:0;right:0;display:flex;align-items:flex-start;gap:14px;padding:10px 14px 0 104px;pointer-events:none;flex-wrap:wrap}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;align-items:flex-start;gap:14px;padding:10px 104px 0 104px;pointer-events:none;flex-wrap:wrap}
 .stat{display:flex;flex-direction:column;line-height:1.15}
 .stat .v{font:600 19px/1 "Space Grotesk";color:#fff}
 .stat .k{font:500 9px/1 "JetBrains Mono",monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:4px}
@@ -129,6 +129,19 @@ canvas{display:block;width:100%;height:100%}
   </div>
 </div>
 
+<div class="overlay hidden" id="pauseScreen">
+  <div class="panel">
+    <div class="eyebrow">pause</div>
+    <h2 style="font-size:30px;font-weight:700;color:var(--ember2)">En pause</h2>
+    <div id="pauseStats" style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:13px;margin-top:6px"></div>
+    <div class="modebtns">
+      <button class="btn" id="resumeBtn">Reprendre</button>
+      <button class="btn ghost" id="endRunBtn">Terminer la partie</button>
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--faint);margin-top:12px">« Terminer » enregistre ta distance et tes pièces.</div>
+  </div>
+</div>
+
 <div class="overlay hidden" id="over">
   <div class="panel">
     <div class="eyebrow" id="overTitle">épave</div>
@@ -177,8 +190,8 @@ canvas{display:block;width:100%;height:100%}
   // ---------- stages (décors) ----------
   const BIOMES=[
     {id:'hills', name:'Collines', hint:'Le classique vallonné.', sky:['#0a0918','#1c1430','#3a2238'], gnd:['#46304f','#2a1c33','#140d1a'], rim:'#ff7a3c', star:'#dcdcff', grav:1650, ampMul:1.0, decor:'tree',cost:0},
-    {id:'desert',name:'Désert de braise', hint:'Dunes chaudes, bosses sèches.', sky:['#1a0c10','#3a1a16','#5a2c1c'], gnd:['#8a5232','#52301c','#23130a'], rim:'#ffb04d', star:'#ffe0b0', grav:1650, ampMul:0.85, decor:'cactus',cost:800},
-    {id:'moon',  name:'Lune morte', hint:'Faible gravité — sauts énormes.', sky:['#04050d','#0b1024','#171c38'], gnd:['#3c3c4c','#222230','#0f0f17'], rim:'#9fb8ff', star:'#ffffff', grav:620, ampMul:1.35, decor:'rock',cost:2500},
+    {id:'desert',name:'Désert de braise', hint:'Dunes chaudes, bosses sèches.', sky:['#1a0c10','#3a1a16','#5a2c1c'], gnd:['#8a5232','#52301c','#23130a'], rim:'#ffb04d', star:'#ffe0b0', grav:1650, ampMul:0.85, decor:'cactus',cost:450},
+    {id:'moon',  name:'Lune morte', hint:'Faible gravité — sauts énormes.', sky:['#04050d','#0b1024','#171c38'], gnd:['#3c3c4c','#222230','#0f0f17'], rim:'#9fb8ff', star:'#ffffff', grav:620, ampMul:1.35, decor:'rock',cost:1500},
   ];
   function ownedStages(){try{return JSON.parse(localStorage.getItem('eh:stages'))||['hills'];}catch(e){return ['hills'];}}
   function saveStages(a){localStorage.setItem('eh:stages',JSON.stringify(a));}
@@ -191,8 +204,8 @@ canvas{display:block;width:100%;height:100%}
   // ---------- véhicules ----------
   const VEHICLES=[
     {id:'buggy', name:'Buggy Braise', cost:0,    ef:1450, top:540, fuel:100, grip:1.00, air:3.2, wb:24, wr:14, body:'buggy'},
-    {id:'moto',  name:'Moto Cendre',  cost:1200, ef:1680, top:640, fuel:80,  grip:0.92, air:4.3, wb:18, wr:13, body:'moto'},
-    {id:'truck', name:'Camion Forge', cost:4000, ef:1320, top:470, fuel:150, grip:1.18, air:2.4, wb:30, wr:16, body:'truck'},
+    {id:'moto',  name:'Moto Cendre',  cost:600,  ef:1680, top:640, fuel:90,  grip:0.92, air:4.3, wb:18, wr:13, body:'moto'},
+    {id:'truck', name:'Camion Forge', cost:2400, ef:1320, top:470, fuel:160, grip:1.18, air:2.4, wb:30, wr:16, body:'truck'},
   ];
   function ownedVeh(){try{return JSON.parse(localStorage.getItem('eh:veh'))||['buggy'];}catch(e){return ['buggy'];}}
   function saveOwned(a){localStorage.setItem('eh:veh',JSON.stringify(a));}
@@ -201,10 +214,10 @@ canvas{display:block;width:100%;height:100%}
 
   // ---------- garage / améliorations ----------
   const UPG=[
-    {id:'engine',ic:'⚙',name:'Moteur',desc:'Accélération et vitesse de pointe.',max:8,cost:l=>120+l*120},
-    {id:'tank',ic:'⛽',name:'Réservoir',desc:'Carburant au départ.',max:8,cost:l=>100+l*110},
-    {id:'grip',ic:'❂',name:'Adhérence',desc:'Grimpe mieux les côtes raides.',max:6,cost:l=>140+l*140},
-    {id:'wing',ic:'✦',name:'Aileron',desc:'Contrôle de rotation en l\'air.',max:6,cost:l=>130+l*130},
+    {id:'engine',ic:'⚙',name:'Moteur',desc:'Accélération et vitesse de pointe.',max:8,cost:l=>60+l*70},
+    {id:'tank',ic:'⛽',name:'Réservoir',desc:'Carburant au départ.',max:8,cost:l=>50+l*60},
+    {id:'grip',ic:'❂',name:'Adhérence',desc:'Grimpe mieux les côtes raides.',max:6,cost:l=>70+l*80},
+    {id:'wing',ic:'✦',name:'Aileron',desc:'Contrôle de rotation en l\'air.',max:6,cost:l=>70+l*75},
   ];
   function getCoins(){ return (window.GamePortal&&GamePortal.getCoins)?GamePortal.getCoins():+(localStorage.getItem('eh:coins')||0); }
   function setCoins(v){ v=Math.max(0,Math.round(v)); if(window.GamePortal&&GamePortal.setCoins)GamePortal.setCoins(v); else localStorage.setItem('eh:coins',v); }
@@ -222,7 +235,7 @@ canvas{display:block;width:100%;height:100%}
     up=DAILY?{}:loadUp(); VEH=DAILY?VEHICLES[0]:currentVehicle(); BIOME=currentBiome();
     EF=VEH.ef+(up.engine||0)*150; TOP=VEH.top+(up.engine||0)*38;
     FUELMAX=VEH.fuel+(up.tank||0)*22; GRIPK=VEH.grip*(1-(up.grip||0)*0.10);
-    AIRROT=(VEH.air+(up.wing||0)*0.45)*0.5; GRAV=BIOME.grav; }  // ×0.5 : rotation aérienne contrôlable
+    AIRROT=(VEH.air+(up.wing||0)*0.45)*0.4; GRAV=BIOME.grav; }  // ×0.4 : rotation aérienne douce et contrôlable
   function ground(x){
     const amp=(42+Math.min(140,x*0.010))*BIOME.ampMul;
     return H*0.62 - Math.sin(x*0.0040+P1)*amp - Math.sin(x*0.0091+P2)*amp*0.40
@@ -232,9 +245,9 @@ canvas{display:block;width:100%;height:100%}
   let DAILY=null, SEED=(Math.random()*99999)|0, P1=0,P2=0,P3=0,P4=0;
   function seedTerrain(rng){ P1=rng()*6.28;P2=rng()*6.28;P3=rng()*6.28;P4=rng()*6.28; }
   function flatStart(){let bx=40,bs=9;for(let x=40;x<460;x+=10){const s=Math.abs(slopeAt(x));if(s<bs){bs=s;bx=x;}}return bx;}
-  const COIN_TIERS=[{v:1,d:0},{v:2,d:150},{v:5,d:400},{v:10,d:800},{v:25,d:1500},{v:50,d:2500},{v:100,d:4000},{v:500,d:7000}];
+  const COIN_TIERS=[{v:2,d:0},{v:5,d:80},{v:10,d:220},{v:25,d:450},{v:50,d:850},{v:100,d:1400},{v:250,d:2200},{v:500,d:3500}];
   function coinValue(x,rng){ const m=x/12, elig=COIN_TIERS.filter(t=>t.d<=m), rr=rng();
-    let idx = rr<0.55 ? elig.length-3 : rr<0.85 ? elig.length-2 : elig.length-1;
+    let idx = rr<0.5 ? elig.length-2 : elig.length-1;   // favorise les 1-2 meilleures valeurs débloquées
     idx=Math.min(Math.max(0,idx),elig.length-1); return elig[idx].v; }
   function reset(){
     applyLoadout();
@@ -243,8 +256,8 @@ canvas{display:block;width:100%;height:100%}
        fuel:FUELMAX,dist:0,best:+(localStorage.getItem('eh:best')||0),wheel:0,dry:0,flipT:0,coins:0,air:0,spin:0,flips:0,susY:0,susV:0};
     pops=[];
     const r=DAILY?DAILY.rng:lrng(SEED);
-    cans=[]; let cx=820; for(let i=0;i<80;i++){cx+=720+r()*900; cans.push({x:cx,got:false});}
-    coins=[]; let px=420; for(let i=0;i<800;i++){px+=110+r()*230; coins.push({x:px,got:false,val:coinValue(px,r)});}
+    cans=[]; let cx=600; for(let i=0;i<160;i++){cx+=460+r()*520; cans.push({x:cx,got:false});}
+    coins=[]; let px=320; for(let i=0;i<1200;i++){px+=85+r()*150; coins.push({x:px,got:false,val:coinValue(px,r)});}
     decos=[]; let dx=180; for(let i=0;i<500;i++){dx+=150+r()*280; decos.push({x:dx,h:0.6+r()*0.8});}
   }
 
@@ -273,9 +286,9 @@ canvas{display:block;width:100%;height:100%}
     holdDamp: 12.0,    // freinage vers l'arrêt sur pente tenable
     revMax: 210,       // vitesse de marche arrière max (frein)
     align: 11,         // vitesse d'alignement du châssis sur le sol /s
-    crashTilt: 2.2,    // inclinaison max tolérée à l'atterrissage (rad) — tolérant (crash ~sur le toit seulement)
+    crashTilt: 2.6,    // inclinaison max tolérée à l'atterrissage (rad) — très tolérant (crash ~sur le toit seulement)
     airDrag: 0.03,     // traînée horizontale en l'air /s
-    bounce: 0.10,      // rebond à l'impact (0 = sec, 1 = trampoline)
+    bounce: 0.20,      // rebond à l'impact (0 = sec, 1 = trampoline)
     airLevel: 3.0,     // auto-stabilisation en l'air quand on ne touche à rien
     airRotMax: 5.0,    // vitesse de rotation aérienne max (rad/s)
     susK: 80,          // raideur ressort de suspension (visuel)
@@ -350,11 +363,11 @@ canvas{display:block;width:100%;height:100%}
     G.susY = clamp((G.susY||0) + G.susV*sdt, -7, 11);
     // usure roue, conso, ramassages, retournement, panne sèche
     G.wheel += G.vx*sdt*0.07; G.t += sdt;
-    G.fuel = Math.max(0, G.fuel - (canGas?3.6:1.2)*sdt);
+    G.fuel = Math.max(0, G.fuel - (canGas?2.4:0.8)*sdt);
     for(const cc of coins){ if(cc.got)continue; if(cc.x<G.x-70)continue; if(cc.x>G.x+70)break;
       if(Math.abs(cc.x-G.x)<26 && Math.abs((ground(cc.x)-40)-G.y)<66){cc.got=true;G.coins+=cc.val;pops.push({x:cc.x,y:ground(cc.x)-46,t:1,txt:'+'+cc.val});blip(1100+Math.min(900,cc.val*6),.05,'square',.03);} }
     for(const cn of cans){ if(cn.got)continue; if(Math.abs(cn.x-G.x)<26 && Math.abs((ground(cn.x)-36)-G.y)<70){
-      cn.got=true; G.fuel=Math.min(FUELMAX,G.fuel+40); blip(880,.12,'sine',.05); banner('+ CARBURANT','#ffd27a'); } }
+      cn.got=true; G.fuel=Math.min(FUELMAX,G.fuel+55); blip(880,.12,'sine',.05); banner('+ CARBURANT','#ffd27a'); } }
     if(G.onGround && Math.abs(angNorm(G.angle))>2.0){ G.flipT+=sdt; if(G.flipT>0.4){ crash('Sur le toit !'); return; } } else G.flipT=0;
     if(G.fuel<=0 && Math.abs(G.vx)<20 && G.onGround){ G.dry+=sdt; if(G.dry>1.4) crash('Panne sèche'); }
     else if(G.fuel>0||Math.abs(G.vx)>=20) G.dry=0;
@@ -391,8 +404,12 @@ canvas{display:block;width:100%;height:100%}
   }
 
   // ---------- rendu monde ----------
+  let camYs=null;   // caméra Y lissée (donne de la vie verticale)
   function render(){
-    const camX=G.x-W*0.30, camY=clamp(G.y-H*0.52,-H*0.6,H*1.2);
+    const camX=G.x-W*0.30, camTgt=G.y-H*0.52;
+    if(camYs===null||Math.abs(camTgt-camYs)>H) camYs=camTgt;   // recadrage instantané au (re)départ
+    camYs += (camTgt-camYs)*0.13;                              // lissage vertical : la voiture vit à l'écran (sauts/bosses)
+    const camY=clamp(camYs,-H*0.6,H*1.2);
     const sky=ctx.createLinearGradient(0,0,0,H); sky.addColorStop(0,BIOME.sky[0]);sky.addColorStop(0.55,BIOME.sky[1]);sky.addColorStop(1,BIOME.sky[2]);
     ctx.fillStyle=sky; ctx.fillRect(0,0,W,H);
     const mx=W*0.78,my=H*0.20; const hg=ctx.createRadialGradient(mx,my,4,mx,my,90);
@@ -485,8 +502,21 @@ canvas{display:block;width:100%;height:100%}
     if(G.state==='play'||G.state==='dead'||G.state==='paused') render();
   }
 
-  function togglePause(){ if(G.state==='play'){G.state='paused';} else if(G.state==='paused'){G.state='play';last=performance.now();} }
+  function togglePause(){
+    if(G.state==='play'){ G.state='paused';
+      document.getElementById('pauseStats').textContent=G.dist+' m · ◉ '+G.coins+' pièces';
+      document.getElementById('pauseScreen').classList.remove('hidden');
+    } else if(G.state==='paused'){ G.state='play'; last=performance.now();
+      document.getElementById('pauseScreen').classList.add('hidden');
+    }
+  }
   document.getElementById('pause').onclick=togglePause;
+  document.getElementById('resumeBtn').onclick=togglePause;
+  // Terminer la partie volontairement : enregistre la course (score + pièces) puis écran de fin
+  function endRun(){ if(G.state!=='paused'&&G.state!=='play')return;
+    document.getElementById('pauseScreen').classList.add('hidden');
+    G.state='dead'; G.crashReason='Course terminée'; endGame(); }
+  document.getElementById('endRunBtn').onclick=endRun;
 
   function endGame(){
     const best=+(localStorage.getItem('eh:best')||0);
@@ -582,9 +612,10 @@ canvas{display:block;width:100%;height:100%}
   function start(){ ac(); reset();
     document.getElementById('menu').classList.add('hidden');
     document.getElementById('over').classList.add('hidden');
+    document.getElementById('pauseScreen').classList.add('hidden');
     document.getElementById('pause').style.display='block';
   }
-  function toMenu(){ document.getElementById('over').classList.add('hidden'); document.getElementById('pause').style.display='none';
+  function toMenu(){ document.getElementById('over').classList.add('hidden'); document.getElementById('pauseScreen').classList.add('hidden'); document.getElementById('pause').style.display='none';
     applyLoadout(); showScreen('play'); document.getElementById('menu').classList.remove('hidden'); }
   document.getElementById('navPlay').onclick=start;
   document.getElementById('retryBtn').onclick=start;
