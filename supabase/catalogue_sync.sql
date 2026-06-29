@@ -23,6 +23,7 @@ insert into public.games (id, title, tagline, sort, enabled, max_value) values
   ('lumen',     'Lumen',              'Guide la lumière, enchaîne les braises. Arcade nerveux.',   1, true,  20000),
   ('ageofwar',  'Conquête des Âges',  'De la préhistoire au futur. Stratégie de couloir.',         2, true,  50000),
   ('emberhill', 'Ember Hill',         'Grimpe sans fin, garde l''équilibre, ne tombe pas en panne.',3, true,  1000000),
+  ('prismbreak','Prismbreak',         'Casse-briques néon : balles multiples, power-ups, combos.', 4, true,  200000),
   ('_portal',   'Portail (interne)',  'Portefeuille global : Ember Coins, niveau, succès.',        999, false, 0)
 on conflict (id) do update
   set title     = excluded.title,

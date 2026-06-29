@@ -119,7 +119,8 @@ const FALLBACK_GAMES = [
   { id:'emberfall', title:'Emberfall', tagline:'Tiens face à la nuit. Survivor roguelite.', enabled:true, sort:0 },
   { id:'lumen', title:'Lumen', tagline:'Guide la lumière, enchaîne les braises. Arcade nerveux.', enabled:true, sort:1 },
   { id:'ageofwar', title:'Conquête des Âges', tagline:'De la préhistoire au futur. Stratégie de couloir.', enabled:true, sort:2 },
-  { id:'emberhill', title:'Ember Hill', tagline:'Grimpe sans fin, garde l\'équilibre, ne tombe pas en panne.', enabled:true, sort:3 }
+  { id:'emberhill', title:'Ember Hill', tagline:'Grimpe sans fin, garde l\'équilibre, ne tombe pas en panne.', enabled:true, sort:3 },
+  { id:'prismbreak', title:'Prismbreak', tagline:'Casse-briques néon : balles multiples, power-ups, combos.', enabled:true, sort:4 }
 ];
 const SOON = [];
 
@@ -133,6 +134,8 @@ const GAME_INFO = {
     desc:'Mène ton armée à travers cinq ères, de la préhistoire au futur. Produis des unités, pose des tourelles, évolue d\'ère, déclenche ton pouvoir spécial et détruis la base adverse.' },
   emberhill:{ genre:'Conduite physique', meta:'Réflexes · Solo · distance sans fin', life:'~2–3 h pour tout débloquer',
     desc:'Pilote ta braise sur des collines générées sans fin. Dose le gaz et le frein, garde l\'équilibre dans les sauts, ramasse le carburant et va le plus loin possible sans te retourner.' },
+  prismbreak:{ genre:'Casse-briques', meta:'Arcade · Solo · parties ~3–6 min', life:'~1–2 h pour tout maîtriser',
+    desc:'Brise tous les prismes avec ta balle. Enchaîne sans rattraper la balle pour faire monter le combo, ramasse les power-ups (multiballe, laser, perçant…) et grimpe les niveaux.' },
 };
 
 const brandName = (window.GAMEPORTAL_CONFIG&&GAMEPORTAL_CONFIG.PORTAL_NAME)||'EMBER ARCADE';
@@ -150,7 +153,7 @@ function cartHTML(g){
       <div class="foot"><button class="play" disabled>Verrouillé</button></div></div></article>`;
   }
   const best = +(localStorage.getItem('gp:'+g.id+':best')||0);
-  const UNIT = { lumen:'pts', ageofwar:'pts', emberhill:'m' };
+  const UNIT = { lumen:'pts', ageofwar:'pts', emberhill:'m', prismbreak:'pts' };
   const bestStr = g.id==='emberfall' ? fmtTime(best) : best+' '+(UNIT[g.id]||'pts');
   const bestTxt = best ? `record local <b>${bestStr}</b>` : 'pas encore joué';
   const meta = info.meta ? `<div class="tag" style="opacity:.7;font-size:12px;margin-top:6px">${info.meta}</div>` : '';
@@ -161,7 +164,7 @@ function cartHTML(g){
     <a class="play" href="/games/${g.id}/index.html">Jouer ▸</a></div></div></article>`;
 }
 
-const GAMEN = { emberfall:'Emberfall', lumen:'Lumen', ageofwar:'Conquête', emberhill:'Ember Hill' };
+const GAMEN = { emberfall:'Emberfall', lumen:'Lumen', ageofwar:'Conquête', emberhill:'Ember Hill', prismbreak:'Prismbreak' };
 const esc = GamePortal.esc;  // échappement HTML partagé (défini dans le SDK)
 function renderProfile(){
   const lv = GamePortal.getLevel(), coins = GamePortal.getCoins(), ach = GamePortal.getAchievements();

@@ -41,13 +41,13 @@
 <script src="/config.js"></script>
 <script src="/sdk.js"></script>
 <script>
-const FALLBACK_GAMES = [{ id:'emberfall', title:'Emberfall' }, { id:'lumen', title:'Lumen' }, { id:'ageofwar', title:'Conquête des Âges' }, { id:'emberhill', title:'Ember Hill' }];
+const FALLBACK_GAMES = [{ id:'emberfall', title:'Emberfall' }, { id:'lumen', title:'Lumen' }, { id:'ageofwar', title:'Conquête des Âges' }, { id:'emberhill', title:'Ember Hill' }, { id:'prismbreak', title:'Prismbreak' }];
 const TIME_GAMES = new Set(['emberfall']); // ces jeux affichent le score en mm:ss
 const brandName = (window.GAMEPORTAL_CONFIG&&GAMEPORTAL_CONFIG.PORTAL_NAME)||'EMBER ARCADE';
 document.getElementById('brand').textContent = brandName;
 
 function fmtTime(s){ s=Math.floor(s||0); const m=Math.floor(s/60); return m+':'+String(s%60).padStart(2,'0'); }
-const UNIT={lumen:'pts',ageofwar:'pts',emberhill:'m'};
+const UNIT={lumen:'pts',ageofwar:'pts',emberhill:'m',prismbreak:'pts'};
 function fmtVal(gid,v){ if(TIME_GAMES.has(gid))return fmtTime(v); return String(v)+' '+(UNIT[gid]||'pts'); }
 // Échappe tout ce qui vient du joueur (pseudo, méta) avant insertion en HTML — anti-XSS.
 const esc = GamePortal.esc;  // échappement HTML partagé (défini dans le SDK)

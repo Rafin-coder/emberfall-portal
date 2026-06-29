@@ -412,7 +412,12 @@
     { id:'eh_1km',    game:'emberhill', name:'Routier',            desc:'Parcourir 1000 m en un run',                coin:30 },
     { id:'eh_5km',    game:'emberhill', name:'Cascadeur',          desc:'Parcourir 5000 m en un run',                coin:60 },
     { id:'eh_flip',   game:'emberhill', name:'Salto',              desc:'Réussir un salto complet en l\'air',         coin:25 },
-    { id:'eh_moon',   game:'emberhill', name:'Sur la Lune',        desc:'Débloquer le stage Lune',                   coin:20 }
+    { id:'eh_moon',   game:'emberhill', name:'Sur la Lune',        desc:'Débloquer le stage Lune',                   coin:20 },
+    { id:'pb_first',  game:'prismbreak',name:'Premier prisme',     desc:'Terminer une partie de Prismbreak',         coin:10 },
+    { id:'pb_lvl5',   game:'prismbreak',name:'Briseur',            desc:'Atteindre le niveau 5',                     coin:30 },
+    { id:'pb_combo',  game:'prismbreak',name:'Enchaîneur',         desc:'Combo de 15 sans rattraper la balle',       coin:25 },
+    { id:'pb_multi',  game:'prismbreak',name:'Pluie de balles',    desc:'Avoir 5 balles en jeu',                     coin:20 },
+    { id:'pb_5k',     game:'prismbreak',name:'Score lumineux',     desc:'Marquer 5000 points',                       coin:35 }
   ];
   const ACH_BY_ID = {}; ACHIEVEMENTS.forEach(a => ACH_BY_ID[a.id]=a);
   function getAchievements(){ const m=_achMap(); return ACHIEVEMENTS.map(a => Object.assign({}, a, { unlocked: !!m[a.id], at: m[a.id]||null })); }
