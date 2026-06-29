@@ -76,7 +76,7 @@
       </div>
     </div>
     <div class="grid" id="achGrid" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))"></div>
-    <p style="color:var(--muted);font-size:12.5px;margin-top:14px;max-width:680px">Les <b style="color:var(--text)">Ember Coins</b> se gagnent en jouant à tous les jeux et en débloquant des succès. Tu peux déjà les dépenser dans le garage d'Ember Hill (véhicules, stages, améliorations) ; d'autres usages arrivent — skins, récompenses.</p>
+    <p style="color:var(--muted);font-size:12.5px;margin-top:14px;max-width:680px">Les <b style="color:var(--text)">Ember Coins</b> se gagnent en jouant aux jeux et en débloquant des succès. Leurs usages arrivent — skins, cosmétiques, récompenses. <span style="color:var(--faint)">(Ember Hill possède sa propre monnaie interne pour ses véhicules, stages et améliorations.)</span></p>
   </section>
 
   <section class="sec">
@@ -103,10 +103,11 @@
   <div class="adslot">emplacement publicitaire — inactif tant que l'audience ne le justifie pas</div>
 </main>
 
-<footer class="foot"><div class="wrap" style="display:flex;gap:16px;flex-wrap:wrap;width:100%">
+<footer class="foot"><div class="wrap" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;width:100%">
   <span id="footName">Ember Arcade</span>
   <a href="/roadmap.html">Roadmap</a>
   <a href="/leaderboard.html">Classement</a>
+  <span class="mono" style="color:var(--faint)">© AofZ Inc. — site &amp; contenu</span>
   <span style="margin-left:auto" id="netState" class="mono">·</span>
 </div></footer>
 
@@ -149,7 +150,9 @@ function cartHTML(g){
       <div class="foot"><button class="play" disabled>Verrouillé</button></div></div></article>`;
   }
   const best = +(localStorage.getItem('gp:'+g.id+':best')||0);
-  const bestTxt = best ? `record local <b>${g.id==='emberfall'?fmtTime(best):best}</b>` : 'pas encore joué';
+  const UNIT = { lumen:'pts', ageofwar:'pts', emberhill:'m' };
+  const bestStr = g.id==='emberfall' ? fmtTime(best) : best+' '+(UNIT[g.id]||'pts');
+  const bestTxt = best ? `record local <b>${bestStr}</b>` : 'pas encore joué';
   const meta = info.meta ? `<div class="tag" style="opacity:.7;font-size:12px;margin-top:6px">${info.meta}</div>` : '';
   const life = info.life ? `<div class="tag" style="font-size:11.5px;margin-top:4px;color:#9fe8ff;opacity:.85">⏱ Durée de vie : ${info.life}</div>` : '';
   return `<article class="cart"><div class="label"><span class="notch"></span>${genre}<span class="st">prêt</span></div>

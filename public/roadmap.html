@@ -61,7 +61,7 @@
       <ul>
         <li><b style="color:var(--text)">Niveau de compte global</b> — XP gagnée dans n'importe quel jeu, un niveau de profil commun (barre du haut + page profil).</li>
         <li><b style="color:var(--text)">Succès par jeu</b> récompensés en <b style="color:var(--text)">Ember Coins</b>, débloquables et suivis sur l'accueil.</li>
-        <li><b style="color:var(--text)">Ember Coins</b> — la monnaie unique du site, gagnée en jouant à <i>tous</i> les jeux, déjà dépensable dans le garage d'Ember Hill.</li>
+        <li><b style="color:var(--text)">Ember Coins</b> — la monnaie commune du site, gagnée en jouant aux jeux et via les succès. <span style="color:var(--muted)">(Chaque jeu peut garder sa propre monnaie interne — ex. les pièces d'Ember Hill.)</span></li>
         <li><b style="color:var(--text)">Durée de vie</b> de chaque jeu affichée sur sa fiche.</li>
         <li>Premier passage de sécurité : correctif XSS du classement, en-têtes CSP/HSTS, plafonds anti-triche resserrés.</li>
       </ul>
@@ -117,7 +117,7 @@
       <div class="tag">prévu — économie</div>
       <h3>Les Ember Coins — la suite</h3>
       <ul>
-        <li><b style="color:var(--text)">Dépenser les Ember Coins partout</b> : étendre les achats au-delà du garage d'Ember Hill (tous les jeux).</li>
+        <li><b style="color:var(--text)">Donner des usages aux Ember Coins</b> : boutique de skins &amp; cosmétiques à l'échelle du site (sans toucher aux monnaies internes des jeux).</li>
         <li>Échangeables contre des récompenses réelles : bons d'achat, cartes cadeaux, voire argent réel <span style="color:var(--muted)">(selon ce qui sera faisable légalement — et seulement après la validation des scores côté serveur)</span>.</li>
         <li><b style="color:var(--text)">Skins &amp; cosmétiques</b> achetables en Ember Coins : apparences de personnages, véhicules, effets — toujours sans avantage de jeu.</li>
         <li><b style="color:var(--text)">Abonnement payant</b> : un tier premium avec des avantages encore à définir (ex. bonus d'Ember Coins, skins exclusifs, sans publicité).</li>
@@ -142,7 +142,7 @@
   </p>
 </main>
 
-<footer class="foot"><div class="wrap" style="width:100%"><a href="/">← Retour à la salle</a></div></footer>
+<footer class="foot"><div class="wrap" style="display:flex;gap:16px;align-items:center;width:100%"><a href="/">← Retour à la salle</a><span class="mono" style="margin-left:auto;color:var(--faint)">© AofZ Inc. — site &amp; contenu</span></div></footer>
 
 <script src="/config.js"></script>
 <script>

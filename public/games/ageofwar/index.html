@@ -21,10 +21,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);overflow:hidden;tou
 .xpbar{height:8px;border-radius:5px;background:rgba(255,255,255,.12);overflow:hidden;margin:4px 0}
 .xpbar i{display:block;height:100%;background:linear-gradient(90deg,#5fe3c8,#9bf5e4);transition:width .15s}
 .bases{margin-left:auto;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
-.bhp{min-width:138px}
-.bhp .lab{display:flex;justify-content:space-between;font:600 10px "JetBrains Mono",monospace;margin-bottom:3px}
+.bhp{min-width:172px}
+.bhp .lab{display:flex;justify-content:space-between;font:700 12.5px "JetBrains Mono",monospace;margin-bottom:5px}
 .bhp .lab .pct{color:#dcd9ea}
-.bhp .bar{height:10px;border-radius:5px;background:rgba(255,255,255,.12);overflow:hidden}
+.bhp .bar{height:16px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}
 .bhp .bar i{display:block;height:100%}
 #stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center}
 canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
@@ -239,23 +239,25 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
   function aiUpdate(dt){
     const e=G.e;
     if(G.mode==='campaign'){
-      e.gold += (6 + G.t*0.04) * dt;
-      // évolution garantie dans le temps (palier toutes les ~48s) + plus tôt si riche
-      const target=Math.min(MAXAGE, Math.floor(G.t/48));
+      e.gold += (9 + G.t*0.06) * dt;
+      // évolution d'ère plus posée (palier ~toutes les 64 s) + plus tôt si riche
+      const target=Math.min(MAXAGE, Math.floor(G.t/64));
       if(e.age<target) e.age=target;
       e.buyCd -= dt;
       if(e.buyCd<=0){
-        e.buyCd = Math.max(0.5, (1.5 - G.t*0.005)) * (0.6+Math.random()*0.8);
-        if(e.age<MAXAGE && e.gold>=evolveCost(e.age)*1.4){ e.gold-=evolveCost(e.age); e.age++; }
-        const eCount=G.units.reduce((n,u)=>n+(u.side==='e'?1:0),0);
-        if(eCount<9){
-          const roll=Math.random(); let role = roll<0.5?0 : roll<0.8?1 : 2;
+        e.buyCd = Math.max(0.45, (1.3 - G.t*0.006)) * (0.7+Math.random()*0.6);
+        if(e.age<MAXAGE && e.gold>=evolveCost(e.age)*1.5){ e.gold-=evolveCost(e.age); e.age++; }
+        let eCount=G.units.reduce((n,u)=>n+(u.side==='e'?1:0),0);
+        // produit une petite escouade VARIÉE tant qu'il a l'or et la place (mêlée / distance / lourd)
+        for(let k=0; k<3 && eCount<13; k++){
+          const roll=Math.random(); const role = roll<0.38?0 : roll<0.70?1 : 2;
           const s=unitStats(e.age, ROLES[role]);
-          if(e.gold>=s.cost){ e.gold-=s.cost; G.units.push(mkUnit('e', e.age, role, s)); }
+          if(e.gold<s.cost) break;
+          e.gold-=s.cost; G.units.push(mkUnit('e', e.age, role, s)); eCount++;
         }
       }
     } else { // endless : vagues croissantes
-      e.age=Math.min(MAXAGE, Math.floor(G.t/50));
+      e.age=Math.min(MAXAGE, Math.floor(G.t/66));
       G.spawnT-=dt;
       if(G.spawnT<=0){
         G.wave++;
@@ -588,7 +590,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     bar.appendChild(mkGroup('Unités',[mkBtn('u0',null,true),mkBtn('u1',null,true),mkBtn('u2',null,true)]));
     // groupe Défense : rangée d'emplacements + bouton ajouter
     const def=document.createElement('div'); def.className='grp';
-    const dl=document.createElement('div'); dl.className='glab'; dl.textContent='Tourelles'; def.appendChild(dl);
+    const dl=document.createElement('div'); dl.className='glab'; dl.id='turGlab'; dl.textContent='Tourelles'; def.appendChild(dl);
     const dw=document.createElement('div'); dw.className='grow';
     const slots=document.createElement('div'); slots.className='slots'; slots.id='slots'; dw.appendChild(slots);
     dw.appendChild(mkBtn('slot')); def.appendChild(dw); bar.appendChild(def);
@@ -630,6 +632,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     // rangée d'emplacements : reconstruite seulement quand l'état change
     // (la reconstruire à chaque image faisait perdre les clics)
     const ts=turretStats(G.age), sl=document.getElementById('slots');
+    const tg=document.getElementById('turGlab'); if(tg) tg.textContent = G.turrets.length>=G.slots ? ('Tourelles · max · ◉ '+ts.cost) : ('Tourelles · ◉ '+ts.cost);
     const sig=G.slots+'|'+G.age+'|'+G.turrets.map(t=>t.age).join(',');
     if(sl.dataset.sig!==sig){
       sl.dataset.sig=sig; sl.innerHTML='';

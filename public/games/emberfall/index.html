@@ -47,6 +47,8 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
 .load{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
 .wchip{display:flex;align-items:center;gap:5px;background:rgba(14,13,20,.6);border:1px solid var(--line);padding:4px 8px;border-radius:9px;font-size:10px;letter-spacing:.03em}
 .wchip .gi{font-size:13px}.wchip b{color:var(--gold)}
+.wchip.evo{background:var(--gold);border-color:var(--gold);color:#1a1206;font-weight:700}
+.wchip.evo .gi,.wchip.evo b{color:#1a1206}
 .hudbtns{position:absolute;right:16px;bottom:16px;display:flex;gap:8px;pointer-events:auto}
 .hbtn.vol{width:auto;padding:0 10px;display:flex;gap:7px;align-items:center}
 .hbtn.vol input{width:74px;accent-color:#ff7a3c;cursor:pointer}
@@ -1015,7 +1017,8 @@ function start(){ensureAudio();playMusic();reset();
   hide('menu');hide('gameover');hide('levelup');hide('shop');hide('pause');
   document.getElementById('hud').classList.remove('hidden');updateLoadout();G.last=performance.now();}
 function updateLoadout(){const l=document.getElementById('load');l.innerHTML='';
-  const add=(ic,n,evo)=>{const d=document.createElement('div');d.className='wchip';d.innerHTML=`<span class="gi">${evo?'★':''}${ic}</span> Nv <b>${n}</b>`;l.appendChild(d);};
+  const add=(ic,n,evo)=>{const d=document.createElement('div');d.className='wchip'+(evo?' evo':'');
+    d.innerHTML=evo?`<span class="gi">★ ${ic}</span> <b>ÉVO</b>`:`<span class="gi">${ic}</span> Nv <b>${n}</b>`;l.appendChild(d);};
   add('✦',G.w.bolt,G.w.boltEvo);
   if(G.w.orb>0)add('◍',G.w.orb,G.w.orbEvo);
   if(G.w.nova>0)add('◎',G.w.nova,G.w.novaEvo);
