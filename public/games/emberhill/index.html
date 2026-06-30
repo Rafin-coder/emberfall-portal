@@ -95,12 +95,12 @@ canvas{display:block;width:100%;height:100%}
   <div id="hud">
     <div class="stat dist"><span class="v" id="dist">0 m</span><span class="k">distance</span></div>
     <div class="stat"><span class="v" id="spd">0</span><span class="k">km/h</span></div>
-    <div class="stat coin"><span class="v"><span class="icn">◉</span><span id="coins">0</span></span><span class="k">pièces</span></div>
-    <div class="fuelwrap"><div class="flab">⛽ carburant</div><div class="fuelbar"><i id="fuel"></i></div></div>
+    <div class="stat coin"><span class="v"><span class="icn">◉</span><span id="coins">0</span></span><span class="k" data-i18n-en="coins">pièces</span></div>
+    <div class="fuelwrap"><div class="flab" data-i18n-en="⛽ fuel">⛽ carburant</div><div class="fuelbar"><i id="fuel"></i></div></div>
   </div>
   <div id="pedals">
-    <div class="pedal brake" id="pBrake">◀ frein</div>
-    <div class="pedal gas" id="pGas">gaz ▶</div>
+    <div class="pedal brake" id="pBrake" data-i18n-en="◀ brake">◀ frein</div>
+    <div class="pedal gas" id="pGas" data-i18n-en="gas ▶">gaz ▶</div>
   </div>
 </div>
 
@@ -109,7 +109,7 @@ canvas{display:block;width:100%;height:100%}
   <div class="panel">
     <div class="eyebrow">ember arcade</div>
     <h1>Ember Hill</h1>
-    <div class="cur"><span>◉ <b id="hdrCoins">0</b></span><span style="color:var(--muted)">·</span><span>record <b id="hdrBest">0</b> m</span></div>
+    <div class="cur"><span>◉ <b id="hdrCoins">0</b></span><span style="color:var(--muted)">·</span><span><span data-i18n-en="best">record</span> <b id="hdrBest">0</b> m</span></div>
 
     <!-- écran JOUER -->
     <div class="scr on" id="scrPlay">
@@ -124,25 +124,25 @@ canvas{display:block;width:100%;height:100%}
     <div class="scr" id="scrGarage"><div id="upList" style="margin-top:6px"></div></div>
 
     <div class="nav">
-      <button class="play" id="navPlay">▶ Jouer</button>
-      <button id="navVeh">Véhicules</button>
-      <button id="navStage">Stages</button>
-      <button id="navGarage">Garage</button>
+      <button class="play" id="navPlay" data-i18n-en="▶ Play">▶ Jouer</button>
+      <button id="navVeh" data-i18n-en="Vehicles">Véhicules</button>
+      <button id="navStage" data-i18n-en="Stages">Stages</button>
+      <button id="navGarage" data-i18n-en="Garage">Garage</button>
     </div>
-    <button id="ehReset" title="Efface pièces, véhicules, stages et améliorations de ce jeu" style="margin-top:14px;background:transparent;border:1px solid rgba(255,255,255,.12);color:var(--faint);font:600 11px 'JetBrains Mono',monospace;letter-spacing:.06em;border-radius:9px;padding:8px 14px;cursor:pointer">↺ Réinitialiser ce jeu</button>
+    <button id="ehReset" title="Efface pièces, véhicules, stages et améliorations de ce jeu" data-i18n-en="↺ Reset this game" style="margin-top:14px;background:transparent;border:1px solid rgba(255,255,255,.12);color:var(--faint);font:600 11px 'JetBrains Mono',monospace;letter-spacing:.06em;border-radius:9px;padding:8px 14px;cursor:pointer">↺ Réinitialiser ce jeu</button>
   </div>
 </div>
 
 <div class="overlay hidden" id="pauseScreen">
   <div class="panel">
-    <div class="eyebrow">pause</div>
-    <h2 style="font-size:30px;font-weight:700;color:var(--ember2)">En pause</h2>
+    <div class="eyebrow" data-i18n-en="pause">pause</div>
+    <h2 style="font-size:30px;font-weight:700;color:var(--ember2)" data-i18n-en="Paused">En pause</h2>
     <div id="pauseStats" style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:13px;margin-top:6px"></div>
     <div class="modebtns">
-      <button class="btn" id="resumeBtn">Reprendre</button>
-      <button class="btn ghost" id="endRunBtn">Terminer la partie</button>
+      <button class="btn" id="resumeBtn" data-i18n-en="Resume">Reprendre</button>
+      <button class="btn ghost" id="endRunBtn" data-i18n-en="End the run">Terminer la partie</button>
     </div>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--faint);margin-top:12px">« Terminer » enregistre ta distance et tes pièces.</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--faint);margin-top:12px" data-i18n-en="“End” saves your distance and coins.">« Terminer » enregistre ta distance et tes pièces.</div>
   </div>
 </div>
 
@@ -154,8 +154,8 @@ canvas{display:block;width:100%;height:100%}
     <p id="netLine"></p>
     <div id="lbBox"></div>
     <div class="modebtns">
-      <button class="btn" id="retryBtn">Rejouer</button>
-      <button class="btn ghost" id="toMenuBtn">Menu</button>
+      <button class="btn" id="retryBtn" data-i18n-en="Replay">Rejouer</button>
+      <button class="btn ghost" id="toMenuBtn" data-i18n-en="Menu">Menu</button>
     </div>
   </div>
 </div>
@@ -164,6 +164,8 @@ canvas{display:block;width:100%;height:100%}
 <script src="/sdk.js"></script>
 <script>
 (function(){
+  const EN=()=> !!(window.GamePortal&&GamePortal.lang==='en');   // langue active (fixée au chargement)
+  const T=(fr,en)=> EN()?en:fr;                                  // raccourci i18n
   const cv=document.getElementById('c'), ctx=cv.getContext('2d');
   let W=innerWidth,H=innerHeight,DPR=Math.min(2,devicePixelRatio||1);
   function fit(){W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
@@ -229,6 +231,15 @@ canvas{display:block;width:100%;height:100%}
     {id:'grip',ic:'❂',name:'Adhérence',desc:'Grimpe mieux les côtes raides.',max:6,cost:l=>70+l*80},
     {id:'wing',ic:'✦',name:'Aileron',desc:'Contrôle de rotation en l\'air.',max:6,cost:l=>70+l*75},
   ];
+  // Localisation des données d'affichage (noms/hints/descs) — fixée au chargement selon la langue.
+  if(EN()){
+    const vEN=['Ember Buggy','Ash Bike','Ember Quad','Forge Truck','Magma Monster','Neon Bolt'];
+    VEHICLES.forEach((v,i)=>{ if(vEN[i]) v.name=vEN[i]; });
+    const bEN=[['Hills','The rolling classic.'],['Ember desert','Hot dunes, dry bumps.'],['Burning cavern','Dark rock, jumpy relief.'],['Frozen tundra','Snow and firs, gentle bumps.'],['Dead moon','Low gravity — huge jumps.'],['Red Mars','Low gravity, red dunes.']];
+    BIOMES.forEach((b,i)=>{ if(bEN[i]){ b.name=bEN[i][0]; b.hint=bEN[i][1]; } });
+    const uEN=[['Engine','Acceleration and top speed.'],['Tank','Starting fuel.'],['Grip','Climbs steep hills better.'],['Wing','Air rotation control.']];
+    UPG.forEach((u,i)=>{ if(uEN[i]){ u.name=uEN[i][0]; u.desc=uEN[i][1]; } });
+  }
   // Monnaie PROPRE à Ember Hill (les "pièces"), distincte des Ember Coins du site. Stockée en local.
   function getCoins(){ return +(localStorage.getItem('eh:coins')||0); }
   function setCoins(v){ localStorage.setItem('eh:coins', Math.max(0,Math.round(v))); }
@@ -351,7 +362,7 @@ canvas{display:block;width:100%;height:100%}
       // alignement du châssis sur la pente (instantané à l'atterrissage, lissé sinon)
       if(wasAir){
         const tilt = Math.abs(angNorm(G.angle - slope));
-        if(tilt > PHYS.crashTilt){ crash('Atterrissage raté'); return; }
+        if(tilt > PHYS.crashTilt){ crash(T('Atterrissage raté','Crash landing')); return; }
         blip(tilt>0.9?180:250, .05, tilt>0.9?'sawtooth':'square', .03);
         G.angle = slope; G.spin = 0;
       } else {
@@ -387,8 +398,8 @@ canvas{display:block;width:100%;height:100%}
       if(Math.abs(cc.x-G.x)<26 && Math.abs((ground(cc.x)-40)-G.y)<66){cc.got=true;G.coins+=cc.val;pops.push({x:cc.x,y:ground(cc.x)-46,t:1,txt:'+'+cc.val});blip(1100+Math.min(900,cc.val*6),.05,'square',.03);} }
     for(const cn of cans){ if(cn.got)continue; if(Math.abs(cn.x-G.x)<26 && Math.abs((ground(cn.x)-36)-G.y)<70){
       cn.got=true; G.fuel=Math.min(FUELMAX,G.fuel+45); blip(880,.12,'sine',.05); banner('+ CARBURANT','#ffd27a'); } }
-    if(G.onGround && Math.abs(angNorm(G.angle))>2.0){ G.flipT+=sdt; if(G.flipT>0.4){ crash('Sur le toit !'); return; } } else G.flipT=0;
-    if(G.fuel<=0 && Math.abs(G.vx)<20 && G.onGround){ G.dry+=sdt; if(G.dry>1.4) crash('Panne sèche'); }
+    if(G.onGround && Math.abs(angNorm(G.angle))>2.0){ G.flipT+=sdt; if(G.flipT>0.4){ crash(T('Sur le toit !','On the roof!')); return; } } else G.flipT=0;
+    if(G.fuel<=0 && Math.abs(G.vx)<20 && G.onGround){ G.dry+=sdt; if(G.dry>1.4) crash(T('Panne sèche','Out of fuel')); }
     else if(G.fuel>0||Math.abs(G.vx)>=20) G.dry=0;
   }
 
@@ -543,7 +554,7 @@ canvas{display:block;width:100%;height:100%}
 
   function togglePause(){
     if(G.state==='play'){ G.state='paused';
-      document.getElementById('pauseStats').textContent=G.dist+' m · ◉ '+G.coins+' pièces';
+      document.getElementById('pauseStats').textContent=G.dist+' m · ◉ '+G.coins+' '+T('pièces','coins');
       document.getElementById('pauseScreen').classList.remove('hidden');
     } else if(G.state==='paused'){ G.state='play'; last=performance.now();
       document.getElementById('pauseScreen').classList.add('hidden');
@@ -554,7 +565,7 @@ canvas{display:block;width:100%;height:100%}
   // Terminer la partie volontairement : enregistre la course (score + pièces) puis écran de fin
   function endRun(){ if(G.state!=='paused'&&G.state!=='play')return;
     document.getElementById('pauseScreen').classList.add('hidden');
-    G.state='dead'; G.crashReason='Course terminée'; endGame(); }
+    G.state='dead'; G.crashReason=T('Course terminée','Run ended'); endGame(); }
   document.getElementById('endRunBtn').onclick=endRun;
 
   function endGame(){
@@ -570,7 +581,7 @@ canvas{display:block;width:100%;height:100%}
     document.getElementById('pause').style.display='none';
     document.getElementById('overTitle').textContent=G.crashReason;
     document.getElementById('overScore').textContent=G.dist+' m';
-    document.getElementById('overSub').textContent='record '+Math.max(best,G.dist)+' m · ◉ '+G.coins+' pièces ramassées';
+    document.getElementById('overSub').textContent=T('record','best')+' '+Math.max(best,G.dist)+' m · ◉ '+G.coins+' '+T('pièces ramassées','coins collected');
     submit();
     setTimeout(()=>document.getElementById('over').classList.remove('hidden'),450);
   }
@@ -601,8 +612,8 @@ canvas{display:block;width:100%;height:100%}
     VEHICLES.forEach(v=>{const own=owned.includes(v.id),isSel=v.id===sel,afford=getCoins()>=v.cost;
       const c=document.createElement('div');c.className='card'+(isSel?' sel':'');
       c.innerHTML='<div class="nm">'+v.name+'</div>'+
-        '<div class="st">moteur'+bar(v.ef-1200,700)+'vitesse'+bar(v.top-400,300)+'carburant'+bar(v.fuel,160)+'stabilité'+bar(2-v.air,1.6)+'</div>'+
-        (own?'<button class="'+(isSel?'owned':'')+'">'+(isSel?'✓ Choisi':'Choisir')+'</button>'
+        '<div class="st">'+T('moteur','engine')+bar(v.ef-1200,700)+T('vitesse','speed')+bar(v.top-400,300)+T('carburant','fuel')+bar(v.fuel,160)+T('stabilité','stability')+bar(2-v.air,1.6)+'</div>'+
+        (own?'<button class="'+(isSel?'owned':'')+'">'+(isSel?T('✓ Choisi','✓ Selected'):T('Choisir','Select'))+'</button>'
             :'<button '+(afford?'':'disabled')+'>◉ '+v.cost+'</button>');
       const b=c.querySelector('button');
       if(own&&!isSel)b.onclick=()=>{localStorage.setItem('eh:car',v.id);VEH=currentVehicle();renderVeh();renderPlay();blip(700,.08,'triangle',.04);};
@@ -611,12 +622,12 @@ canvas{display:block;width:100%;height:100%}
   }
   function renderStage(){
     const wrap=document.getElementById('stageCards'); wrap.innerHTML='';
-    if(DAILY){wrap.innerHTML='<div class="st" style="padding:10px">Le défi du jour impose le stage <b style="color:#ffd27a">'+BIOME.name+'</b> à tous les joueurs.</div>';return;}
+    if(DAILY){wrap.innerHTML='<div class="st" style="padding:10px">'+T('Le défi du jour impose le stage','The daily challenge forces stage')+' <b style="color:#ffd27a">'+BIOME.name+'</b> '+T('à tous les joueurs.','for all players.')+'</div>';return;}
     const sel=biomeIndex(), owned=ownedStages();
     BIOMES.forEach((b,i)=>{const own=owned.includes(b.id), isSel=i===sel, afford=getCoins()>=(b.cost||0);
       const c=document.createElement('div');c.className='card'+(isSel?' sel':'');
       c.innerHTML='<div class="nm">'+b.name+'</div><div class="st" style="margin:7px 0 10px">'+b.hint+'</div>'+
-        (own?'<button class="'+(isSel?'owned':'')+'">'+(isSel?'✓ Choisi':'Choisir')+'</button>'
+        (own?'<button class="'+(isSel?'owned':'')+'">'+(isSel?T('✓ Choisi','✓ Selected'):T('Choisir','Select'))+'</button>'
             :'<button '+(afford?'':'disabled')+'>◉ '+b.cost+'</button>');
       const btn=c.querySelector('button');
       if(own&&!isSel)btn.onclick=()=>{localStorage.setItem('eh:stage',i);BIOME=currentBiome();renderStage();renderPlay();blip(700,.08,'triangle',.04);};
@@ -625,7 +636,7 @@ canvas{display:block;width:100%;height:100%}
   }
   function renderGarage(){
     const up2=loadUp(), list=document.getElementById('upList');
-    list.innerHTML='<div style="font:600 12px/1.4 \'JetBrains Mono\',monospace;color:var(--muted);margin:2px 0 10px">Améliorations de <b style="color:var(--gold)">'+currentVehicle().name+'</b> <span style="color:var(--faint)">· propres à ce véhicule</span></div>';
+    list.innerHTML='<div style="font:600 12px/1.4 \'JetBrains Mono\',monospace;color:var(--muted);margin:2px 0 10px">'+T('Améliorations de','Upgrades for')+' <b style="color:var(--gold)">'+currentVehicle().name+'</b> <span style="color:var(--faint)">'+T('· propres à ce véhicule','· specific to this vehicle')+'</span></div>';
     UPG.forEach(u=>{const lv=up2[u.id]||0,maxed=lv>=u.max,cost=u.cost(lv),afford=getCoins()>=cost;
       let bars='';for(let i=0;i<u.max;i++)bars+='<span class="'+(i<lv?'f':'')+'"></span>';
       const row=document.createElement('div');row.className='uprow';
@@ -661,15 +672,15 @@ canvas{display:block;width:100%;height:100%}
   document.getElementById('toMenuBtn').onclick=toMenu;
   // Réinitialiser les données locales d'Ember Hill (confirmation en deux temps)
   (function(){ const b=document.getElementById('ehReset'); let armed=false,to=null;
-    b.onclick=()=>{ if(!armed){ armed=true; b.textContent='Confirmer ? (efface tout)'; b.style.color='#ff5d6c'; b.style.borderColor='rgba(255,93,108,.5)';
-        to=setTimeout(()=>{armed=false;b.textContent='↺ Réinitialiser ce jeu';b.style.color='';b.style.borderColor='';},3000);
+    b.onclick=()=>{ if(!armed){ armed=true; b.textContent=T('Confirmer ? (efface tout)','Confirm? (erases all)'); b.style.color='#ff5d6c'; b.style.borderColor='rgba(255,93,108,.5)';
+        to=setTimeout(()=>{armed=false;b.textContent=T('↺ Réinitialiser ce jeu','↺ Reset this game');b.style.color='';b.style.borderColor='';},3000);
       } else { clearTimeout(to); ['eh:coins','eh:veh','eh:car','eh:up','eh:stages','eh:stage','eh:best','eh:migrated'].forEach(k=>localStorage.removeItem(k)); location.reload(); } };
   })();
 
   const PARAMS=new URLSearchParams(location.search);
   if(PARAMS.get('daily')==='1' && window.GamePortal){
     DAILY=GamePortal.daily(); seedTerrain(DAILY.rng);
-    const b=document.getElementById('dailyBadge'); b.textContent='DÉFI DU JOUR · '+DAILY.date; b.style.display='block';
+    const b=document.getElementById('dailyBadge'); b.textContent=T('DÉFI DU JOUR','DAILY CHALLENGE')+' · '+DAILY.date; b.style.display='block';
   } else { seedTerrain(lrng(SEED)); }
   applyLoadout(); reset(); G.state='menu'; showScreen('play');
   requestAnimationFrame(loop);
