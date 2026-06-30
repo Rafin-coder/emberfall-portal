@@ -83,12 +83,12 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
 
 <div id="wrap">
   <div id="top">
-    <div class="res gold"><span class="v" id="gold">◉ 0</span><span class="k">or</span></div>
+    <div class="res gold"><span class="v" id="gold">◉ 0</span><span class="k" data-i18n-en="gold">or</span></div>
     <div class="res xpwrap"><span class="v" id="ageName">Préhistoire</span><div class="xpbar"><i id="xpb" style="width:0%"></i></div><span class="k" id="xpTxt">0 / 0 XP</span></div>
-    <div class="res"><span class="v" id="popTxt">0</span><span class="k">tes unités</span></div>
+    <div class="res"><span class="v" id="popTxt">0</span><span class="k" data-i18n-en="your units">tes unités</span></div>
     <div class="bases">
-      <div class="bhp"><div class="lab"><span style="color:#ffb04d">TA BASE</span><span class="pct" id="phpPct">100%</span></div><div class="bar"><i id="phpb" style="width:100%;background:linear-gradient(90deg,#ff7a3c,#ffb04d)"></i></div></div>
-      <div class="bhp" id="ehpwrap"><div class="lab"><span style="color:#ff7d8e">BASE ENNEMIE</span><span class="pct" id="ehpPct">100%</span></div><div class="bar"><i id="ehpb" style="width:100%;background:linear-gradient(90deg,#ff5d6c,#c44)"></i></div></div>
+      <div class="bhp"><div class="lab"><span style="color:#ffb04d" data-i18n-en="YOUR BASE">TA BASE</span><span class="pct" id="phpPct">100%</span></div><div class="bar"><i id="phpb" style="width:100%;background:linear-gradient(90deg,#ff7a3c,#ffb04d)"></i></div></div>
+      <div class="bhp" id="ehpwrap"><div class="lab"><span style="color:#ff7d8e" data-i18n-en="ENEMY BASE">BASE ENNEMIE</span><span class="pct" id="ehpPct">100%</span></div><div class="bar"><i id="ehpb" style="width:100%;background:linear-gradient(90deg,#ff5d6c,#c44)"></i></div></div>
       <div class="res" id="endlessInfo" style="display:none;text-align:right"><span class="v" id="waveTxt">0</span><span class="k" id="killTxt">vague · 0 détruits</span></div>
       <label class="vol" title="Volume de la musique">♪<input id="vol" type="range" min="0" max="100" value="40"></label>
     </div>
@@ -101,36 +101,36 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
   <div class="panel">
     <div class="eyebrow">ember arcade</div>
     <h1>Conquête des Âges</h1>
-    <p>Mène ton armée de la préhistoire au futur. Produis des unités, défends ta base avec des tourelles, évolue d'ère, et déclenche ton pouvoir spécial pour renverser la marée.</p>
+    <p data-i18n-en="Lead your army from prehistory to the future. Produce units, defend your base with turrets, evolve through the ages, and trigger your special power to turn the tide.">Mène ton armée de la préhistoire au futur. Produis des unités, défends ta base avec des tourelles, évolue d'ère, et déclenche ton pouvoir spécial pour renverser la marée.</p>
     <div class="modebtns">
-      <button class="btn" id="campBtn">Campagne — détruire la base ennemie</button>
-      <button class="btn ghost" id="endlessBtn">Endless — survivre aux vagues (classé)</button>
+      <button class="btn" id="campBtn" data-i18n-en="Campaign — destroy the enemy base">Campagne — détruire la base ennemie</button>
+      <button class="btn ghost" id="endlessBtn" data-i18n-en="Endless — survive the waves (ranked)">Endless — survivre aux vagues (classé)</button>
     </div>
-    <div class="keys">1/2/3 unités · T tourelle · E évoluer · Espace spécial</div>
+    <div class="keys" data-i18n-en="1/2/3 units · T turret · E evolve · Space special">1/2/3 unités · T tourelle · E évoluer · Espace spécial</div>
   </div>
 </div>
 
 <div class="overlay hidden" id="pauseScreen">
   <div class="panel">
-    <div class="eyebrow">pause</div>
-    <h1 style="font-size:34px;font-weight:700;color:var(--ember2)">En pause</h1>
+    <div class="eyebrow" data-i18n-en="pause">pause</div>
+    <h1 style="font-size:34px;font-weight:700;color:var(--ember2)" data-i18n-en="Paused">En pause</h1>
     <div class="modebtns">
-      <button class="btn" id="resumeBtn">Reprendre</button>
-      <button class="btn ghost" id="quitBtn">Quitter au menu</button>
+      <button class="btn" id="resumeBtn" data-i18n-en="Resume">Reprendre</button>
+      <button class="btn ghost" id="quitBtn" data-i18n-en="Quit to menu">Quitter au menu</button>
     </div>
   </div>
 </div>
 
 <div class="overlay hidden" id="over">
   <div class="panel">
-    <div class="eyebrow" id="overTitle">fin de partie</div>
+    <div class="eyebrow" id="overTitle" data-i18n-en="game over">fin de partie</div>
     <div class="big" id="overScore">0</div>
     <div id="overSub" style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:13px"></div>
     <p id="netLine" style="font-size:12px"></p>
     <div id="lbBox"></div>
     <div class="modebtns">
-      <button class="btn" id="retryBtn">Rejouer</button>
-      <button class="btn ghost" id="menuBtn">Menu</button>
+      <button class="btn" id="retryBtn" data-i18n-en="Replay">Rejouer</button>
+      <button class="btn ghost" id="menuBtn" data-i18n-en="Menu">Menu</button>
     </div>
   </div>
 </div>
@@ -139,6 +139,8 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
 <script src="/sdk.js"></script>
 <script>
 (function(){
+  const EN=()=> !!(window.GamePortal&&GamePortal.lang==='en');         // langue active (fixée au chargement de la partie)
+  const T=(fr,en)=> EN()?en:fr;                                        // raccourci i18n
   const cv=document.getElementById('c'), ctx=cv.getContext('2d');
   let W=960,H=440,DPR=Math.min(2,window.devicePixelRatio||1);
   function fit(){
@@ -157,11 +159,15 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     o.connect(g).connect(AC.destination);o.start(n);o.stop(n+d+.02);}
 
   // ---------- données ----------
-  const AGES=['Préhistoire','Antiquité','Médiéval','Moderne','Futur'];
+  const AGES = EN()? ['Prehistory','Antiquity','Medieval','Modern','Future']
+                   : ['Préhistoire','Antiquité','Médiéval','Moderne','Futur'];
   const AGETINT=['90,70,45','120,95,55','110,118,132','90,120,140','90,200,210'];
-  const UNAMES=[['Massue','Sagaie','Mammouth'],['Légionnaire','Archer','Catapulte'],['Chevalier','Arbalétrier','Bélier'],['Soldat','Tireur','Blindé'],['Droïde','Laser','Méca']];
-  const TNAMES=['Piège à pieux','Baliste','Canon','Mitrailleuse','Tourelle laser'];
-  const SPNAMES=['Cri de guerre','Pluie de flèches','Bombarde','Frappe aérienne','Frappe orbitale'];
+  const UNAMES = EN()? [['Club','Spear','Mammoth'],['Legionary','Archer','Catapult'],['Knight','Crossbow','Ram'],['Soldier','Gunner','Tank'],['Droid','Laser','Mech']]
+                     : [['Massue','Sagaie','Mammouth'],['Légionnaire','Archer','Catapulte'],['Chevalier','Arbalétrier','Bélier'],['Soldat','Tireur','Blindé'],['Droïde','Laser','Méca']];
+  const TNAMES = EN()? ['Spike trap','Ballista','Cannon','Machine gun','Laser turret']
+                     : ['Piège à pieux','Baliste','Canon','Mitrailleuse','Tourelle laser'];
+  const SPNAMES = EN()? ['War cry','Arrow rain','Bombard','Air strike','Orbital strike']
+                      : ['Cri de guerre','Pluie de flèches','Bombarde','Frappe aérienne','Frappe orbitale'];
   const ROLES=['light','ranged','heavy'];
   function am(age){return Math.pow(1.85,age);}
   function unitStats(age,role){
@@ -422,7 +428,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     ctx.textAlign='left';
     ctx.restore();
     if(bannerT>0){ ctx.globalAlpha=Math.min(1,bannerT); ctx.fillStyle='#ffd27a'; ctx.font='700 26px Space Grotesk'; ctx.textAlign='center';
-      ctx.fillText('ÈRE : '+AGES[G.age].toUpperCase(), W/2, H*0.30); ctx.globalAlpha=1; ctx.textAlign='left'; }
+      ctx.fillText(T('ÈRE','ERA')+' : '+AGES[G.age].toUpperCase(), W/2, H*0.30); ctx.globalAlpha=1; ctx.textAlign='left'; }
     if(G.special>0){ ctx.fillStyle='rgba(255,120,60,'+(G.special*0.5)+')'; ctx.fillRect(0,0,W,H); }
   }
 
@@ -626,14 +632,14 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     const row=document.createElement('div'); row.className='grow'; btns.forEach(b=>row.appendChild(b)); g.appendChild(row); return g; }
   function buildBar(){
     const bar=document.getElementById('bar'); bar.innerHTML='';
-    bar.appendChild(mkGroup('Unités',[mkBtn('u0',null,true),mkBtn('u1',null,true),mkBtn('u2',null,true)]));
+    bar.appendChild(mkGroup(T('Unités','Units'),[mkBtn('u0',null,true),mkBtn('u1',null,true),mkBtn('u2',null,true)]));
     // groupe Défense : rangée d'emplacements + bouton ajouter
     const def=document.createElement('div'); def.className='grp';
     const dl=document.createElement('div'); dl.className='glab'; dl.id='turGlab'; dl.textContent='Tourelles'; def.appendChild(dl);
     const dw=document.createElement('div'); dw.className='grow';
     const slots=document.createElement('div'); slots.className='slots'; slots.id='slots'; dw.appendChild(slots);
     dw.appendChild(mkBtn('slot')); def.appendChild(dw); bar.appendChild(def);
-    bar.appendChild(mkGroup('Empire',[mkBtn('evo','evo'),mkBtn('sp','sp')]));
+    bar.appendChild(mkGroup(T('Empire','Empire'),[mkBtn('evo','evo'),mkBtn('sp','sp')]));
     document.getElementById('btn_u0').onclick=()=>{ac();buyUnit(0);};
     document.getElementById('btn_u1').onclick=()=>{ac();buyUnit(1);};
     document.getElementById('btn_u2').onclick=()=>{ac();buyUnit(2);};
@@ -649,29 +655,30 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     document.getElementById('ageName').textContent=AGES[G.age];
     const need=G.age<MAXAGE?evolveXp(G.age):1;
     document.getElementById('xpb').style.width=(G.age>=MAXAGE?100:Math.min(100,G.xp/need*100))+'%';
-    document.getElementById('xpTxt').textContent=G.age>=MAXAGE?'ÈRE MAXIMALE':Math.floor(Math.min(G.xp,need))+' / '+need+' XP';
+    document.getElementById('xpTxt').textContent=G.age>=MAXAGE?T('ÈRE MAXIMALE','MAX ERA'):Math.floor(Math.min(G.xp,need))+' / '+need+' XP';
     document.getElementById('popTxt').textContent=G.units.filter(u=>u.side==='p').length;
     const pp=Math.max(0,Math.round(G.pbHp/G.pbMax*100));
     document.getElementById('phpb').style.width=pp+'%'; document.getElementById('phpPct').textContent=Math.max(0,Math.ceil(G.pbHp))+' / '+G.pbMax;
     const ew=document.getElementById('ehpwrap'), ei=document.getElementById('endlessInfo');
     if(G.mode==='endless'){ ew.style.display='none'; ei.style.display='flex';
-      document.getElementById('waveTxt').textContent='Vague '+G.wave;
-      document.getElementById('killTxt').textContent=G.kills+' détruits · ère IA '+AGES[G.e.age]; }
+      document.getElementById('waveTxt').textContent=T('Vague','Wave')+' '+G.wave;
+      document.getElementById('killTxt').textContent=G.kills+' '+T('détruits · ère IA','killed · AI era')+' '+AGES[G.e.age]; }
     else { ei.style.display='none'; ew.style.display='block';
       const ep=Math.max(0,Math.round(G.ebHp/G.ebMax*100));
       document.getElementById('ehpb').style.width=ep+'%'; document.getElementById('ehpPct').textContent=Math.max(0,Math.ceil(G.ebHp))+' / '+G.ebMax; }
-    const labels=['Mêlée','Distance','Lourd'];
+    const labels=[T('Mêlée','Melee'),T('Distance','Ranged'),T('Lourd','Heavy')];
+    const PV=T('PV','HP'), DGT=T('DGT','DMG'), SPACE=T('Espace','Space');
     for(let i=0;i<3;i++){ const s=unitStats(G.age,ROLES[i]);
-      const b=setBtn('u'+i, UNAMES[G.age][i], '◉ '+s.cost+'  ['+(i+1)+']', labels[i]+' · PV '+s.hp+' · DGT '+Math.round(s.dmg));
+      const b=setBtn('u'+i, UNAMES[G.age][i], '◉ '+s.cost+'  ['+(i+1)+']', labels[i]+' · '+PV+' '+s.hp+' · '+DGT+' '+Math.round(s.dmg));
       b.disabled=G.gold<s.cost; }
-    setBtn('slot','+ Emplacement', G.slots>=MAXSLOTS?'max atteint':'◉ '+slotCost()).disabled=G.slots>=MAXSLOTS||G.gold<slotCost();
-    if(G.age>=MAXAGE) setBtn('evo','Ère maximale','—').disabled=true;
-    else setBtn('evo','Évoluer → '+AGES[G.age+1], '◉ '+evolveCost(G.age)+'  [E]').disabled=G.xp<need||G.gold<evolveCost(G.age);
-    setBtn('sp', SPNAMES[G.age], G.spCd>0?Math.ceil(G.spCd)+'s  [Espace]':'PRÊT  [Espace]').disabled=G.spCd>0;
+    setBtn('slot',T('+ Emplacement','+ Slot'), G.slots>=MAXSLOTS?T('max atteint','max reached'):'◉ '+slotCost()).disabled=G.slots>=MAXSLOTS||G.gold<slotCost();
+    if(G.age>=MAXAGE) setBtn('evo',T('Ère maximale','Max era'),'—').disabled=true;
+    else setBtn('evo',T('Évoluer →','Evolve →')+' '+AGES[G.age+1], '◉ '+evolveCost(G.age)+'  [E]').disabled=G.xp<need||G.gold<evolveCost(G.age);
+    setBtn('sp', SPNAMES[G.age], G.spCd>0?Math.ceil(G.spCd)+'s  ['+SPACE+']':T('PRÊT','READY')+'  ['+SPACE+']').disabled=G.spCd>0;
     // rangée d'emplacements : reconstruite seulement quand l'état change
     // (la reconstruire à chaque image faisait perdre les clics)
     const ts=turretStats(G.age), sl=document.getElementById('slots');
-    const tg=document.getElementById('turGlab'); if(tg) tg.textContent = G.turrets.length>=G.slots ? ('Tourelles · max · ◉ '+ts.cost) : ('Tourelles · ◉ '+ts.cost);
+    const tg=document.getElementById('turGlab'); if(tg){ const TUR=T('Tourelles','Turrets'); tg.textContent = G.turrets.length>=G.slots ? (TUR+' · '+T('max','max')+' · ◉ '+ts.cost) : (TUR+' · ◉ '+ts.cost); }
     const sig=G.slots+'|'+G.age+'|'+G.turrets.map(t=>t.age).join(',');
     if(sl.dataset.sig!==sig){
       sl.dataset.sig=sig; sl.innerHTML='';
@@ -679,7 +686,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
         const c=document.createElement('div');
         if(i<G.turrets.length){ const tr=G.turrets[i], refund=Math.round(turretStats(tr.age).cost*0.5);
           c.className='slot filled';
-          c.innerHTML='<span>'+TNAMES[tr.age].split(' ')[0]+'</span><b title="Vendre (+'+refund+' or)">✕</b>';
+          c.innerHTML='<span>'+TNAMES[tr.age].split(' ')[0]+'</span><b title="'+T('Vendre (+'+refund+' or)','Sell (+'+refund+' gold)')+'">✕</b>';
           c.querySelector('b').onclick=(ev)=>{ ev.stopPropagation(); ac(); sellTurretAt(i); };
         } else {
           c.className='slot empty';
@@ -714,16 +721,16 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
       if(G.turrets.length>=4)GamePortal.unlock('aw_turret'); }
     const ov=document.getElementById('over');
     if(G.mode==='endless'){
-      document.getElementById('overTitle').textContent='base détruite';
+      document.getElementById('overTitle').textContent=T('base détruite','base destroyed');
       document.getElementById('overScore').textContent=G.kills;
-      document.getElementById('overSub').textContent='unités détruites · vague '+G.wave+' · '+Math.floor(G.t)+'s';
+      document.getElementById('overSub').textContent=T('unités détruites · vague','units destroyed · wave')+' '+G.wave+' · '+Math.floor(G.t)+'s';
       submitEndless();
     } else {
-      document.getElementById('overTitle').textContent= win?'victoire':'défaite';
+      document.getElementById('overTitle').textContent= win?T('victoire','victory'):T('défaite','defeat');
       document.getElementById('overScore').textContent= win?'⚑':'☠';
       document.getElementById('overScore').style.fontSize='44px';
-      document.getElementById('overSub').textContent= win? 'Base ennemie détruite en '+Math.floor(G.t)+'s · ère '+AGES[G.age] : 'Ta base est tombée à la vague... tiens bon la prochaine fois.';
-      document.getElementById('netLine').textContent='Le mode Endless alimente le classement.';
+      document.getElementById('overSub').textContent= win? (T('Base ennemie détruite en','Enemy base destroyed in')+' '+Math.floor(G.t)+'s · '+T('ère','era')+' '+AGES[G.age]) : T('Ta base est tombée à la vague... tiens bon la prochaine fois.','Your base fell... hold on next time.');
+      document.getElementById('netLine').textContent=T('Le mode Endless alimente le classement.','Endless mode feeds the leaderboard.');
       document.getElementById('lbBox').innerHTML='';
     }
     blip(win?660:160,.3,win?'triangle':'sawtooth',.05);
@@ -774,10 +781,14 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
   buildBar(); reset('endless'); G.state='menu';
   if(PARAMS.get('daily')==='1' && window.GamePortal){
     DAILY=GamePortal.daily(); RNG=DAILY.rng;
-    const b=document.getElementById('dailyBadge'); b.textContent='DÉFI DU JOUR · '+DAILY.date; b.style.display='block';
+    const b=document.getElementById('dailyBadge'); b.textContent=T('DÉFI DU JOUR','DAILY CHALLENGE')+' · '+DAILY.date; b.style.display='block';
     // en défi : on force l'Endless
     document.getElementById('campBtn').style.display='none';
-    document.querySelector('#menu p').textContent='Défi du jour — mode Endless, mêmes vagues pour tous. Survis le plus longtemps et détruis un maximum d\'unités.';
+    // On règle aussi __fr + data-i18n-en pour que applyLang (DOMContentLoaded, après cet IIFE) garde le bon texte de défi.
+    const mp=document.querySelector('#menu p');
+    const dfr='Défi du jour — mode Endless, mêmes vagues pour tous. Survis le plus longtemps et détruis un maximum d\'unités.';
+    const den='Daily challenge — Endless mode, same waves for everyone. Survive as long as you can and destroy as many units as possible.';
+    if(mp){ mp.__fr=dfr; mp.setAttribute('data-i18n-en',den); mp.textContent=T(dfr,den); }
   }
   requestAnimationFrame(loop);
   if(window.GamePortal) GamePortal.init({gameId:'ageofwar'});
