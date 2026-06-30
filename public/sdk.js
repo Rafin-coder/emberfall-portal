@@ -459,6 +459,7 @@
       if(el.__frp===undefined) el.__frp = el.getAttribute('placeholder')||'';
       el.setAttribute('placeholder', lang==='en' ? el.getAttribute('data-i18n-en-ph') : el.__frp); });
     const chip=document.getElementById('langChip'); if(chip) chip.textContent = lang==='en' ? 'EN' : 'FR';
+    try{ window.dispatchEvent(new CustomEvent('gp:lang', { detail:{ lang:lang } })); }catch(e){}
   }
   function setLang(l){ lang = (l==='en') ? 'en' : 'fr'; try{ localStorage.setItem('gp:lang',lang); }catch(e){} applyLang(); }
   function initI18n(){ const chip=document.getElementById('langChip');

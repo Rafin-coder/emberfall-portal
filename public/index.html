@@ -2,6 +2,8 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ember Arcade — petits jeux, gros scores</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,7 +27,7 @@
     <span style="font:700 12px 'JetBrains Mono',monospace;color:#ffb04d">◉&nbsp;<b id="navCoins">0</b></span>
   </a>
   <div class="chip" id="userChip" title="Changer de pseudo">
-    <span class="av"></span><span>Pseudo</span> <b id="uname">…</b>
+    <span class="av"></span><span data-i18n-en="Name">Pseudo</span> <b id="uname">…</b>
   </div>
 </div></nav>
 
@@ -45,23 +47,23 @@
      border-radius:16px;padding:18px 20px">
     <span style="font-size:30px">🔥</span>
     <span style="flex:1">
-      <span style="display:block;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;color:var(--text)">Défi du jour</span>
-      <span style="color:var(--muted);font-size:13px">Les mêmes conditions pour tous, un classement remis à zéro chaque jour. Garde ta série.</span>
+      <span style="display:block;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;color:var(--text)" data-i18n-en="Daily challenge">Défi du jour</span>
+      <span style="color:var(--muted);font-size:13px" data-i18n-en="Same conditions for everyone, a leaderboard reset every day. Keep your streak.">Les mêmes conditions pour tous, un classement remis à zéro chaque jour. Garde ta série.</span>
     </span>
-    <span class="play">Relever ▸</span>
+    <span class="play" data-i18n-en="Take it ▸">Relever ▸</span>
   </a>
 
   <section class="sec" style="padding-top:18px">
-    <div class="sechead"><h2>À jouer maintenant</h2><span class="c" id="gcount"></span><span class="line"></span></div>
+    <div class="sechead"><h2 data-i18n-en="Play now">À jouer maintenant</h2><span class="c" id="gcount"></span><span class="line"></span></div>
     <div class="grid" id="grid"></div>
   </section>
 
   <section class="sec" id="profil">
-    <div class="sechead"><h2>Profil &amp; succès</h2><span class="line"></span></div>
+    <div class="sechead"><h2 data-i18n-en="Profile &amp; achievements">Profil &amp; succès</h2><span class="line"></span></div>
     <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px 18px;margin-bottom:16px">
       <div style="text-align:center;min-width:74px">
         <div style="font:700 30px 'Space Grotesk',sans-serif;color:#ffd27a;line-height:1" id="pLvl">1</div>
-        <div style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8d8aa0;text-transform:uppercase">Niveau</div>
+        <div style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8d8aa0;text-transform:uppercase" data-i18n-en="Level">Niveau</div>
       </div>
       <div style="flex:1;min-width:200px">
         <div style="display:flex;justify-content:space-between;font:600 11px 'JetBrains Mono',monospace;color:#8d8aa0;margin-bottom:5px"><span>XP</span><span id="pXp">0 / 100</span></div>
@@ -73,42 +75,42 @@
       </div>
       <div style="text-align:center;min-width:74px">
         <div style="font:700 24px 'Space Grotesk',sans-serif;color:#ece9f5;line-height:1.1"><span id="pAch">0</span><span style="color:#5b5870;font-size:16px">/<span id="pAchTot">0</span></span></div>
-        <div style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8d8aa0;text-transform:uppercase">Succès</div>
+        <div style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8d8aa0;text-transform:uppercase" data-i18n-en="Achievements">Succès</div>
       </div>
     </div>
     <div class="grid" id="achGrid" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))"></div>
-    <p style="color:var(--muted);font-size:12.5px;margin-top:14px;max-width:680px">Les <b style="color:var(--text)">Ember Coins</b> se gagnent en jouant aux jeux et en débloquant des succès. Leurs usages arrivent — skins, cosmétiques, récompenses. <span style="color:var(--faint)">(Ember Hill possède sa propre monnaie interne pour ses véhicules, stages et améliorations.)</span></p>
+    <p style="color:var(--muted);font-size:12.5px;margin-top:14px;max-width:680px" data-i18n-en-html="&lt;b style=&quot;color:var(--text)&quot;&gt;Ember Coins&lt;/b&gt; are earned by playing games and unlocking achievements. More uses are coming — skins, cosmetics, rewards. &lt;span style=&quot;color:var(--faint)&quot;&gt;(Ember Hill has its own internal currency for its vehicles, stages and upgrades.)&lt;/span&gt;">Les <b style="color:var(--text)">Ember Coins</b> se gagnent en jouant aux jeux et en débloquant des succès. Leurs usages arrivent — skins, cosmétiques, récompenses. <span style="color:var(--faint)">(Ember Hill possède sa propre monnaie interne pour ses véhicules, stages et améliorations.)</span></p>
   </section>
 
   <section class="sec">
-    <div class="sechead"><h2>Comment ça marche</h2><span class="line"></span></div>
+    <div class="sechead"><h2 data-i18n-en="How it works">Comment ça marche</h2><span class="line"></span></div>
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
-      <div class="cart"><div class="body"><div class="ttl" style="font-size:18px">🎮 Zéro installation</div>
-        <div class="tag">Tout se joue directement dans le navigateur, sur ordi comme sur mobile. Un clic et c'est parti.</div></div></div>
-      <div class="cart"><div class="body"><div class="ttl" style="font-size:18px">🏆 Un pseudo, tous les scores</div>
-        <div class="tag">Choisis un pseudo une fois. Tes scores comptent sur le classement en ligne de chaque jeu.</div></div></div>
-      <div class="cart"><div class="body"><div class="ttl" style="font-size:18px">🔥 Le défi du jour</div>
-        <div class="tag">Chaque jour, les mêmes conditions pour tout le monde et un classement remis à zéro. Garde ta série de jours.</div></div></div>
-      <div class="cart"><div class="body"><div class="ttl" style="font-size:18px">⏱️ Sessions courtes</div>
-        <div class="tag">Des jeux pensés pour une partie rapide — parfait pour une pause, avec l'envie de retenter « encore une ».</div></div></div>
+      <div class="cart"><div class="body"><div class="ttl" style="font-size:18px" data-i18n-en="🎮 Zero install">🎮 Zéro installation</div>
+        <div class="tag" data-i18n-en="Everything plays right in the browser, on desktop or mobile. One click and you're in.">Tout se joue directement dans le navigateur, sur ordi comme sur mobile. Un clic et c'est parti.</div></div></div>
+      <div class="cart"><div class="body"><div class="ttl" style="font-size:18px" data-i18n-en="🏆 One name, all scores">🏆 Un pseudo, tous les scores</div>
+        <div class="tag" data-i18n-en="Pick a name once. Your scores count on every game's online leaderboard.">Choisis un pseudo une fois. Tes scores comptent sur le classement en ligne de chaque jeu.</div></div></div>
+      <div class="cart"><div class="body"><div class="ttl" style="font-size:18px" data-i18n-en="🔥 The daily challenge">🔥 Le défi du jour</div>
+        <div class="tag" data-i18n-en="Every day, the same conditions for everyone and a fresh leaderboard. Keep your daily streak.">Chaque jour, les mêmes conditions pour tout le monde et un classement remis à zéro. Garde ta série de jours.</div></div></div>
+      <div class="cart"><div class="body"><div class="ttl" style="font-size:18px" data-i18n-en="⏱️ Short sessions">⏱️ Sessions courtes</div>
+        <div class="tag" data-i18n-en="Games built for a quick run — perfect for a break, with that 'just one more' urge.">Des jeux pensés pour une partie rapide — parfait pour une pause, avec l'envie de retenter « encore une ».</div></div></div>
     </div>
   </section>
 
   <section class="sec">
-    <div class="sechead"><h2>À propos</h2><span class="line"></span></div>
-    <p style="color:var(--muted);max-width:680px;line-height:1.65">
-      <b style="color:var(--text)">Ember Arcade</b> est une petite salle d'arcade en ligne : une collection de jeux maison, courts et nerveux, qui partagent un même compte et des classements communs. Trois titres sont jouables aujourd'hui — un survivor roguelite (<b style="color:var(--text)">Emberfall</b>), un arcade de lumière (<b style="color:var(--text)">Lumen</b>) et une stratégie de couloir à travers les âges (<b style="color:var(--text)">Conquête des Âges</b>) — et d'autres arrivent. Le projet grandit au fil des retours : tu peux suivre ce qui est prévu sur la <a href="/roadmap.html" style="color:var(--ember)">roadmap publique</a>.
+    <div class="sechead"><h2 data-i18n-en="About">À propos</h2><span class="line"></span></div>
+    <p style="color:var(--muted);max-width:680px;line-height:1.65" data-i18n-en-html="&lt;b style=&quot;color:var(--text)&quot;&gt;Ember Arcade&lt;/b&gt; is a small online arcade: a collection of homemade games, short and snappy, sharing one account and common leaderboards. Five titles are playable today — a survivor roguelite (&lt;b style=&quot;color:var(--text)&quot;&gt;Emberfall&lt;/b&gt;), a light arcade (&lt;b style=&quot;color:var(--text)&quot;&gt;Lumen&lt;/b&gt;), a lane strategy through the ages (&lt;b style=&quot;color:var(--text)&quot;&gt;Conquête des Âges&lt;/b&gt;), physics driving (&lt;b style=&quot;color:var(--text)&quot;&gt;Ember Hill&lt;/b&gt;) and a neon brick-breaker (&lt;b style=&quot;color:var(--text)&quot;&gt;Prismbreak&lt;/b&gt;) — with more coming. The project grows with feedback: follow what's planned on the &lt;a href=&quot;/roadmap.html&quot; style=&quot;color:var(--ember)&quot;&gt;public roadmap&lt;/a&gt;.">
+      <b style="color:var(--text)">Ember Arcade</b> est une petite salle d'arcade en ligne : une collection de jeux maison, courts et nerveux, qui partagent un même compte et des classements communs. Cinq titres sont jouables aujourd'hui — un survivor roguelite (<b style="color:var(--text)">Emberfall</b>), un arcade de lumière (<b style="color:var(--text)">Lumen</b>), une stratégie de couloir à travers les âges (<b style="color:var(--text)">Conquête des Âges</b>), une conduite physique (<b style="color:var(--text)">Ember Hill</b>) et un casse-briques néon (<b style="color:var(--text)">Prismbreak</b>) — et d'autres arrivent. Le projet grandit au fil des retours : tu peux suivre ce qui est prévu sur la <a href="/roadmap.html" style="color:var(--ember)">roadmap publique</a>.
     </p>
   </section>
 
-  <div class="adslot">emplacement publicitaire — inactif tant que l'audience ne le justifie pas</div>
+  <div class="adslot" data-i18n-en="ad slot — inactive until the audience justifies it">emplacement publicitaire — inactif tant que l'audience ne le justifie pas</div>
 </main>
 
 <footer class="foot"><div class="wrap" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;width:100%">
   <span id="footName">Ember Arcade</span>
-  <a href="/roadmap.html">Roadmap</a>
-  <a href="/leaderboard.html">Classement</a>
-  <span class="mono" style="color:var(--faint)">© AofZ Inc. — site &amp; contenu</span>
+  <a href="/roadmap.html" data-i18n-en="Roadmap">Roadmap</a>
+  <a href="/leaderboard.html" data-i18n-en="Leaderboard">Classement</a>
+  <span class="mono" style="color:var(--faint)" data-i18n-en="© AofZ Inc. — site &amp; content">© AofZ Inc. — site &amp; contenu</span>
   <span style="margin-left:auto" id="netState" class="mono">·</span>
 </div></footer>
 
@@ -127,16 +129,21 @@ const SOON = [];
 
 // Infos d'affichage par jeu (genre + description + format), utilisées par les fiches.
 const GAME_INFO = {
-  emberfall:{ genre:'Survivor roguelite', meta:'Action · Solo · parties ~5–15 min', life:'~3–4 h pour tout débloquer',
-    desc:'Survis à des vagues d\'ennemis de plus en plus denses. Ramasse l\'XP, choisis tes armes et leurs évolutions, et va le plus loin possible avant d\'être submergé.' },
-  lumen:{ genre:'Arcade de réflexes', meta:'Nerveux · Solo · parties ~1–3 min', life:'~1–2 h pour tout débloquer',
-    desc:'Un serpent de lumière à faire grandir sans se mordre. Récupère les braises, enchaîne les combos et explose ton score.' },
-  ageofwar:{ genre:'Stratégie de couloir', meta:'Stratégie · Solo · campagne + endless', life:'~2–3 h pour tout débloquer',
-    desc:'Mène ton armée à travers cinq ères, de la préhistoire au futur. Produis des unités, pose des tourelles, évolue d\'ère, déclenche ton pouvoir spécial et détruis la base adverse.' },
-  emberhill:{ genre:'Conduite physique', meta:'Réflexes · Solo · distance sans fin', life:'~2–3 h pour tout débloquer',
-    desc:'Pilote ta braise sur des collines générées sans fin. Dose le gaz et le frein, garde l\'équilibre dans les sauts, ramasse le carburant et va le plus loin possible sans te retourner.' },
-  prismbreak:{ genre:'Casse-briques', meta:'Arcade · Solo · parties ~3–6 min', life:'~1–2 h pour tout maîtriser',
-    desc:'Brise tous les prismes avec ta balle. Enchaîne sans rattraper la balle pour faire monter le combo, ramasse les power-ups (multiballe, laser, perçant…) et grimpe les niveaux.' },
+  emberfall:{ genre:'Survivor roguelite', genreEn:'Survivor roguelite', meta:'Action · Solo · parties ~5–15 min', metaEn:'Action · Solo · ~5–15 min runs', life:'~3–4 h pour tout débloquer', lifeEn:'~3–4 h to unlock everything',
+    desc:'Survis à des vagues d\'ennemis de plus en plus denses. Ramasse l\'XP, choisis tes armes et leurs évolutions, et va le plus loin possible avant d\'être submergé.',
+    descEn:'Survive waves of ever-denser enemies. Grab XP, choose your weapons and their evolutions, and go as far as you can before being overwhelmed.' },
+  lumen:{ genre:'Arcade de réflexes', genreEn:'Reflex arcade', meta:'Nerveux · Solo · parties ~1–3 min', metaEn:'Snappy · Solo · ~1–3 min runs', life:'~1–2 h pour tout débloquer', lifeEn:'~1–2 h to unlock everything',
+    desc:'Un serpent de lumière à faire grandir sans se mordre. Récupère les braises, enchaîne les combos et explose ton score.',
+    descEn:'A snake of light to grow without biting itself. Collect embers, chain combos and blow up your score.' },
+  ageofwar:{ genre:'Stratégie de couloir', genreEn:'Lane strategy', meta:'Stratégie · Solo · campagne + endless', metaEn:'Strategy · Solo · campaign + endless', life:'~2–3 h pour tout débloquer', lifeEn:'~2–3 h to unlock everything',
+    desc:'Mène ton armée à travers cinq ères, de la préhistoire au futur. Produis des unités, pose des tourelles, évolue d\'ère, déclenche ton pouvoir spécial et détruis la base adverse.',
+    descEn:'Lead your army through five ages, from prehistory to the future. Produce units, place turrets, evolve, trigger your special power and destroy the enemy base.' },
+  emberhill:{ genre:'Conduite physique', genreEn:'Physics driving', meta:'Réflexes · Solo · distance sans fin', metaEn:'Reflexes · Solo · endless distance', life:'~2–3 h pour tout débloquer', lifeEn:'~2–3 h to unlock everything',
+    desc:'Pilote ta braise sur des collines générées sans fin. Dose le gaz et le frein, garde l\'équilibre dans les sauts, ramasse le carburant et va le plus loin possible sans te retourner.',
+    descEn:'Drive your ember over endlessly generated hills. Balance gas and brake, keep your balance through jumps, grab fuel and go as far as you can without flipping.' },
+  prismbreak:{ genre:'Casse-briques', genreEn:'Brick-breaker', meta:'Arcade · Solo · parties ~3–6 min', metaEn:'Arcade · Solo · ~3–6 min runs', life:'~1–2 h pour tout maîtriser', lifeEn:'~1–2 h to master',
+    desc:'Brise tous les prismes avec ta balle. Enchaîne sans rattraper la balle pour faire monter le combo, ramasse les power-ups (multiballe, laser, perçant…) et grimpe les niveaux.',
+    descEn:'Break every prism with your ball. Chain hits without catching the ball to raise your combo, grab power-ups (multiball, laser, pierce…) and climb the levels.' },
 };
 
 const brandName = (window.GAMEPORTAL_CONFIG&&GAMEPORTAL_CONFIG.PORTAL_NAME)||'EMBER ARCADE';
@@ -147,22 +154,24 @@ function fmtTime(s){ s=Math.floor(s||0); const m=Math.floor(s/60); return m+':'+
 
 function cartHTML(g){
   const info = GAME_INFO[g.id] || {};
-  const genre = info.genre || 'Jeu';
+  const genre = info.genre || 'Jeu', genreEn = info.genreEn || genre;
+  const gAttr = `data-i18n-en="${genreEn}"`;
+  const descAttr = info.descEn ? ` data-i18n-en="${info.descEn}"` : '';
   if(g.soon){
-    return `<article class="cart soon"><div class="label"><span class="notch"></span>${genre}<span class="st">bientôt</span></div>
-      <div class="body"><div class="ttl">${g.title}</div><div class="tag">${info.desc||g.tagline}</div>
-      <div class="foot"><button class="play" disabled>Verrouillé</button></div></div></article>`;
+    return `<article class="cart soon"><div class="label"><span class="notch"></span><span ${gAttr}>${genre}</span><span class="st" data-i18n-en="soon">bientôt</span></div>
+      <div class="body"><div class="ttl">${g.title}</div><div class="tag"${descAttr}>${info.desc||g.tagline}</div>
+      <div class="foot"><button class="play" disabled data-i18n-en="Locked">Verrouillé</button></div></div></article>`;
   }
   const best = +(localStorage.getItem('gp:'+g.id+':best')||0);
   const UNIT = { lumen:'pts', ageofwar:'pts', emberhill:'m', prismbreak:'pts' };
   const bestStr = g.id==='emberfall' ? fmtTime(best) : best+' '+(UNIT[g.id]||'pts');
-  const bestTxt = best ? `record local <b>${bestStr}</b>` : 'pas encore joué';
-  const meta = info.meta ? `<div class="tag" style="opacity:.7;font-size:12px;margin-top:6px">${info.meta}</div>` : '';
-  const life = info.life ? `<div class="tag" style="font-size:11.5px;margin-top:4px;color:#9fe8ff;opacity:.85">⏱ Durée de vie : ${info.life}</div>` : '';
-  return `<article class="cart"><div class="label"><span class="notch"></span>${genre}<span class="st">prêt</span></div>
-    <div class="body"><div class="ttl">${g.title}</div><div class="tag">${info.desc||g.tagline}</div>${meta}${life}
+  const bestTxt = best ? `<span data-i18n-en="local record">record local</span> <b>${bestStr}</b>` : `<span data-i18n-en="not played yet">pas encore joué</span>`;
+  const meta = info.meta ? `<div class="tag" style="opacity:.7;font-size:12px;margin-top:6px"${info.metaEn?` data-i18n-en="${info.metaEn}"`:''}>${info.meta}</div>` : '';
+  const life = info.life ? `<div class="tag" style="font-size:11.5px;margin-top:4px;color:#9fe8ff;opacity:.85"${info.lifeEn?` data-i18n-en="⏱ Lifespan: ${info.lifeEn}"`:''}>⏱ Durée de vie : ${info.life}</div>` : '';
+  return `<article class="cart"><div class="label"><span class="notch"></span><span ${gAttr}>${genre}</span><span class="st" data-i18n-en="ready">prêt</span></div>
+    <div class="body"><div class="ttl">${g.title}</div><div class="tag"${descAttr}>${info.desc||g.tagline}</div>${meta}${life}
     <div class="foot"><span class="best">${bestTxt}</span>
-    <a class="play" href="/games/${g.id}/index.html">Jouer ▸</a></div></div></article>`;
+    <a class="play" href="/games/${g.id}/index.html" data-i18n-en="Play ▸">Jouer ▸</a></div></div></article>`;
 }
 
 const GAMEN = { emberfall:'Emberfall', lumen:'Lumen', ageofwar:'Conquête', emberhill:'Ember Hill', prismbreak:'Prismbreak' };
@@ -183,21 +192,26 @@ function renderProfile(){
 }
 window.addEventListener('gp:wallet', renderProfile);
 
+let GAMES_COUNT=0, ONLINE=false;
+function updateMeta(){ const t=GamePortal.t||((fr)=>fr), en=GamePortal.lang==='en';
+  const ss=document.getElementById('stStatus'); if(ss) ss.textContent = ONLINE ? t('en ligne','online') : t('hors-ligne','offline');
+  const ns=document.getElementById('netState'); if(ns) ns.textContent = ONLINE ? t('connecté à Supabase','connected to Supabase') : t('mode hors-ligne (scores locaux)','offline mode (local scores)');
+  const gc=document.getElementById('gcount'); if(gc) gc.textContent = GAMES_COUNT + (en ? (' game'+(GAMES_COUNT>1?'s':'')) : (' titre'+(GAMES_COUNT>1?'s':''))); }
 async function boot(){
   await GamePortal.init({ gameId:'portal' });
   document.getElementById('uname').textContent = GamePortal.getUsername();
   renderProfile();
-  const online = GamePortal.online;
-  document.getElementById('stStatus').textContent = online ? 'en ligne' : 'hors-ligne';
-  document.getElementById('netState').textContent = online ? 'connecté à Supabase' : 'mode hors-ligne (scores locaux)';
-
+  ONLINE = GamePortal.online;
   let games = await GamePortal.getGames();
   if(!games || !games.length) games = FALLBACK_GAMES;
   const all = games.concat(SOON);
   document.getElementById('grid').innerHTML = all.map(cartHTML).join('');
   document.getElementById('stGames').textContent = games.length;
-  document.getElementById('gcount').textContent = games.length+' titre'+(games.length>1?'s':'');
+  GAMES_COUNT = games.length;
+  updateMeta();
+  if(GamePortal.applyLang) GamePortal.applyLang();   // traduit les cartes fraîchement rendues si la langue est EN
 }
+window.addEventListener('gp:lang', updateMeta);
 
 document.getElementById('userChip').addEventListener('click', async ()=>{
   const res = await GamePortal.promptUsername();
@@ -207,19 +221,19 @@ document.getElementById('userChip').addEventListener('click', async ()=>{
 boot();
 </script>
 <!-- Signaler / Suggérer -->
-<button id="fbBtn" title="Signaler un bug ou proposer une idée" style="position:fixed;right:16px;bottom:16px;z-index:60;border:none;border-radius:999px;padding:12px 16px;font:600 13px 'Space Grotesk',sans-serif;color:#0c0a08;background:linear-gradient(120deg,#ff7a3c,#ffb04d);box-shadow:0 6px 20px rgba(0,0,0,.4);cursor:pointer">💬 Signaler / Suggérer</button>
+<button id="fbBtn" title="Signaler un bug ou proposer une idée" data-i18n-en="💬 Report / Suggest" style="position:fixed;right:16px;bottom:16px;z-index:60;border:none;border-radius:999px;padding:12px 16px;font:600 13px 'Space Grotesk',sans-serif;color:#0c0a08;background:linear-gradient(120deg,#ff7a3c,#ffb04d);box-shadow:0 6px 20px rgba(0,0,0,.4);cursor:pointer">💬 Signaler / Suggérer</button>
 <div id="fbModal" style="display:none;position:fixed;inset:0;z-index:61;background:rgba(6,6,12,.7);backdrop-filter:blur(5px);align-items:center;justify-content:center">
   <div style="background:#12101a;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:22px;max-width:440px;width:92%">
-    <div style="font:700 18px 'Space Grotesk',sans-serif;color:#fff;margin-bottom:4px">Ton retour</div>
-    <div style="font:400 13px 'Space Grotesk',sans-serif;color:#8d8aa0;margin-bottom:14px">Un bug, une idée d'amélioration ou de jeu ? Dis-moi tout.</div>
+    <div style="font:700 18px 'Space Grotesk',sans-serif;color:#fff;margin-bottom:4px" data-i18n-en="Your feedback">Ton retour</div>
+    <div style="font:400 13px 'Space Grotesk',sans-serif;color:#8d8aa0;margin-bottom:14px" data-i18n-en="A bug, an idea to improve or a new game? Tell me everything.">Un bug, une idée d'amélioration ou de jeu ? Dis-moi tout.</div>
     <div style="display:flex;gap:14px;margin-bottom:10px">
-      <label style="font:600 12px 'JetBrains Mono',monospace;color:#bfb9d6"><input type="radio" name="fbtype" value="Bug" checked> Bug</label>
-      <label style="font:600 12px 'JetBrains Mono',monospace;color:#bfb9d6"><input type="radio" name="fbtype" value="Idée"> Idée / amélioration</label>
+      <label style="font:600 12px 'JetBrains Mono',monospace;color:#bfb9d6"><input type="radio" name="fbtype" value="Bug" checked> <span data-i18n-en="Bug">Bug</span></label>
+      <label style="font:600 12px 'JetBrains Mono',monospace;color:#bfb9d6"><input type="radio" name="fbtype" value="Idée"> <span data-i18n-en="Idea / improvement">Idée / amélioration</span></label>
     </div>
-    <textarea id="fbText" rows="5" placeholder="Décris ici…" style="width:100%;background:#0a0a12;border:1px solid rgba(255,255,255,.14);border-radius:10px;color:#ece9f5;padding:10px;font:400 14px 'Space Grotesk',sans-serif;resize:vertical"></textarea>
+    <textarea id="fbText" rows="5" placeholder="Décris ici…" data-i18n-en-ph="Describe here…" style="width:100%;background:#0a0a12;border:1px solid rgba(255,255,255,.14);border-radius:10px;color:#ece9f5;padding:10px;font:400 14px 'Space Grotesk',sans-serif;resize:vertical"></textarea>
     <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end">
-      <button id="fbCancel" style="background:transparent;border:1px solid rgba(255,255,255,.18);color:#bfb9d6;border-radius:10px;padding:10px 16px;font:600 13px 'Space Grotesk',sans-serif;cursor:pointer">Annuler</button>
-      <button id="fbSend" style="background:linear-gradient(120deg,#ff7a3c,#ffb04d);border:none;color:#0c0a08;border-radius:10px;padding:10px 18px;font:600 13px 'Space Grotesk',sans-serif;cursor:pointer">Envoyer</button>
+      <button id="fbCancel" data-i18n-en="Cancel" style="background:transparent;border:1px solid rgba(255,255,255,.18);color:#bfb9d6;border-radius:10px;padding:10px 16px;font:600 13px 'Space Grotesk',sans-serif;cursor:pointer">Annuler</button>
+      <button id="fbSend" data-i18n-en="Send" style="background:linear-gradient(120deg,#ff7a3c,#ffb04d);border:none;color:#0c0a08;border-radius:10px;padding:10px 18px;font:600 13px 'Space Grotesk',sans-serif;cursor:pointer">Envoyer</button>
     </div>
   </div>
 </div>

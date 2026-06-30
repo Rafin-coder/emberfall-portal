@@ -42,3 +42,9 @@
   for = "/styles.css"
   [headers.values]
     Cache-Control = "public, max-age=86400"
+
+# Favicon : cache long.
+[[headers]]
+  for = "/favicon.png"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
