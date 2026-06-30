@@ -193,7 +193,10 @@ canvas{display:block;width:100%;height:100%}
   const BIOMES=[
     {id:'hills', name:'Collines', hint:'Le classique vallonné.', sky:['#0a0918','#1c1430','#3a2238'], gnd:['#46304f','#2a1c33','#140d1a'], rim:'#ff7a3c', star:'#dcdcff', grav:1650, ampMul:1.0, decor:'tree',cost:0},
     {id:'desert',name:'Désert de braise', hint:'Dunes chaudes, bosses sèches.', sky:['#1a0c10','#3a1a16','#5a2c1c'], gnd:['#8a5232','#52301c','#23130a'], rim:'#ffb04d', star:'#ffe0b0', grav:1650, ampMul:0.85, decor:'cactus',cost:450},
+    {id:'cavern',name:'Caverne ardente', hint:'Roche sombre, relief nerveux.', sky:['#0a0a0e','#16101c','#241526'], gnd:['#3a2a3a','#241a26','#0e0a10'], rim:'#ff9a4d', star:'#6a5a7a', grav:1650, ampMul:1.15, decor:'crystal',cost:900},
+    {id:'arctic',name:'Toundra givrée', hint:'Neige et sapins, bosses douces.', sky:['#0a1420','#16283a','#2a4a60'], gnd:['#4a6a82','#2c4256','#101a24'], rim:'#9fe8ff', star:'#ffffff', grav:1650, ampMul:0.9, decor:'pine',cost:1100},
     {id:'moon',  name:'Lune morte', hint:'Faible gravité — sauts énormes.', sky:['#04050d','#0b1024','#171c38'], gnd:['#3c3c4c','#222230','#0f0f17'], rim:'#9fb8ff', star:'#ffffff', grav:620, ampMul:1.35, decor:'rock',cost:1500},
+    {id:'mars',  name:'Mars rouge', hint:'Gravité faible, dunes rouges.', sky:['#1a0a08','#3a140e','#5a2016'], gnd:['#8a3a26','#4e2014','#200a06'], rim:'#ff6a4d', star:'#ffd0b0', grav:1000, ampMul:1.25, decor:'spire',cost:2200},
   ];
   function ownedStages(){try{return JSON.parse(localStorage.getItem('eh:stages'))||['hills'];}catch(e){return ['hills'];}}
   function saveStages(a){localStorage.setItem('eh:stages',JSON.stringify(a));}
@@ -205,9 +208,12 @@ canvas{display:block;width:100%;height:100%}
 
   // ---------- véhicules ----------
   const VEHICLES=[
-    {id:'buggy', name:'Buggy Braise', cost:0,    ef:1450, top:540, fuel:100, grip:1.00, air:3.2, wb:24, wr:14, body:'buggy'},
-    {id:'moto',  name:'Moto Cendre',  cost:600,  ef:1680, top:640, fuel:90,  grip:0.92, air:4.3, wb:18, wr:13, body:'moto'},
-    {id:'truck', name:'Camion Forge', cost:2400, ef:1320, top:470, fuel:160, grip:1.18, air:2.4, wb:30, wr:16, body:'truck'},
+    {id:'buggy',  name:'Buggy Braise',   cost:0,    ef:1450, top:540, fuel:100, grip:1.00, air:3.2, wb:24, wr:14, body:'buggy'},
+    {id:'moto',   name:'Moto Cendre',    cost:600,  ef:1680, top:640, fuel:90,  grip:0.92, air:4.3, wb:18, wr:13, body:'moto'},
+    {id:'quad',   name:'Quad Ember',     cost:1400, ef:1560, top:600, fuel:115, grip:1.08, air:4.6, wb:22, wr:15, body:'quad'},
+    {id:'truck',  name:'Camion Forge',   cost:2400, ef:1320, top:470, fuel:160, grip:1.18, air:2.4, wb:30, wr:16, body:'truck'},
+    {id:'monster',name:'Monstre Magma',  cost:3600, ef:1500, top:560, fuel:155, grip:1.32, air:2.8, wb:30, wr:21, body:'monster'},
+    {id:'bolide', name:'Bolide Néon',    cost:6000, ef:2050, top:840, fuel:80,  grip:0.82, air:2.6, wb:30, wr:11, body:'bolide'},
   ];
   function ownedVeh(){try{return JSON.parse(localStorage.getItem('eh:veh'))||['buggy'];}catch(e){return ['buggy'];}}
   function saveOwned(a){localStorage.setItem('eh:veh',JSON.stringify(a));}
@@ -400,17 +406,30 @@ canvas{display:block;width:100%;height:100%}
     wheel(-v.wb); wheel(v.wb);
     g.save(); g.translate(0, dip||0);            // débattement de suspension : le corps plonge/rebondit, roues au sol
     const bg=g.createLinearGradient(0,-12,0,14); bg.addColorStop(0,'#ffd27a');bg.addColorStop(1,'#ff7a3c'); g.fillStyle=bg;
-    if(v.body==='buggy'){ R(-30,-6,60,20,7);g.fill(); g.fillStyle='#ff7a3c';R(-16,-22,34,18,6);g.fill();
-      g.fillStyle='rgba(150,230,255,0.55)';R(-12,-19,26,12,4);g.fill();
-      g.fillStyle='#fff';g.beginPath();g.arc(0,-13,5,0,6.28);g.fill();g.fillStyle='#ffd27a';g.beginPath();g.arc(0,-13,3,0,6.28);g.fill(); }
-    else if(v.body==='moto'){ g.strokeStyle='#ff7a3c';g.lineWidth=4;g.beginPath();g.moveTo(-v.wb,14);g.lineTo(0,-6);g.lineTo(v.wb,14);g.moveTo(0,-6);g.lineTo(8,-2);g.stroke();
+    if(v.body==='moto'){ g.strokeStyle='#ff7a3c';g.lineWidth=4;g.beginPath();g.moveTo(-v.wb,14);g.lineTo(0,-6);g.lineTo(v.wb,14);g.moveTo(0,-6);g.lineTo(8,-2);g.stroke();
       R(-8,-10,20,8,3);g.fill();
       g.fillStyle='#fff';g.beginPath();g.arc(-2,-20,5,0,6.28);g.fill();g.fillStyle='#ffd27a';g.beginPath();g.arc(-2,-20,3,0,6.28);g.fill();
       g.strokeStyle='#ffd27a';g.lineWidth=3;g.beginPath();g.moveTo(-2,-16);g.lineTo(6,-4);g.stroke(); }
-    else { R(-34,-10,68,24,6);g.fill(); g.fillStyle='#ff7a3c';R(-30,-30,30,22,5);g.fill();
+    else if(v.body==='truck'){ R(-34,-10,68,24,6);g.fill(); g.fillStyle='#ff7a3c';R(-30,-30,30,22,5);g.fill();
       g.fillStyle='rgba(150,230,255,0.5)';R(-26,-26,22,12,3);g.fill();
       g.fillStyle='#22222e';R(2,-26,30,18,4);g.fill();
       g.fillStyle='#fff';g.beginPath();g.arc(-15,-20,5,0,6.28);g.fill();g.fillStyle='#ffd27a';g.beginPath();g.arc(-15,-20,3,0,6.28);g.fill(); }
+    else if(v.body==='quad'){ R(-22,-3,44,16,6);g.fill();
+      g.fillStyle='#ff7a3c';R(-6,-16,20,13,5);g.fill();                                  // bloc moteur/siège
+      g.strokeStyle='#ffd27a';g.lineWidth=3;g.beginPath();g.moveTo(10,-12);g.lineTo(21,-19);g.stroke();   // guidon
+      g.fillStyle='#fff';g.beginPath();g.arc(21,-4,4,0,6.28);g.fill();g.fillStyle='#ffd27a';g.beginPath();g.arc(21,-4,2.5,0,6.28);g.fill(); }
+    else if(v.body==='monster'){ R(-26,-16,52,20,6);g.fill();                            // châssis surélevé
+      g.fillStyle='#ff7a3c';R(-18,-34,32,20,5);g.fill();                                 // cabine haute
+      g.fillStyle='rgba(150,230,255,0.5)';R(-13,-30,22,12,3);g.fill();
+      g.fillStyle='#fff';g.beginPath();g.arc(20,-9,5,0,6.28);g.fill();g.fillStyle='#ffd27a';g.beginPath();g.arc(20,-9,3,0,6.28);g.fill(); }
+    else if(v.body==='bolide'){ g.beginPath();g.moveTo(-34,9);g.lineTo(-30,-1);g.lineTo(4,-6);g.lineTo(22,-1);g.lineTo(34,9);g.closePath();g.fill();  // coque profilée basse
+      g.fillStyle='#ff7a3c';R(-8,-15,20,11,4);g.fill();                                  // cockpit
+      g.fillStyle='rgba(150,230,255,0.5)';R(-4,-13,12,6,2);g.fill();
+      g.strokeStyle='#ffd27a';g.lineWidth=3;g.beginPath();g.moveTo(-30,-2);g.lineTo(-35,-13);g.lineTo(-21,-13);g.stroke();   // aileron arrière
+      g.fillStyle='#fff';g.beginPath();g.arc(30,3,3.5,0,6.28);g.fill(); }
+    else { R(-30,-6,60,20,7);g.fill(); g.fillStyle='#ff7a3c';R(-16,-22,34,18,6);g.fill();   // buggy (défaut)
+      g.fillStyle='rgba(150,230,255,0.55)';R(-12,-19,26,12,4);g.fill();
+      g.fillStyle='#fff';g.beginPath();g.arc(0,-13,5,0,6.28);g.fill();g.fillStyle='#ffd27a';g.beginPath();g.arc(0,-13,3,0,6.28);g.fill(); }
     g.restore();
   }
 
@@ -441,6 +460,11 @@ canvas{display:block;width:100%;height:100%}
         ctx.fillStyle='#3a4d3a';ctx.beginPath();ctx.arc(d.x,gy-44*d.h,16*d.h,0,6.28);ctx.fill(); }
       else if(BIOME.decor==='cactus'){ ctx.strokeStyle='#3c5a30';ctx.lineWidth=6;ctx.lineCap='round';ctx.beginPath();
         ctx.moveTo(d.x,gy);ctx.lineTo(d.x,gy-40*d.h);ctx.moveTo(d.x,gy-24*d.h);ctx.lineTo(d.x+10,gy-30*d.h);ctx.stroke();ctx.lineCap='butt'; }
+      else if(BIOME.decor==='crystal'){ ctx.fillStyle='rgba(255,154,77,0.45)';ctx.beginPath();ctx.moveTo(d.x-7*d.h,gy);ctx.lineTo(d.x,gy-34*d.h);ctx.lineTo(d.x+7*d.h,gy);ctx.closePath();ctx.fill();
+        ctx.fillStyle='rgba(255,205,150,0.7)';ctx.beginPath();ctx.moveTo(d.x-3*d.h,gy);ctx.lineTo(d.x+2,gy-21*d.h);ctx.lineTo(d.x+4*d.h,gy);ctx.closePath();ctx.fill(); }
+      else if(BIOME.decor==='pine'){ ctx.fillStyle='#2e4636';ctx.beginPath();ctx.moveTo(d.x-13*d.h,gy);ctx.lineTo(d.x,gy-42*d.h);ctx.lineTo(d.x+13*d.h,gy);ctx.closePath();ctx.fill();
+        ctx.fillStyle='rgba(232,246,255,0.85)';ctx.beginPath();ctx.moveTo(d.x-6*d.h,gy-19*d.h);ctx.lineTo(d.x,gy-42*d.h);ctx.lineTo(d.x+6*d.h,gy-19*d.h);ctx.closePath();ctx.fill(); }
+      else if(BIOME.decor==='spire'){ ctx.fillStyle='#5a2418';ctx.beginPath();ctx.moveTo(d.x-6*d.h,gy);ctx.lineTo(d.x-2*d.h,gy-46*d.h);ctx.lineTo(d.x+2*d.h,gy-46*d.h);ctx.lineTo(d.x+6*d.h,gy);ctx.closePath();ctx.fill(); }
       else { ctx.fillStyle='#2c2630';ctx.beginPath();ctx.ellipse(d.x,gy-6,14*d.h,9*d.h,0,0,6.28);ctx.fill(); } }
     ctx.beginPath(); ctx.moveTo(x0,ground(x0));
     for(let wx=x0;wx<=x1;wx+=7) ctx.lineTo(wx,ground(wx));
