@@ -58,9 +58,9 @@ a.lblink{color:var(--cool);text-decoration:none;font-family:"JetBrains Mono",mon
 
 <canvas id="c"></canvas>
 <div id="hud">
-  <div class="stat sc"><span class="v" id="score">0</span><span class="k">score</span></div>
-  <div class="stat"><span class="v" id="level">1</span><span class="k">niveau</span></div>
-  <div class="stat"><div id="lives"></div><span class="k" style="margin-top:6px">vies</span></div>
+  <div class="stat sc"><span class="v" id="score">0</span><span class="k" data-i18n-en="score">score</span></div>
+  <div class="stat"><span class="v" id="level">1</span><span class="k" data-i18n-en="level">niveau</span></div>
+  <div class="stat"><div id="lives"></div><span class="k" style="margin-top:6px" data-i18n-en="lives">vies</span></div>
   <span id="combo">×1</span>
 </div>
 
@@ -69,48 +69,48 @@ a.lblink{color:var(--cool);text-decoration:none;font-family:"JetBrains Mono",mon
   <div class="panel">
     <div class="eyebrow">ember arcade</div>
     <h1>Prismbreak</h1>
-    <p>Brise tous les prismes. Renvoie la balle avec la raquette, enchaîne sans la rattraper pour faire grimper le combo.</p>
+    <p data-i18n-en="Break every prism. Bounce the ball with the paddle, chain hits without catching it to raise the combo.">Brise tous les prismes. Renvoie la balle avec la raquette, enchaîne sans la rattraper pour faire grimper le combo.</p>
     <div class="legend">
-      <div class="h">POWER-UPS (tombent des prismes)</div>
-      <div><span style="color:#9fe8ff">◈ Multiballe</span> — triple les balles</div>
-      <div><span style="color:#5fe3c8">▭ Large</span> — élargit la raquette</div>
-      <div><span style="color:#96e6ff">❄ Lenteur</span> — ralentit les balles</div>
-      <div><span style="color:#ffb04d">⌖ Laser</span> — la raquette tire</div>
-      <div><span style="color:#c08bff">➤ Perçant</span> — la balle transperce</div>
-      <div><span style="color:#ff8a9a">♥ Vie</span> — +1 vie</div>
+      <div class="h" data-i18n-en="POWER-UPS (drop from prisms)">POWER-UPS (tombent des prismes)</div>
+      <div><span style="color:#9fe8ff" data-i18n-en="◈ Multiball">◈ Multiballe</span> — <span data-i18n-en="triples the balls">triple les balles</span></div>
+      <div><span style="color:#5fe3c8" data-i18n-en="▭ Wide">▭ Large</span> — <span data-i18n-en="widens the paddle">élargit la raquette</span></div>
+      <div><span style="color:#96e6ff" data-i18n-en="❄ Slow">❄ Lenteur</span> — <span data-i18n-en="slows the balls">ralentit les balles</span></div>
+      <div><span style="color:#ffb04d" data-i18n-en="⌖ Laser">⌖ Laser</span> — <span data-i18n-en="the paddle shoots">la raquette tire</span></div>
+      <div><span style="color:#c08bff" data-i18n-en="➤ Pierce">➤ Perçant</span> — <span data-i18n-en="the ball goes through">la balle transperce</span></div>
+      <div><span style="color:#ff8a9a" data-i18n-en="♥ Life">♥ Vie</span> — <span data-i18n-en="+1 life">+1 vie</span></div>
     </div>
-    <div class="modebtns"><button class="btn" id="startBtn">Commencer</button></div>
-    <div class="keys">souris / glisse pour bouger &nbsp;·&nbsp; clic / espace pour lancer &nbsp;·&nbsp; ← →</div>
+    <div class="modebtns"><button class="btn" id="startBtn" data-i18n-en="Start">Commencer</button></div>
+    <div class="keys" data-i18n-en="mouse / drag to move &nbsp;·&nbsp; click / space to launch &nbsp;·&nbsp; ← →">souris / glisse pour bouger &nbsp;·&nbsp; clic / espace pour lancer &nbsp;·&nbsp; ← →</div>
   </div>
 </div>
 
 <!-- PAUSE -->
 <div class="overlay hidden" id="pauseScreen">
   <div class="panel">
-    <div class="eyebrow">pause</div>
-    <h2>En pause</h2>
+    <div class="eyebrow" data-i18n-en="pause">pause</div>
+    <h2 data-i18n-en="Paused">En pause</h2>
     <div id="pauseStats" style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:13px;margin-top:6px"></div>
     <div class="modebtns">
-      <button class="btn" id="resumeBtn">Reprendre</button>
-      <button class="btn ghost" id="endRunBtn">Terminer la partie</button>
+      <button class="btn" id="resumeBtn" data-i18n-en="Resume">Reprendre</button>
+      <button class="btn ghost" id="endRunBtn" data-i18n-en="End the run">Terminer la partie</button>
     </div>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--faint);margin-top:12px">« Terminer » enregistre ton score.</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--faint);margin-top:12px" data-i18n-en="“End” saves your score.">« Terminer » enregistre ton score.</div>
   </div>
 </div>
 
 <!-- GAME OVER -->
 <div class="overlay hidden" id="over">
   <div class="panel">
-    <div class="eyebrow" id="overTitle" style="color:var(--danger)">partie terminée</div>
+    <div class="eyebrow" id="overTitle" style="color:var(--danger)" data-i18n-en="game over">partie terminée</div>
     <div class="big" id="overScore">0</div>
     <div id="overSub" style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:13px"></div>
     <p id="netLine"></p>
     <div id="lbBox"></div>
     <div class="modebtns">
-      <button class="btn" id="retryBtn">Rejouer</button>
-      <button class="btn ghost" id="toMenuBtn">Menu</button>
+      <button class="btn" id="retryBtn" data-i18n-en="Replay">Rejouer</button>
+      <button class="btn ghost" id="toMenuBtn" data-i18n-en="Menu">Menu</button>
     </div>
-    <div class="keys"><a class="lblink" href="/leaderboard.html">voir le classement →</a></div>
+    <div class="keys"><a class="lblink" href="/leaderboard.html" data-i18n-en="view leaderboard →">voir le classement →</a></div>
   </div>
 </div>
 
@@ -118,6 +118,7 @@ a.lblink{color:var(--cool);text-decoration:none;font-family:"JetBrains Mono",mon
 <script src="/sdk.js"></script>
 <script>
 (function(){
+  const T=(fr,en)=> (window.GamePortal&&GamePortal.t) ? GamePortal.t(fr,en) : fr;  // raccourci i18n
   const cv=document.getElementById('c'), ctx=cv.getContext('2d');
   let W=innerWidth,H=innerHeight,DPR=Math.min(2,devicePixelRatio||1);
   let PW=560, OX=0, LWALL=0, RWALL=560, TOPY=78, padY=0;
@@ -144,7 +145,7 @@ a.lblink{color:var(--cool);text-decoration:none;font-family:"JetBrains Mono",mon
   const PARAMS=new URLSearchParams(location.search);
   let DAILY=null, RNG=Math.random;
   if(PARAMS.get('daily')==='1' && window.GamePortal){ DAILY=GamePortal.daily(); RNG=DAILY.rng;
-    const b=document.getElementById('dailyBadge'); b.textContent='DÉFI DU JOUR · '+DAILY.date; b.style.display='block'; }
+    const b=document.getElementById('dailyBadge'); b.textContent=T('DÉFI DU JOUR','DAILY CHALLENGE')+' · '+DAILY.date; b.style.display='block'; }
 
   // ---------- niveaux ----------
   // '.'=vide  1/2/3=PV  S=acier(incassable)  X=explosif  G=or(bonus)
@@ -215,7 +216,7 @@ a.lblink{color:var(--cool);text-decoration:none;font-family:"JetBrains Mono",mon
   function nextLevel(){ level++; combo=0;mult=1; drops=[];lasers=[];
     wide=Math.min(wide,2);   // garde un reste de bonus
     buildLevel(level); resetPaddle(); attachBall();
-    setBanner('NIVEAU '+level, '#9fe8ff'); score+=120; blip(880,.14,'triangle',.05); blip(1320,.16,'sine',.04); updateHUD(); }
+    setBanner(T('NIVEAU','LEVEL')+' '+level, '#9fe8ff'); score+=120; blip(880,.14,'triangle',.05); blip(1320,.16,'sine',.04); updateHUD(); }
 
   // ---------- contrôles ----------
   function movePaddleTo(px){ if(!P)return; P.x=clamp(px,LWALL+P.w/2,RWALL-P.w/2); if(launchHold&&balls[0]&&balls[0].stuck)balls[0].x=P.x; }
@@ -245,8 +246,8 @@ a.lblink{color:var(--cool);text-decoration:none;font-family:"JetBrains Mono",mon
     else if(t==='laser'){ laserT=11; }
     else if(t==='pierce'){ pierceT=8; }
     else if(t==='life'){ lives++; }
-    setBanner(({multi:'MULTIBALLE',wide:'RAQUETTE LARGE',slow:'RALENTI',laser:'LASER',pierce:'PERÇANT',life:'+1 VIE'})[t], 'rgb('+I.c+')');
-    floatTxt(P.x,padY-24,({multi:'×3',wide:'LARGE',slow:'SLOW',laser:'LASER',pierce:'PIERCE',life:'+VIE'})[t],'rgb('+I.c+')');
+    setBanner(({multi:T('MULTIBALLE','MULTIBALL'),wide:T('RAQUETTE LARGE','WIDE PADDLE'),slow:T('RALENTI','SLOW'),laser:T('LASER','LASER'),pierce:T('PERÇANT','PIERCE'),life:T('+1 VIE','+1 LIFE')})[t], 'rgb('+I.c+')');
+    floatTxt(P.x,padY-24,({multi:'×3',wide:T('LARGE','WIDE'),slow:'SLOW',laser:'LASER',pierce:'PIERCE',life:T('+VIE','+LIFE')})[t],'rgb('+I.c+')');
     blip(740,.1,'sine',.04); blip(1100,.08,'triangle',.03); updateHUD(); }
   function fireLaser(){ if(laserT<=0||state!=='play'||laserCd>0)return; laserCd=0.22;
     lasers.push({x:P.x-P.w/2+8,y:padY}); lasers.push({x:P.x+P.w/2-8,y:padY}); blip(1500,.05,'square',.025); }
@@ -361,7 +362,7 @@ a.lblink{color:var(--cool);text-decoration:none;font-family:"JetBrains Mono",mon
     const cb=document.getElementById('combo'); cb.textContent='×'+mult+(combo>1?'  '+combo+' combo':''); cb.classList.toggle('on',mult>1);
   }
   function togglePause(){ if(state==='play'){ state='paused';
-      document.getElementById('pauseStats').textContent='niveau '+level+' · '+score+' pts';
+      document.getElementById('pauseStats').textContent=T('niveau','level')+' '+level+' · '+score+' pts';
       show('pauseScreen');
     } else if(state==='paused'){ state='play'; last=performance.now(); hide('pauseScreen'); } }
   document.getElementById('pause').onclick=togglePause;
@@ -376,7 +377,7 @@ a.lblink{color:var(--cool);text-decoration:none;font-family:"JetBrains Mono",mon
       if(GamePortal.unlock){ GamePortal.unlock('pb_first'); if(level>=5)GamePortal.unlock('pb_lvl5'); if(score>=5000)GamePortal.unlock('pb_5k'); }
     }
     document.getElementById('overScore').textContent=score;
-    document.getElementById('overSub').textContent='niveau '+level+' · '+bricksDestroyed+' prismes · meilleur combo ×'+(1+Math.floor(peakCombo/3));
+    document.getElementById('overSub').textContent=T('niveau','level')+' '+level+' · '+bricksDestroyed+' '+T('prismes','prisms')+' · '+T('meilleur combo','best combo')+' ×'+(1+Math.floor(peakCombo/3));
     const nl=document.getElementById('netLine'), box=document.getElementById('lbBox'); box.innerHTML='';
     if(window.GamePortal&&GamePortal.finishRun){ GamePortal.finishRun(score,{lvl:level},{daily:!!DAILY,gameId:'prismbreak',netEl:nl,lbEl:box}); }
     else if(nl) nl.textContent='';
@@ -451,7 +452,7 @@ a.lblink{color:var(--cool);text-decoration:none;font-family:"JetBrains Mono",mon
     // bannière
     if(bannerT>0&&banner){ ctx.save();ctx.globalAlpha=Math.min(1,bannerT/0.5);ctx.fillStyle=banner.col;ctx.font='700 26px Space Grotesk';ctx.textAlign='center';ctx.shadowColor=banner.col;ctx.shadowBlur=18;ctx.fillText(banner.txt,W/2,H*0.32);ctx.restore();ctx.textAlign='left'; }
     // hint lancer
-    if(launchHold && balls[0] && balls[0].stuck && state==='play'){ ctx.save();ctx.globalAlpha=.6+.4*Math.sin(mt*4);ctx.fillStyle='#9fe8ff';ctx.font='600 13px JetBrains Mono';ctx.textAlign='center';ctx.fillText('clic / espace pour lancer',W/2,padY-40);ctx.restore();ctx.textAlign='left'; }
+    if(launchHold && balls[0] && balls[0].stuck && state==='play'){ ctx.save();ctx.globalAlpha=.6+.4*Math.sin(mt*4);ctx.fillStyle='#9fe8ff';ctx.font='600 13px JetBrains Mono';ctx.textAlign='center';ctx.fillText(T('clic / espace pour lancer','click / space to launch'),W/2,padY-40);ctx.restore();ctx.textAlign='left'; }
     if(flash>0){ ctx.fillStyle='rgba(255,60,90,'+(flash*0.4)+')';ctx.fillRect(0,0,W,H); }
   }
 
