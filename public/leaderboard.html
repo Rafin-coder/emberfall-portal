@@ -26,11 +26,11 @@
     <span style="width:46px;height:6px;border-radius:3px;background:rgba(255,255,255,.13);overflow:hidden;display:inline-block"><span id="navXp" style="display:block;height:100%;width:0;background:linear-gradient(90deg,#9fe8ff,#7ad7ff)"></span></span>
     <span style="font:700 12px 'JetBrains Mono',monospace;color:#ffb04d">◉&nbsp;<b id="navCoins">0</b></span>
   </a>
-  <div class="chip" id="userChip" title="Changer de pseudo"><span class="av"></span><span>Pseudo</span> <b id="uname">…</b></div>
+  <div class="chip" id="userChip" title="Changer de pseudo"><span class="av"></span><span data-i18n-en="Name">Pseudo</span> <b id="uname">…</b></div>
 </div></nav>
 
 <main class="wrap sec" style="padding-top:46px">
-  <div class="sechead"><h2>Classement</h2><span class="c">meilleur score par joueur</span><span class="line"></span></div>
+  <div class="sechead"><h2 data-i18n-en="Leaderboard">Classement</h2><span class="c" data-i18n-en="best score per player">meilleur score par joueur</span><span class="line"></span></div>
 
   <div class="controls">
     <select id="gameSel"></select>
@@ -38,13 +38,13 @@
   </div>
 
   <table class="lb">
-    <thead><tr><th class="rk">#</th><th>Joueur</th><th style="text-align:right">Score</th></tr></thead>
+    <thead><tr><th class="rk">#</th><th data-i18n-en="Player">Joueur</th><th style="text-align:right" data-i18n-en="Score">Score</th></tr></thead>
     <tbody id="rows"></tbody>
   </table>
-  <div class="empty" id="empty" style="display:none">Aucun score pour l'instant. Sois le premier à inscrire ton nom.</div>
+  <div class="empty" id="empty" style="display:none" data-i18n-en="No score yet. Be the first to put your name down.">Aucun score pour l'instant. Sois le premier à inscrire ton nom.</div>
 </main>
 
-<footer class="foot"><div class="wrap" style="display:flex;gap:16px;align-items:center;width:100%"><a href="/">← Retour à la salle</a><span class="mono" style="margin-left:auto;color:var(--faint)">© AofZ Inc. — site &amp; contenu</span></div></footer>
+<footer class="foot"><div class="wrap" style="display:flex;gap:16px;align-items:center;width:100%"><a href="/" data-i18n-en="← Back to the arcade">← Retour à la salle</a><span class="mono" style="margin-left:auto;color:var(--faint)" data-i18n-en="© AofZ Inc. — site &amp; content">© AofZ Inc. — site &amp; contenu</span></div></footer>
 
 <script src="/config.js"></script>
 <script src="/sdk.js"></script>
@@ -63,7 +63,7 @@ function fmtMeta(m){ if(!m) return ''; const p=[]; if(m.char)p.push(esc(m.char))
 
 async function render(gid){
   const rows = document.getElementById('rows'), empty = document.getElementById('empty');
-  rows.innerHTML = '<tr><td colspan="3" class="mono" style="color:var(--faint)">chargement…</td></tr>';
+  rows.innerHTML = '<tr><td colspan="3" class="mono" style="color:var(--faint)">'+GamePortal.t('chargement…','loading…')+'</td></tr>';
   const data = await GamePortal.getLeaderboard({ gameId: gid, limit: 50 });
   if(!data.length){ rows.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display='none';
@@ -85,7 +85,7 @@ window.addEventListener('gp:wallet', fillNav);
 async function boot(){
   await GamePortal.init({ gameId:'portal' });
   fillNav();
-  document.getElementById('netInfo').textContent = GamePortal.online ? 'classement en ligne' : 'hors-ligne — score local uniquement';
+  document.getElementById('netInfo').textContent = GamePortal.online ? GamePortal.t('classement en ligne','online leaderboard') : GamePortal.t('hors-ligne — score local uniquement','offline — local score only');
   let games = await GamePortal.getGames();
   if(!games || !games.length) games = FALLBACK_GAMES;
   const sel = document.getElementById('gameSel');

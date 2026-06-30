@@ -38,26 +38,26 @@
     <span style="width:46px;height:6px;border-radius:3px;background:rgba(255,255,255,.13);overflow:hidden;display:inline-block"><span id="navXp" style="display:block;height:100%;width:0;background:linear-gradient(90deg,#9fe8ff,#7ad7ff)"></span></span>
     <span style="font:700 12px 'JetBrains Mono',monospace;color:#ffb04d">◉&nbsp;<b id="navCoins">0</b></span>
   </a>
-  <div class="chip" id="userChip" title="Changer de pseudo"><span class="av"></span><span>Pseudo</span> <b id="uname">…</b></div>
+  <div class="chip" id="userChip" title="Changer de pseudo"><span class="av"></span><span data-i18n-en="Name">Pseudo</span> <b id="uname">…</b></div>
 </div></nav>
 
 <header class="hero" style="padding:54px 0 26px"><div class="scan"></div><div class="wrap">
-  <div class="eyebrow">une épreuve · 24 heures · le même départ pour tous</div>
-  <h1>Défi du <span class="em" id="dayLabel">jour</span></h1>
-  <p>Chaque jour, les mêmes conditions pour tout le monde. Inscris ton meilleur score avant minuit (UTC) et tiens ta série.</p>
+  <div class="eyebrow" data-i18n-en="one trial · 24 hours · same start for all">une épreuve · 24 heures · le même départ pour tous</div>
+  <h1><span data-i18n-en="Daily —">Défi du</span> <span class="em" id="dayLabel">jour</span></h1>
+  <p data-i18n-en="Every day, the same conditions for everyone. Post your best score before midnight (UTC) and keep your streak.">Chaque jour, les mêmes conditions pour tout le monde. Inscris ton meilleur score avant minuit (UTC) et tiens ta série.</p>
 </div></header>
 
 <main class="wrap sec" style="padding-top:8px">
   <div class="streak">
     <span class="flame">🔥</span>
-    <div><div class="n"><span id="streakN">0</span> jour<span id="streakS"></span></div><div class="l">série en cours · record <b id="streakBest">0</b></div></div>
+    <div><div class="n"><span id="streakN">0</span> <span data-i18n-en="day">jour</span><span id="streakS"></span></div><div class="l"><span data-i18n-en="current streak · best">série en cours · record</span> <b id="streakBest">0</b></div></div>
     <span class="mono" id="netInfo" style="margin-left:auto;color:var(--faint);font-size:12px"></span>
   </div>
 
   <div id="cards"></div>
 </main>
 
-<footer class="foot"><div class="wrap" style="display:flex;gap:16px;align-items:center;width:100%"><a href="/">← Retour à la salle</a><span class="mono" style="margin-left:auto;color:var(--faint)">© AofZ Inc. — site &amp; contenu</span></div></footer>
+<footer class="foot"><div class="wrap" style="display:flex;gap:16px;align-items:center;width:100%"><a href="/" data-i18n-en="← Back to the arcade">← Retour à la salle</a><span class="mono" style="margin-left:auto;color:var(--faint)" data-i18n-en="© AofZ Inc. — site &amp; content">© AofZ Inc. — site &amp; contenu</span></div></footer>
 
 <script src="/config.js"></script>
 <script src="/sdk.js"></script>
@@ -88,17 +88,17 @@ function emberfallConds(){
 }
 const COND = {
   emberfall: emberfallConds,
-  lumen: ()=> 'Séquence de braises partagée',
-  ageofwar: ()=> 'Mêmes vagues ennemies pour tous',
-  emberhill: ()=> 'Même terrain pour tous',
-  prismbreak: ()=> 'Mêmes niveaux pour tous'
+  lumen: ()=> GamePortal.t('Séquence de braises partagée','Shared ember sequence'),
+  ageofwar: ()=> GamePortal.t('Mêmes vagues ennemies pour tous','Same enemy waves for all'),
+  emberhill: ()=> GamePortal.t('Même terrain pour tous','Same terrain for all'),
+  prismbreak: ()=> GamePortal.t('Mêmes niveaux pour tous','Same levels for all')
 };
 
 function cardHTML(g){
   const cond = COND[g.id] ? COND[g.id]() : 'conditions du jour';
   return `<div class="daycard" data-g="${g.id}">
     <div class="top"><span class="ttl">${g.title}</span><span class="cond">${cond}</span></div>
-    <a class="play" href="/games/${g.id}/index.html?daily=1">Jouer le défi ▸</a>
+    <a class="play" href="/games/${g.id}/index.html?daily=1" data-i18n-en="Play the challenge ▸">Jouer le défi ▸</a>
     <div class="lb" id="lb-${g.id}"></div>
   </div>`;
 }
@@ -113,7 +113,7 @@ async function boot(){
   await GamePortal.init({ gameId:'portal' });
   fillNav();
   document.getElementById('dayLabel').textContent = GamePortal.daily().date;
-  document.getElementById('netInfo').textContent = GamePortal.online ? 'classements du jour en ligne' : 'hors-ligne — scores locaux';
+  document.getElementById('netInfo').textContent = GamePortal.online ? GamePortal.t('classements du jour en ligne','daily leaderboards online') : GamePortal.t('hors-ligne — scores locaux','offline — local scores');
 
   const st = GamePortal.getStreak();
   document.getElementById('streakN').textContent = st.count||0;
@@ -124,10 +124,11 @@ async function boot(){
   if(!games || !games.length) games = FALLBACK_GAMES;
   games = games.filter(g=>g.id!=='_portal');
   document.getElementById('cards').innerHTML = games.map(cardHTML).join('');
+  if(GamePortal.applyLang) GamePortal.applyLang();   // traduit les boutons des cartes si EN
 
   for(const g of games){
     const box = document.getElementById('lb-'+g.id);
-    GamePortal.renderTop(box, { gameId:g.id, limit:5, daily:true, title:'Classement du jour', format:(v)=>fmtVal(g.id,v) });
+    GamePortal.renderTop(box, { gameId:g.id, limit:5, daily:true, title:GamePortal.t('Classement du jour','Daily leaderboard'), format:(v)=>fmtVal(g.id,v) });
   }
 }
 

@@ -216,11 +216,11 @@
     return new Promise((resolve) => {
       const ov = document.createElement('div'); ov.className = 'gp-ov';
       ov.innerHTML = `<div class="gp-modal">
-        <div class="gp-h">Ton pseudo</div>
-        <div class="gp-sub">Visible dans les classements.</div>
+        <div class="gp-h">${t('Ton pseudo','Your name')}</div>
+        <div class="gp-sub">${t('Visible dans les classements.','Shown on the leaderboards.')}</div>
         <input class="gp-input" maxlength="24" value="${escapeHtml(getUsername())}">
-        <div class="gp-row2"><button class="gp-btn gp-ghost" data-x="cancel">Annuler</button>
-          <button class="gp-btn" data-x="ok">Enregistrer</button></div>
+        <div class="gp-row2"><button class="gp-btn gp-ghost" data-x="cancel">${t('Annuler','Cancel')}</button>
+          <button class="gp-btn" data-x="ok">${t('Enregistrer','Save')}</button></div>
         <div class="gp-err"></div></div>`;
       document.body.appendChild(ov);
       const input = ov.querySelector('.gp-input'), err = ov.querySelector('.gp-err');
@@ -230,9 +230,9 @@
       ov.addEventListener('mousedown', (e) => { if (e.target === ov) close(null); });
       async function save(){
         const name = input.value.trim();
-        if (!name) { err.textContent = 'Choisis un pseudo.'; return; }
+        if (!name) { err.textContent = t('Choisis un pseudo.','Choose a name.'); return; }
         const r = await setUsername(name);
-        if (r.ok) close(getUsername()); else err.textContent = r.error || 'Pseudo indisponible.';
+        if (r.ok) close(getUsername()); else err.textContent = r.error || t('Pseudo indisponible.','Name unavailable.');
       }
       ov.querySelector('[data-x="ok"]').onclick = save;
       input.addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') close(null); });
@@ -243,13 +243,13 @@
   async function renderTop(el, opts){
     if (!el) return; injectUI(); opts = opts || {};
     const limit = opts.limit || 5, fmt = opts.format || ((v) => String(v));
-    const title = opts.title || 'Classement en ligne';
-    el.innerHTML = `<div class="gp-lbtitle">${title}</div><div class="gp-muted">chargement…</div>`;
+    const title = opts.title || t('Classement en ligne','Online leaderboard');
+    el.innerHTML = `<div class="gp-lbtitle">${title}</div><div class="gp-muted">${t('chargement…','loading…')}</div>`;
     const data = opts.daily
       ? await getDailyLeaderboard({ gameId: opts.gameId, limit: 60 })
       : await getLeaderboard({ gameId: opts.gameId, limit: 60 });
     if (!data.length) {
-      el.innerHTML = `<div class="gp-lbtitle">${title}</div><div class="gp-muted">${sb ? 'Sois le premier à inscrire ton score.' : 'Classement en ligne indisponible.'}</div>`;
+      el.innerHTML = `<div class="gp-lbtitle">${title}</div><div class="gp-muted">${sb ? t('Sois le premier à inscrire ton score.','Be the first to post a score.') : t('Classement en ligne indisponible.','Online leaderboard unavailable.')}</div>`;
       return;
     }
     const me = data.find((r) => r.is_me);
