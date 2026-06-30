@@ -48,38 +48,38 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
 <div id="hud">
   <span class="sc" id="score">0</span>
   <span class="cmb" id="combo">×2</span>
-  <span class="best" id="best">record —</span>
+  <span class="best" id="best" data-i18n-en="best —">record —</span>
 </div>
 <div id="stage"><canvas id="c"></canvas></div>
-<div id="keysHud" style="position:fixed;bottom:10px;left:50%;transform:translateX(-50%);z-index:8;font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:rgba(255,255,255,.38);pointer-events:none">↑ ↓ ← →&nbsp; ·&nbsp; ZQSD&nbsp; ·&nbsp; glisse du doigt</div>
+<div id="keysHud" style="position:fixed;bottom:10px;left:50%;transform:translateX(-50%);z-index:8;font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:rgba(255,255,255,.38);pointer-events:none" data-i18n-en="↑ ↓ ← →&nbsp; ·&nbsp; WASD&nbsp; ·&nbsp; swipe">↑ ↓ ← →&nbsp; ·&nbsp; ZQSD&nbsp; ·&nbsp; glisse du doigt</div>
 
 <div class="overlay" id="menu">
   <div class="panel">
     <div class="eyebrow">ember arcade</div>
     <h1>Lumen</h1>
-    <p>Guide la lumière, ramasse les braises, fuis tes propres ténèbres. Plus tu enchaînes vite, plus le combo grimpe.</p>
+    <p data-i18n-en="Guide the light, collect the embers, flee your own darkness. The faster you chain, the higher the combo.">Guide la lumière, ramasse les braises, fuis tes propres ténèbres. Plus tu enchaînes vite, plus le combo grimpe.</p>
     <div style="text-align:left;max-width:340px;margin:14px auto 4px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;color:var(--muted)">
-      <div style="color:#bfb9d6;font-size:11px;letter-spacing:.12em;margin-bottom:6px">BRAISES SPÉCIALES (1 sur 7)</div>
-      <div><span style="color:#ffd27a">◆ Braise d'or</span> — +120 points</div>
-      <div><span style="color:#96e6ff">❄ Prisme</span> — ralentit pendant 5 s</div>
-      <div><span style="color:#ff8c5a">✦ Brasier</span> — points ×2 sur 6 braises</div>
-      <div><span style="color:#5fe3c8">◉ Halo</span> — survit à un choc (cumulable ×3)</div>
+      <div style="color:#bfb9d6;font-size:11px;letter-spacing:.12em;margin-bottom:6px" data-i18n-en="SPECIAL EMBERS (1 in 7)">BRAISES SPÉCIALES (1 sur 7)</div>
+      <div><span style="color:#ffd27a" data-i18n-en="◆ Gold ember">◆ Braise d'or</span> — <span data-i18n-en="+120 points">+120 points</span></div>
+      <div><span style="color:#96e6ff" data-i18n-en="❄ Prism">❄ Prisme</span> — <span data-i18n-en="slows for 5 s">ralentit pendant 5 s</span></div>
+      <div><span style="color:#ff8c5a" data-i18n-en="✦ Blaze">✦ Brasier</span> — <span data-i18n-en="points ×2 over 6 embers">points ×2 sur 6 braises</span></div>
+      <div><span style="color:#5fe3c8" data-i18n-en="◉ Halo">◉ Halo</span> — <span data-i18n-en="survive one hit (stacks ×3)">survit à un choc (cumulable ×3)</span></div>
     </div>
-    <button class="btn" id="startBtn">Commencer</button>
-    <div class="keys">flèches / ZQSD &nbsp;·&nbsp; ou glisse du doigt</div>
+    <button class="btn" id="startBtn" data-i18n-en="Start">Commencer</button>
+    <div class="keys" data-i18n-en="arrows / WASD &nbsp;·&nbsp; or swipe">flèches / ZQSD &nbsp;·&nbsp; ou glisse du doigt</div>
   </div>
 </div>
 
 <div class="overlay hidden" id="over">
   <div class="panel">
-    <div class="eyebrow" style="color:var(--danger)">extinction</div>
+    <div class="eyebrow" style="color:var(--danger)" data-i18n-en="extinguished">extinction</div>
     <div class="big" id="finalScore">0</div>
     <div class="sub" id="finalSub">longueur 0</div>
     <p id="netLine" style="font-size:12px"></p>
     <div id="lbBox" style="margin:10px 0 2px"></div>
-    <button class="btn" id="retryBtn">Rejouer</button>
-    <button id="toMenuBtn" style="margin-top:9px;background:transparent;border:1px solid rgba(255,255,255,.18);color:#bfb9d6;font:600 14px 'Space Grotesk';border-radius:11px;padding:11px 22px;cursor:pointer">Menu principal</button>
-    <div class="keys"><a href="/leaderboard.html" style="color:var(--cool);text-decoration:none">voir le classement →</a></div>
+    <button class="btn" id="retryBtn" data-i18n-en="Replay">Rejouer</button>
+    <button id="toMenuBtn" style="margin-top:9px;background:transparent;border:1px solid rgba(255,255,255,.18);color:#bfb9d6;font:600 14px 'Space Grotesk';border-radius:11px;padding:11px 22px;cursor:pointer" data-i18n-en="Main menu">Menu principal</button>
+    <div class="keys"><a href="/leaderboard.html" style="color:var(--cool);text-decoration:none" data-i18n-en="view leaderboard →">voir le classement →</a></div>
   </div>
 </div>
 
@@ -87,6 +87,7 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
 <script src="/sdk.js"></script>
 <script>
 (function(){
+  const T=(fr,en)=> (window.GamePortal&&GamePortal.t) ? GamePortal.t(fr,en) : fr;  // raccourci i18n
   const cv=document.getElementById('c'), ctx=cv.getContext('2d');
   const GRID=22; let CELL=24, SIZE=GRID*CELL, DPR=Math.min(2,window.devicePixelRatio||1);
 
@@ -104,7 +105,7 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
   if(PARAMS.get('daily')==='1' && window.GamePortal){
     DAILY=GamePortal.daily(); RNG=DAILY.rng;
     const b=document.getElementById('dailyBadge');
-    if(b){ b.textContent='DÉFI DU JOUR · '+DAILY.date; b.style.display='block'; }
+    if(b){ b.textContent=T('DÉFI DU JOUR','DAILY CHALLENGE')+' · '+DAILY.date; b.style.display='block'; }
   }
 
   // ---------- audio ----------
@@ -118,10 +119,10 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
   let S=null;
   const SPECIALS=['gold','slow','double','shield'];
   const SPECIAL_INFO={
-    gold:  {col:'255,210,122', icon:'◆', label:"Braise d'or", desc:'+120 points'},
-    slow:  {col:'150,230,255', icon:'❄', label:'Prisme',     desc:'ralentit 5 s'},
-    double:{col:'255,140,90',  icon:'✦', label:'Brasier',    desc:'points ×2 (6 braises)'},
-    shield:{col:'95,227,200',  icon:'◉', label:'Halo',       desc:"survit à 1 choc"},
+    gold:  {col:'255,210,122', icon:'◆', label:T("Braise d'or",'Gold ember'), desc:T('+120 points','+120 points')},
+    slow:  {col:'150,230,255', icon:'❄', label:T('Prisme','Prism'),     desc:T('ralentit 5 s','slows 5 s')},
+    double:{col:'255,140,90',  icon:'✦', label:T('Brasier','Blaze'),    desc:T('points ×2 (6 braises)','points ×2 (6 embers)')},
+    shield:{col:'95,227,200',  icon:'◉', label:T('Halo','Halo'),       desc:T("survit à 1 choc",'survive 1 hit')},
   };
   function lumBanner(t,col){ if(!S)return; S.banner=t; S.bannerCol=col||'255,255,255'; S.bannerT=1.4; }
   function reset(){
@@ -169,14 +170,14 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
     if(S.queue.length) S.dir=S.queue.shift();
     const head=S.snake[0], nh={x:head.x+S.dir.x, y:head.y+S.dir.y};
     if(nh.x<0||nh.x>=GRID||nh.y<0||nh.y>=GRID){
-      if(S.shield>0){ S.shield--; S.queue=[]; lumBanner('Halo consommé','95,227,200'); blip(520,.12,'square',.05); return; }
+      if(S.shield>0){ S.shield--; S.queue=[]; lumBanner(T('Halo consommé','Halo used'),'95,227,200'); blip(520,.12,'square',.05); return; }
       return die(); }
     const eat = S.food && nh.x===S.food.x && nh.y===S.food.y;
     S.prev = S.snake.map(s=>({x:s.x,y:s.y}));
     S.snake.unshift(nh);
     if(!eat) S.snake.pop();
     for(let i=1;i<S.snake.length;i++){ if(S.snake[i].x===nh.x&&S.snake[i].y===nh.y){
-      if(S.shield>0){ S.shield--; S.snake=S.prev.map(s=>({x:s.x,y:s.y})); S.queue=[]; lumBanner('Halo consommé','95,227,200'); blip(520,.12,'square',.05); return; }
+      if(S.shield>0){ S.shield--; S.snake=S.prev.map(s=>({x:s.x,y:s.y})); S.queue=[]; lumBanner(T('Halo consommé','Halo used'),'95,227,200'); blip(520,.12,'square',.05); return; }
       return die(); } }
     if(eat){
       S.eaten++;
@@ -220,7 +221,7 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
       if(S.score>=1000)GamePortal.unlock('lu_score');
       if(DAILY)GamePortal.unlock('lu_daily'); }
     document.getElementById('finalScore').textContent=S.score;
-    document.getElementById('finalSub').textContent='longueur '+S.snake.length+' · '+S.eaten+' braises';
+    document.getElementById('finalSub').textContent=T('longueur','length')+' '+S.snake.length+' · '+S.eaten+' '+T('braises','embers');
     const nl=document.getElementById('netLine');
     if(window.GamePortal){
       GamePortal.finishRun(S.score, {len:S.snake.length, embers:S.eaten},
@@ -297,18 +298,18 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
   // ---------- flow ----------
   function startGame(){ ac(); reset(); document.getElementById('menu').classList.add('hidden'); document.getElementById('over').classList.add('hidden'); }
   function toMenu(){ document.getElementById('over').classList.add('hidden'); reset(); S.state='menu';
-    document.getElementById('best').textContent='record '+(+(localStorage.getItem('gp:lumen:best')||0));
+    document.getElementById('best').textContent=T('record','best')+' '+(+(localStorage.getItem('gp:lumen:best')||0));
     document.getElementById('menu').classList.remove('hidden'); }
   document.getElementById('startBtn').onclick=startGame;
   document.getElementById('retryBtn').onclick=startGame;
   document.getElementById('toMenuBtn').onclick=toMenu;
 
   reset(); S.state='menu';
-  document.getElementById('best').textContent='record '+(+(localStorage.getItem('gp:lumen:best')||0));
+  document.getElementById('best').textContent=T('record','best')+' '+(+(localStorage.getItem('gp:lumen:best')||0));
   requestAnimationFrame(loop);
 
   if(window.GamePortal){ GamePortal.init({gameId:'lumen'}).then(()=>{
-    document.getElementById('best').textContent='record '+(+(localStorage.getItem('gp:lumen:best')||0)); }); }
+    document.getElementById('best').textContent=T('record','best')+' '+(+(localStorage.getItem('gp:lumen:best')||0)); }); }
 })();
 </script>
 </body>
