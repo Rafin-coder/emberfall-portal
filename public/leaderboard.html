@@ -18,7 +18,12 @@
     <a href="/leaderboard.html" class="on">Classement</a>
     <a href="/roadmap.html">Roadmap</a>
   </div>
-  <div class="chip" id="userChip"><span class="av"></span><span>Pseudo</span> <b id="uname">…</b></div>
+  <a class="chip" href="/#profil" id="profilChip" title="Ton profil & tes succès" style="text-decoration:none">
+    <span style="font:700 12px 'JetBrains Mono',monospace;color:#ffd27a">Nv&nbsp;<b id="navLvl">1</b></span>
+    <span style="width:46px;height:6px;border-radius:3px;background:rgba(255,255,255,.13);overflow:hidden;display:inline-block"><span id="navXp" style="display:block;height:100%;width:0;background:linear-gradient(90deg,#9fe8ff,#7ad7ff)"></span></span>
+    <span style="font:700 12px 'JetBrains Mono',monospace;color:#ffb04d">◉&nbsp;<b id="navCoins">0</b></span>
+  </a>
+  <div class="chip" id="userChip" title="Changer de pseudo"><span class="av"></span><span>Pseudo</span> <b id="uname">…</b></div>
 </div></nav>
 
 <main class="wrap sec" style="padding-top:46px">
@@ -68,9 +73,15 @@ async function render(gid){
   }).join('');
 }
 
+function fillNav(){ const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  const lv=GamePortal.getLevel?GamePortal.getLevel():{level:1,pct:0};
+  set('navLvl',lv.level); set('navCoins',GamePortal.getCoins?GamePortal.getCoins():0);
+  const nx=document.getElementById('navXp'); if(nx)nx.style.width=Math.round((lv.pct||0)*100)+'%';
+  set('uname', GamePortal.getUsername?GamePortal.getUsername():'Invité'); }
+window.addEventListener('gp:wallet', fillNav);
 async function boot(){
   await GamePortal.init({ gameId:'portal' });
-  document.getElementById('uname').textContent = GamePortal.getUsername();
+  fillNav();
   document.getElementById('netInfo').textContent = GamePortal.online ? 'classement en ligne' : 'hors-ligne — score local uniquement';
   let games = await GamePortal.getGames();
   if(!games || !games.length) games = FALLBACK_GAMES;
