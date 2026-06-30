@@ -13,11 +13,12 @@
 <nav class="nav"><div class="wrap row">
   <a class="brand" href="/"><span class="dot"></span><span id="brand">EMBER ARCADE</span></a>
   <div class="navlinks">
-    <a href="/" class="on">Jeux</a>
-    <a href="/daily.html">Défi</a>
-    <a href="/leaderboard.html">Classement</a>
-    <a href="/roadmap.html">Roadmap</a>
+    <a href="/" class="on" data-i18n-en="Games">Jeux</a>
+    <a href="/daily.html" data-i18n-en="Daily">Défi</a>
+    <a href="/leaderboard.html" data-i18n-en="Leaderboard">Classement</a>
+    <a href="/roadmap.html" data-i18n-en="Roadmap">Roadmap</a>
   </div>
+  <button class="chip" id="langChip" title="Langue / Language" style="cursor:pointer;font:700 11px 'JetBrains Mono',monospace">FR</button>
   <a class="chip" href="#profil" id="profilChip" title="Ton profil & tes succès" style="text-decoration:none">
     <span style="font:700 12px 'JetBrains Mono',monospace;color:#ffd27a">Nv&nbsp;<b id="navLvl">1</b></span>
     <span style="width:46px;height:6px;border-radius:3px;background:rgba(255,255,255,.13);overflow:hidden;display:inline-block"><span id="navXp" style="display:block;height:100%;width:0;background:linear-gradient(90deg,#9fe8ff,#7ad7ff)"></span></span>
@@ -29,12 +30,12 @@
 </div></nav>
 
 <header class="hero"><div class="scan"></div><div class="wrap">
-  <div class="eyebrow">salle d'arcade · navigateur · sans installation</div>
-  <h1>De petits jeux.<br>De <span class="em">vrais</span> classements.</h1>
-  <p>Une collection de jeux courts qui se jouent dans l'onglet. Un seul pseudo, des scores partagés, et une place à défendre sur chaque tableau.</p>
+  <div class="eyebrow" data-i18n-en="arcade · browser · no install">salle d'arcade · navigateur · sans installation</div>
+  <h1 data-i18n-en-html="Small games.<br>Real <span class=&quot;em&quot;>leaderboards</span>.">De petits jeux.<br>De <span class="em">vrais</span> classements.</h1>
+  <p data-i18n-en="A collection of short games you play right in the tab. One name, shared scores, and a spot to defend on every board.">Une collection de jeux courts qui se jouent dans l'onglet. Un seul pseudo, des scores partagés, et une place à défendre sur chaque tableau.</p>
   <div class="stats">
-    <div class="s"><div class="n mono" id="stGames">1</div><div class="l">jeux jouables</div></div>
-    <div class="s"><div class="n mono" id="stStatus">hors-ligne</div><div class="l">classements</div></div>
+    <div class="s"><div class="n mono" id="stGames">1</div><div class="l" data-i18n-en="playable games">jeux jouables</div></div>
+    <div class="s"><div class="n mono" id="stStatus">hors-ligne</div><div class="l" data-i18n-en="leaderboards">classements</div></div>
   </div>
 </div></header>
 

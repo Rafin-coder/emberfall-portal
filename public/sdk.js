@@ -442,8 +442,36 @@
     requestAnimationFrame(()=>t.classList.add('in'));
     setTimeout(()=>{ t.classList.remove('in'); setTimeout(()=>t.remove(), 420); }, opts.kind==='ach'?4200:2700); }
 
+  // ---------- i18n (FR/EN) ----------
+  // Le HTML reste en français ; on ajoute data-i18n-en="..." (texte) ou
+  // data-i18n-en-html="..." (HTML) sur les éléments à traduire. applyLang() bascule.
+  let lang = (function(){ try{ return localStorage.getItem('gp:lang')==='en' ? 'en' : 'fr'; }catch(e){ return 'fr'; } })();
+  function t(fr,en){ return (lang==='en' && en!=null) ? en : fr; }
+  function applyLang(){
+    try{ document.documentElement.lang = lang; }catch(e){}
+    document.querySelectorAll('[data-i18n-en]').forEach(el=>{
+      if(el.__fr===undefined) el.__fr = el.textContent;
+      el.textContent = lang==='en' ? el.getAttribute('data-i18n-en') : el.__fr; });
+    document.querySelectorAll('[data-i18n-en-html]').forEach(el=>{
+      if(el.__frh===undefined) el.__frh = el.innerHTML;
+      el.innerHTML = lang==='en' ? el.getAttribute('data-i18n-en-html') : el.__frh; });
+    document.querySelectorAll('[data-i18n-en-ph]').forEach(el=>{
+      if(el.__frp===undefined) el.__frp = el.getAttribute('placeholder')||'';
+      el.setAttribute('placeholder', lang==='en' ? el.getAttribute('data-i18n-en-ph') : el.__frp); });
+    const chip=document.getElementById('langChip'); if(chip) chip.textContent = lang==='en' ? 'EN' : 'FR';
+  }
+  function setLang(l){ lang = (l==='en') ? 'en' : 'fr'; try{ localStorage.setItem('gp:lang',lang); }catch(e){} applyLang(); }
+  function initI18n(){ const chip=document.getElementById('langChip');
+    if(chip) chip.addEventListener('click', ()=> setLang(lang==='en'?'fr':'en'));
+    applyLang(); }
+  if(typeof document!=='undefined'){
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initI18n);
+    else initI18n();
+  }
+
   const GamePortal = {
     init, ready,
+    t, applyLang, setLang, get lang(){ return lang; },
     getUsername, setUsername,
     submitScore, getLeaderboard, getGames,
     saveProgress, loadProgress,
