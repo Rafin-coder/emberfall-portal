@@ -24,7 +24,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
   padding:5px 10px;border-radius:9px;white-space:nowrap;text-shadow:0 0 12px rgba(255,154,60,.5)}
 .lvltag b{font-size:14px}
 .xpcol{flex:1;min-width:50px}
-.xpbar{position:relative;height:9px;border-radius:99px;background:rgba(56,224,192,.1);overflow:hidden;border:1px solid rgba(56,224,192,.28);box-shadow:0 0 14px rgba(56,224,192,.12)}
+.xpbar{position:relative;height:12px;border-radius:99px;background:rgba(56,224,192,.1);overflow:hidden;border:1px solid rgba(56,224,192,.28);box-shadow:0 0 14px rgba(56,224,192,.12)}
 .xpbar>i{position:absolute;inset:0;width:0;border-radius:99px;background:linear-gradient(90deg,#1fbfa6,var(--xp));box-shadow:0 0 10px var(--xp);transition:width .12s linear}
 .xptxt{font-size:10px;letter-spacing:.06em;opacity:.6;margin-top:3px;text-align:right}
 .hcenter{display:flex;flex-direction:column;align-items:center;gap:2px}
@@ -35,10 +35,10 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
   padding:5px 9px;border-radius:9px;backdrop-filter:blur(4px);white-space:nowrap}
 .chip i{font-style:normal;opacity:.7}.chip b{color:var(--ember-hi)}
 .chip.coin b{color:var(--coin)}.chip.coin i{color:var(--coin);opacity:.85}
-.hudvitals{position:absolute;left:16px;bottom:16px;width:min(270px,54vw);display:flex;flex-direction:column;gap:7px}
-.vrow{display:flex;align-items:center;gap:8px}
-.vlabel{font-size:9px;letter-spacing:.1em;opacity:.6;width:64px;text-align:right;flex:none}
-.hpbar,.frbar{position:relative;flex:1;height:15px;border-radius:99px;overflow:hidden}
+.hudvitals{position:absolute;left:16px;bottom:16px;width:min(360px,72vw);display:flex;flex-direction:column;gap:10px}
+.vrow{display:flex;align-items:center;gap:9px}
+.vlabel{font-size:11px;letter-spacing:.1em;opacity:.65;width:78px;text-align:right;flex:none}
+.hpbar,.frbar{position:relative;flex:1;height:24px;border-radius:99px;overflow:hidden}
 .hpbar{background:rgba(255,85,102,.12);border:1px solid rgba(255,85,102,.35)}
 .hpbar>i{position:absolute;inset:0;width:100%;border-radius:99px;background:linear-gradient(90deg,#c2303f,var(--hp));box-shadow:0 0 10px rgba(255,85,102,.5);transition:width .15s ease}
 .frbar{background:rgba(255,206,122,.1);border:1px solid rgba(255,206,122,.3)}
@@ -165,12 +165,12 @@ button:hover{filter:brightness(1.08)}button:active{transform:translateY(2px)}
 /* --- ajustements : lisibilité + anti-chevauchement bouton Arcade --- */
 .hudtop{padding:14px 16px 14px 112px}
 .timer{font-size:30px}
-.lvltag{font-size:13px} .lvltag b{font-size:17px}
+.lvltag{font-size:15px} .lvltag b{font-size:19px}
 .xptxt{font-size:12px}
 .difftag{font-size:11px}
-.chip{font-size:15px;padding:7px 11px}
-.vlabel{font-size:12px}
-.barnum{font-size:12px}
+.chip{font-size:17px;padding:8px 13px}
+.vlabel{font-size:14px}
+.barnum{font-size:14px}
 .wchip{font-size:12px;padding:5px 9px}
 .invrow .t{font-size:15px}
 .invrow .d{font-size:12.5px}
@@ -559,17 +559,33 @@ const sfx={shoot:()=>blip(rand(620,720),.05,'square',.03),
   over:()=>{[440,660,880,1320].forEach((f,i)=>setTimeout(()=>blip(f,.2,'square',.05),i*55));},
   buy:()=>{blip(700,.1,'triangle',.05);setTimeout(()=>blip(1050,.12,'triangle',.05),60);}};
 // ---- musique via Web Audio (même moteur que les effets => fiable, pas de blocage <audio>) ----
-let musicGain=null, musicBuf=null, musicSrc=null, musicReq=false, musicWant=false;
+let musicGain=null, musicBuf=null, musicSrc=null, musicReq=false, musicWant=false, musicPlaying=false, musicTimer=null;
+const XFADE=1.4;   // durée du fondu enchaîné au bouclage (s) -> aucune coupure perçue
 function ensureMusicGain(){ if(AC && !musicGain){ musicGain=AC.createGain(); musicGain.gain.value=Math.min(1,Math.max(0,musicVol)); musicGain.connect(AC.destination); } }
 function loadMusic(){ if(musicReq||!AC) return; musicReq=true;
   fetch('music.mp3').then(r=>r.arrayBuffer()).then(b=>AC.decodeAudioData(b))
-    .then(buf=>{ musicBuf=buf; if(musicWant) playMusic(); })
+    .then(buf=>{ musicBuf=buf; if(musicWant&&!musicPlaying) startMusicLoop(AC.currentTime+0.05); })
     .catch(()=>{ musicReq=false; }); }
+// boucle avec crossfade : chaque itération démarre XFADE secondes avant la fin de la précédente,
+// la fin s'estompe pendant que le début monte -> transition douce, plus de "coupure".
+function startMusicLoop(at){
+  if(!musicWant||!musicBuf||!AC) return; musicPlaying=true;
+  const dur=musicBuf.duration, X=Math.min(XFADE,dur*0.4);
+  const src=AC.createBufferSource(); src.buffer=musicBuf;
+  const g=AC.createGain(); src.connect(g).connect(musicGain);
+  g.gain.setValueAtTime(0.0001, at);
+  g.gain.linearRampToValueAtTime(1, at+X);
+  g.gain.setValueAtTime(1, at+dur-X);
+  g.gain.linearRampToValueAtTime(0.0001, at+dur);
+  src.start(at); src.stop(at+dur+0.1); musicSrc=src;
+  const next=at+dur-X;
+  clearTimeout(musicTimer);
+  musicTimer=setTimeout(()=>startMusicLoop(next), Math.max(50,(next-AC.currentTime-0.4)*1000));
+}
 function playMusic(){ musicWant=true; if(!AC) return; ensureMusicGain();
   if(!musicBuf){ loadMusic(); return; }
-  try{ if(musicSrc) musicSrc.stop(); }catch(e){}
-  musicSrc=AC.createBufferSource(); musicSrc.buffer=musicBuf; musicSrc.loop=true; musicSrc.connect(musicGain); musicSrc.start(0); }
-function stopMusic(){ musicWant=false; try{ if(musicSrc) musicSrc.stop(); }catch(e){} musicSrc=null; }
+  if(!musicPlaying) startMusicLoop(AC.currentTime+0.05); }
+function stopMusic(){ musicWant=false; musicPlaying=false; clearTimeout(musicTimer); try{ if(musicSrc) musicSrc.stop(); }catch(e){} musicSrc=null; }
 function applyMusicVol(){ if(musicGain) musicGain.gain.value=Math.min(1,Math.max(0,musicVol)); }
 const hudVol=document.getElementById('hudVol');
 hudVol.value=Math.round(musicVol*100);
