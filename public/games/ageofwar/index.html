@@ -75,6 +75,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
 </head>
 <body>
 <a id="back" href="/">← Arcade</a>
+<button id="pauseBtn" title="Pause" style="display:none;position:fixed;top:9px;right:12px;z-index:40;width:40px;height:34px;font-size:14px;cursor:pointer;background:rgba(8,8,14,.7);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:9px;color:#ffb04d">❚❚</button>
 <audio id="bgm" src="music.mp3" loop preload="none"></audio>
 <div id="dailyBadge"></div>
 
@@ -104,6 +105,17 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
       <button class="btn ghost" id="endlessBtn">Endless — survivre aux vagues (classé)</button>
     </div>
     <div class="keys">1/2/3 unités · T tourelle · E évoluer · Espace spécial</div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="pauseScreen">
+  <div class="panel">
+    <div class="eyebrow">pause</div>
+    <h1 style="font-size:34px;font-weight:700;color:var(--ember2)">En pause</h1>
+    <div class="modebtns">
+      <button class="btn" id="resumeBtn">Reprendre</button>
+      <button class="btn ghost" id="quitBtn">Quitter au menu</button>
+    </div>
   </div>
 </div>
 
@@ -173,7 +185,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
        pbHp:baseHp, pbMax:baseHp, ebHp:baseHp, ebMax:baseHp,
        units:[], turrets:[], slots:2, tracers:[], parts:[], floats:[],
        spawnCd:0, queue:[], spCd:0, special:0, shake:0,
-       e:{gold:90, xp:0, age:0, buyCd:1.2},
+       e:{gold:90, xp:0, age:0, buyCd:1.2, turrets:[], slots:2},
        spawnT:2.0, state:'play'};
   }
 
@@ -239,23 +251,33 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
   function aiUpdate(dt){
     const e=G.e;
     if(G.mode==='campaign'){
-      e.gold += (9 + G.t*0.06) * dt;
-      // évolution d'ère plus posée (palier ~toutes les 64 s) + plus tôt si riche
-      const target=Math.min(MAXAGE, Math.floor(G.t/64));
+      // Économie par VAGUES : l'IA épargne jusqu'à un pactole, puis lâche une vague variée (+ parfois une tourelle).
+      e.gold += (24 + G.t*0.16) * dt;
+      const target=Math.min(MAXAGE, Math.floor(G.t/48));
       if(e.age<target) e.age=target;
+      if(e.age<MAXAGE && e.gold>=evolveCost(e.age)*1.7){ e.gold-=evolveCost(e.age); e.age++; }  // évolue si très gros pactole
       e.buyCd -= dt;
-      if(e.buyCd<=0){
-        e.buyCd = Math.max(0.45, (1.3 - G.t*0.006)) * (0.7+Math.random()*0.6);
-        if(e.age<MAXAGE && e.gold>=evolveCost(e.age)*1.5){ e.gold-=evolveCost(e.age); e.age++; }
-        let eCount=G.units.reduce((n,u)=>n+(u.side==='e'?1:0),0);
-        // produit une petite escouade VARIÉE tant qu'il a l'or et la place (mêlée / distance / lourd)
-        for(let k=0; k<3 && eCount<13; k++){
-          const roll=Math.random(); const role = roll<0.38?0 : roll<0.70?1 : 2;
-          const s=unitStats(e.age, ROLES[role]);
-          if(e.gold<s.cost) break;
+      if(e.buyCd<=0 && e.gold>=(e.spendTarget||140)){
+        e.buyCd=0.2;
+        const ts=turretStats(e.age);
+        // défense : une tourelle (1 vague sur 2) si emplacement libre
+        if(e.turrets.length<e.slots && e.gold>=ts.cost && Math.random()<0.5){ e.gold-=ts.cost; e.turrets.push({age:e.age,dmg:ts.dmg,rng:ts.rng,rate:ts.rate,cd:0}); }
+        // parfois un emplacement de tourelle de plus
+        const sc=Math.round(260*Math.pow(1.7,e.slots-2));
+        if(e.slots<MAXSLOTS && e.gold>=sc+ts.cost && Math.random()<0.3){ e.gold-=sc; e.slots++; }
+        // vague d'unités VARIÉE (mêlée / distance / lourd)
+        let eCount=G.units.reduce((n,u)=>n+(u.side==='e'?1:0),0), guard=0;
+        while(eCount<14 && guard++<12){
+          const h=unitStats(e.age,'heavy'), r=unitStats(e.age,'ranged'), l=unitStats(e.age,'light'), pick=Math.random();
+          let role,s;
+          if(e.gold>=h.cost && pick<0.35){ role=2; s=h; }
+          else if(e.gold>=r.cost && pick<0.75){ role=1; s=r; }
+          else if(e.gold>=l.cost){ role=0; s=l; }
+          else break;
           e.gold-=s.cost; G.units.push(mkUnit('e', e.age, role, s)); eCount++;
         }
-      }
+        e.spendTarget = 120 + Math.random()*140 + G.t*0.6;   // prochain pactole (vagues qui grossissent)
+      } else if(e.buyCd<=0){ e.buyCd=0.4; }                   // pas encore le pactole : on patiente
     } else { // endless : vagues croissantes
       e.age=Math.min(MAXAGE, Math.floor(G.t/66));
       G.spawnT-=dt;
@@ -333,6 +355,13 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
         if(best){ tr.cd=tr.rate; best.hp-=tr.dmg; best.hit=.12;
           const tp=turretPos(idx); G.tracers.push({x1:tp.x+9,y1:tp.y,x2:best.x,y2:laneY()-10,t:.1,col:'120,230,200'}); blip(620,.03,'square',.012); } }
     });
+    // tourelles ennemies (défendent la base adverse)
+    G.e.turrets.forEach((tr,idx)=>{ tr.cd-=dt;
+      if(tr.cd<=0){ let best=null,bd=tr.rng*tr.rng;
+        for(const o of G.units){ if(o.side!=='p')continue; const dx=eBaseX()-o.x; const d=dx*dx; if(dx>0&&d<bd){bd=d;best=o;} }
+        if(best){ tr.cd=tr.rate; best.hp-=tr.dmg; best.hit=.12;
+          const tp=eTurretPos(idx); G.tracers.push({x1:tp.x-9,y1:tp.y,x2:best.x,y2:laneY()-10,t:.1,col:'255,150,120'}); blip(500,.03,'square',.012); } }
+    });
     // morts
     for(let i=G.units.length-1;i>=0;i--){ const u=G.units[i]; if(u.hp<=0){
       for(let k=0;k<7;k++){const a=Math.random()*6.28,s=30+Math.random()*90;G.parts.push({x:u.x,y:laneY()-8,dx:Math.cos(a)*s,dy:Math.sin(a)*s-30,life:.5,t:0,col:u.side==='p'?'255,150,90':'255,110,120'});}
@@ -356,6 +385,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
   function cap(x1,y1,x2,y2,w,col){ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
 
   function turretPos(idx){ return { x: pBaseX()-6+idx*20, y: laneY()-60 }; }
+  function eTurretPos(idx){ return { x: eBaseX()+6-idx*20, y: laneY()-60 }; }
   function render(){
     const gy=laneY();
     ctx.clearRect(0,0,W,H);
@@ -372,6 +402,13 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
       ctx.strokeStyle='rgba(255,255,255,.10)';ctx.lineWidth=1;
       for(let i=G.turrets.length;i<G.slots;i++){ const p=turretPos(i); ctx.strokeRect(p.x-9,p.y-2,18,12); } } // emplacements libres
     G.turrets.forEach((tr,idx)=>{ const p=turretPos(idx); drawTurret(p.x,p.y,tr.age); });
+    // rempart + tourelles ennemis
+    { const n=Math.max(2,G.e.slots), w=n*20+10, x0=eBaseX()+16-w, ry=gy-58;
+      ctx.fillStyle='rgba(30,22,26,.96)'; ctx.fillRect(x0,ry,w,11);
+      ctx.fillStyle='rgba(255,120,130,.45)'; for(let i=0;i<n;i++) ctx.fillRect(x0+5+i*20,ry-4,3,5);
+      ctx.strokeStyle='rgba(255,255,255,.10)';ctx.lineWidth=1;
+      for(let i=G.e.turrets.length;i<G.e.slots;i++){ const p=eTurretPos(i); ctx.strokeRect(p.x-9,p.y-2,18,12); } }
+    G.e.turrets.forEach((tr,idx)=>{ const p=eTurretPos(idx); drawTurret(p.x,p.y,tr.age); });
     for(const tc of G.tracers){ ctx.strokeStyle='rgba('+tc.col+','+Math.min(1,tc.t*10)+')';ctx.lineWidth=2;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(tc.x1,tc.y1);ctx.lineTo(tc.x2,tc.y2);ctx.stroke(); }
     // unités triées par x pour un bon recouvrement
     const sorted=G.units.slice().sort((a,b)=>a.x-b.x);
@@ -665,6 +702,7 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
   // ---------- fin ----------
   function endGame(win){
     G.state='done';
+    document.getElementById('pauseBtn').style.display='none';
     if(window.GamePortal&&GamePortal.addCoins){
       GamePortal.addCoins(Math.floor(G.kills/3)+G.wave*4+(win?120:0),'ageofwar');
       GamePortal.addXP(Math.floor(G.kills/4)+G.wave*3+(win?80:0),'ageofwar');
@@ -710,12 +748,24 @@ canvas{display:block;background:#06060c;border-top:1px solid var(--line);border-
     reset(mode);
     document.getElementById('menu').classList.add('hidden');
     document.getElementById('over').classList.add('hidden');
+    document.getElementById('pauseScreen').classList.add('hidden');
+    document.getElementById('pauseBtn').style.display='block';
     document.getElementById('overScore').style.fontSize='40px';
   }
   document.getElementById('campBtn').onclick=()=>start('campaign');
   document.getElementById('endlessBtn').onclick=()=>start('endless');
   document.getElementById('retryBtn').onclick=()=>start(G?G.mode:'endless');
-  document.getElementById('menuBtn').onclick=()=>{ document.getElementById('over').classList.add('hidden'); document.getElementById('menu').classList.remove('hidden'); G.state='menu'; };
+  function toMenu(){ document.getElementById('over').classList.add('hidden'); document.getElementById('pauseScreen').classList.add('hidden');
+    document.getElementById('pauseBtn').style.display='none'; document.getElementById('menu').classList.remove('hidden'); if(G)G.state='menu'; }
+  document.getElementById('menuBtn').onclick=toMenu;
+  // ---------- pause ----------
+  function togglePause(){ if(!G)return;
+    if(G.state==='play'){ G.state='paused'; document.getElementById('pauseScreen').classList.remove('hidden'); }
+    else if(G.state==='paused'){ G.state='play'; last=performance.now(); document.getElementById('pauseScreen').classList.add('hidden'); } }
+  document.getElementById('pauseBtn').onclick=togglePause;
+  document.getElementById('resumeBtn').onclick=togglePause;
+  document.getElementById('quitBtn').onclick=toMenu;
+  document.addEventListener('keydown',e=>{ const k=e.key.toLowerCase(); if((k==='p'||k==='escape')&&G&&(G.state==='play'||G.state==='paused'))togglePause(); });
 
   // défi du jour
   const PARAMS=new URLSearchParams(location.search);

@@ -42,6 +42,7 @@ canvas{display:block;width:100%;height:100%}
   background:radial-gradient(700px 400px at 50% 34%,rgba(255,122,60,.12),transparent 70%),rgba(6,6,12,.86);backdrop-filter:blur(6px);overflow:auto}
 .overlay.hidden{display:none}
 .panel{text-align:center;padding:26px 30px;max-width:520px;width:100%}
+#menu .panel{max-width:720px}  /* le menu (véhicules/stages/garage) a besoin de plus de largeur */
 .eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--ember);margin-bottom:12px}
 .panel h1{font-size:44px;font-weight:700;line-height:1;background:linear-gradient(120deg,#fff,var(--ember2));-webkit-background-clip:text;background-clip:text;color:transparent}
 .panel h2{font-size:28px;font-weight:700;color:var(--ember2)}
@@ -261,10 +262,10 @@ canvas{display:block;width:100%;height:100%}
     applyLoadout();
     const sx=flatStart();
     G={state:'play',t:0,x:sx,y:ground(sx)-VEH.wr,vx:0,vy:0,angle:slopeAt(sx),angVel:0,onGround:true,
-       fuel:FUELMAX,dist:0,best:+(localStorage.getItem('eh:best')||0),wheel:0,dry:0,flipT:0,coins:0,air:0,spin:0,flips:0,susY:0,susV:0};
+       fuel:FUELMAX,dist:0,best:+(localStorage.getItem('eh:best')||0),wheel:0,dry:0,flipT:0,coins:0,air:0,spin:0,flips:0,susY:0,susV:0,nextMile:500};
     pops=[];
     const r=DAILY?DAILY.rng:lrng(SEED);
-    cans=[]; let cx=820; for(let i=0;i<120;i++){cx+=760+r()*820; cans.push({x:cx,got:false});}
+    cans=[]; let cx=1100; for(let i=0;i<120;i++){cx+=1150+r()*1150; cans.push({x:cx,got:false});}
     coins=[]; let px=320; for(let i=0;i<1200;i++){px+=85+r()*150; coins.push({x:px,got:false,val:coinValue(px,r)});}
     decos=[]; let dx=180; for(let i=0;i<500;i++){dx+=150+r()*280; decos.push({x:dx,h:0.6+r()*0.8});}
   }
@@ -363,7 +364,9 @@ canvas{display:block;width:100%;height:100%}
       }
       G.angVel = clamp(G.angVel, -PHYS.airRotMax, PHYS.airRotMax);
       G.spin = (G.spin||0) + G.angVel*sdt;
-      if(Math.abs(G.spin) >= 6.2832){ G.spin -= Math.sign(G.spin)*6.2832; G.flips=(G.flips||0)+1; banner('SALTO !','#9fe8ff'); blip(880,.12,'triangle',.04); }
+      if(Math.abs(G.spin) >= 6.2832){ G.spin -= Math.sign(G.spin)*6.2832; G.flips=(G.flips||0)+1;
+        const fb=30+((G.flips-1)*10); G.coins+=fb;                       // bonus de pièces par salto (croissant)
+        pops.push({x:G.x,y:G.y-44,t:1.2,txt:'SALTO +'+fb}); banner('SALTO ! +'+fb+' ◉','#9fe8ff'); blip(880,.12,'triangle',.04); blip(1240,.1,'sine',.04); }
       G.vx *= (1 - PHYS.airDrag*sdt);
     }
     // 4) suspension visuelle (ressort amorti vers une compression de repos, n'affecte pas la collision)
@@ -371,7 +374,7 @@ canvas{display:block;width:100%;height:100%}
     G.susY = clamp((G.susY||0) + G.susV*sdt, -7, 11);
     // usure roue, conso, ramassages, retournement, panne sèche
     G.wheel += G.vx*sdt*0.07; G.t += sdt;
-    G.fuel = Math.max(0, G.fuel - (canGas?3.2:1.0)*sdt);
+    G.fuel = Math.max(0, G.fuel - (canGas?5.2:1.5)*sdt);
     for(const cc of coins){ if(cc.got)continue; if(cc.x<G.x-70)continue; if(cc.x>G.x+70)break;
       if(Math.abs(cc.x-G.x)<26 && Math.abs((ground(cc.x)-40)-G.y)<66){cc.got=true;G.coins+=cc.val;pops.push({x:cc.x,y:ground(cc.x)-46,t:1,txt:'+'+cc.val});blip(1100+Math.min(900,cc.val*6),.05,'square',.03);} }
     for(const cn of cans){ if(cn.got)continue; if(Math.abs(cn.x-G.x)<26 && Math.abs((ground(cn.x)-36)-G.y)<70){
@@ -492,6 +495,8 @@ canvas{display:block;width:100%;height:100%}
 
   function updateHUD(){
     G.dist=Math.max(G.dist,Math.floor(G.x/12));
+    if(G.dist>=G.nextMile){ const mb=20+Math.floor(G.nextMile/500-1)*10; G.coins+=mb;   // palier tous les 500 m -> bonus pièces
+      pops.push({x:G.x,y:G.y-50,t:1.3,txt:'+'+mb+' ◉'}); banner(G.nextMile+' m · +'+mb+' ◉','#ffd27a'); blip(1000,.12,'triangle',.04); G.nextMile+=500; }
     document.getElementById('dist').textContent=G.dist+' m';
     document.getElementById('spd').textContent=Math.round(Math.abs(G.vx)*0.16);
     document.getElementById('coins').textContent=G.coins;
