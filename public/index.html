@@ -59,6 +59,11 @@
     <span class="play" data-i18n-en="Take it ▸">Relever ▸</span>
   </a>
 
+  <section class="sec" id="quests" style="padding-top:16px;display:none">
+    <div class="sechead"><h2 data-i18n-en="Daily quests">Quêtes du jour</h2><span class="c" id="questSub"></span><span class="line"></span></div>
+    <div id="questList" style="display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(255px,1fr))"></div>
+  </section>
+
   <section class="sec" style="padding-top:18px">
     <div class="sechead"><h2 data-i18n-en="Play now">À jouer maintenant</h2><span class="c" id="gcount"></span><span class="line"></span></div>
     <div class="grid" id="grid"></div>
@@ -198,6 +203,35 @@ function renderProfile(){
 }
 window.addEventListener('gp:wallet', renderProfile);
 
+// ---- Quêtes du jour (rétention) ----
+function renderQuests(){
+  if(!GamePortal.getDailyQuests) return;
+  const list=document.getElementById('questList'), sec=document.getElementById('quests');
+  if(!list||!sec) return;
+  const qs=GamePortal.getDailyQuests(); if(!qs.length){ sec.style.display='none'; return; }
+  sec.style.display='block';
+  const t=GamePortal.t||((fr)=>fr);
+  const claimed=qs.filter(q=>q.claimed).length;
+  const sub=document.getElementById('questSub'); if(sub) sub.textContent=claimed+'/'+qs.length;
+  list.innerHTML=qs.map(q=>{
+    const pct=Math.max(0,Math.min(100,Math.round(q.value/q.target*100)));
+    let action;
+    if(q.claimed) action=`<span style="flex:none;font:700 12px 'JetBrains Mono',monospace;color:#5fe3c8">${t('Récupéré ✓','Claimed ✓')}</span>`;
+    else if(q.done) action=`<button data-claim="${q.id}" style="flex:none;border:none;cursor:pointer;border-radius:10px;padding:9px 13px;font:700 12px 'JetBrains Mono',monospace;color:#0c0a08;background:linear-gradient(120deg,#ffd27a,#ffe6b0)">${t('Récupérer','Claim')} ◉${q.reward}</button>`;
+    else action=`<span style="flex:none;font:700 12px 'JetBrains Mono',monospace;color:#8d8aa0">◉ ${q.reward}</span>`;
+    return `<div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.03);border:1px solid ${q.done&&!q.claimed?'rgba(255,210,122,.42)':'rgba(255,255,255,.08)'};border-radius:14px;padding:14px 16px">
+      <div style="flex:1;min-width:0">
+        <div style="font:600 14px 'Space Grotesk',sans-serif;color:#ece9f5;margin-bottom:8px">${esc(q.title)}</div>
+        <div style="height:7px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden"><span style="display:block;height:100%;width:${pct}%;background:linear-gradient(90deg,#ff7a3c,#ffd27a);transition:width .4s"></span></div>
+        <div style="font:600 11px 'JetBrains Mono',monospace;color:#8d8aa0;margin-top:5px">${q.value} / ${q.target}</div>
+      </div>${action}</div>`;
+  }).join('');
+  list.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>{ const r=GamePortal.claimQuest(b.dataset.claim); if(r&&r.ok){ renderQuests(); renderProfile(); } });
+}
+window.addEventListener('gp:quests', renderQuests);
+window.addEventListener('gp:wallet', renderQuests);
+window.addEventListener('gp:lang', renderQuests);
+
 let GAMES_COUNT=0, ONLINE=false;
 function updateMeta(){ const t=GamePortal.t||((fr)=>fr), en=GamePortal.lang==='en';
   const ss=document.getElementById('stStatus'); if(ss) ss.textContent = ONLINE ? t('en ligne','online') : t('hors-ligne','offline');
@@ -207,6 +241,7 @@ async function boot(){
   await GamePortal.init({ gameId:'portal' });
   document.getElementById('uname').textContent = GamePortal.getUsername();
   renderProfile();
+  renderQuests();
   ONLINE = GamePortal.online;
   let games = await GamePortal.getGames();
   if(!games || !games.length) games = FALLBACK_GAMES;

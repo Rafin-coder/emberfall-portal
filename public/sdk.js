@@ -270,6 +270,7 @@
     opts = opts || {};
     const isDaily = !!opts.daily;
     const r = isDaily ? await submitDaily(value, meta) : await submitScore(value, meta);
+    _questOnRun(opts.gameId || gameId, isDaily);   // progression des quêtes du jour
     if (opts.netEl){
       let txt = sb ? (isDaily ? 'défi du jour envoyé' : 'score envoyé au classement')
                    : (isDaily ? 'hors-ligne — score local' : 'hors-ligne — score gardé en local');
@@ -373,6 +374,7 @@
   function setCoins(v){ localStorage.setItem(W.coins, Math.max(0, Math.floor(v||0))); emitWallet(); syncWallet(); }
   function addCoins(n, reason, opts){ n=Math.floor(n||0); if(n<=0) return getCoins();
     setCoins(getCoins()+n);
+    if(reason!=='quest') _questOnCoins(n);   // compte pour les quêtes (sauf récompense de quête)
     if(!(opts&&opts.silent)) toast('+'+n+' Ember Coins', { kind:'coin', icon:'◉' });
     track('coins', { n:n, reason:reason||'' });
     return getCoins(); }
@@ -430,6 +432,52 @@
     emitWallet(); syncWallet(); track('achievement', { id:id });
     return { ok:true, coin:a.coin }; }
 
+  // ================= Quêtes du jour (rétention) =================
+  // Objectifs quotidiens communs à tous (tirés de la graine du jour), suivis en
+  // local et récompensés en Ember Coins. Progression alimentée par finishRun + addCoins.
+  const QUEST_POOL = {
+    runs:  [ { id:'runs3', target:3, reward:30, fr:'Joue 3 parties',            en:'Play 3 games' },
+             { id:'runs5', target:5, reward:55, fr:'Joue 5 parties',            en:'Play 5 games' } ],
+    games: [ { id:'games2', target:2, reward:40, fr:'Joue à 2 jeux différents', en:'Play 2 different games' },
+             { id:'games3', target:3, reward:70, fr:'Joue à 3 jeux différents', en:'Play 3 different games' } ],
+    coins: [ { id:'coins120', target:120, reward:35, fr:'Gagne 120 Ember Coins', en:'Earn 120 Ember Coins' },
+             { id:'coins250', target:250, reward:65, fr:'Gagne 250 Ember Coins', en:'Earn 250 Ember Coins' } ],
+    daily: [ { id:'daily1', target:1, reward:50, fr:'Relève le défi du jour',    en:'Take on the daily challenge' } ]
+  };
+  // 3 quêtes/jour, une par métrique tirée au sort — déterministe (même graine pour tous).
+  function _questPick(){
+    const rng = daily().rng, metrics = ['runs','games','coins','daily'];
+    for (let i=metrics.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); const tmp=metrics[i]; metrics[i]=metrics[j]; metrics[j]=tmp; }
+    return metrics.slice(0,3).map(m => { const opts=QUEST_POOL[m]; const q=opts[Math.floor(rng()*opts.length)]; return Object.assign({ metric:m }, q); });
+  }
+  function _questState(){ const date=dayStr(); const k='gp:quests:'+date; let s=null;
+    try { s=JSON.parse(localStorage.getItem(k)); } catch(e){}
+    if (!s || s.date!==date){ s={ date:date, runs:0, games:[], coins:0, daily:0, claimed:[] };
+      try { for (let i=0;i<localStorage.length;i++){ const kk=localStorage.key(i);   // purge des jours passés
+        if (kk && kk.indexOf('gp:quests:')===0 && kk!==k){ localStorage.removeItem(kk); i--; } } } catch(e){}
+    }
+    return s; }
+  function _questSave(s){ try { localStorage.setItem('gp:quests:'+s.date, JSON.stringify(s)); } catch(e){} }
+  function _questVal(s,m){ return m==='games' ? (s.games||[]).length : (s[m]||0); }
+  function emitQuests(){ try { window.dispatchEvent(new CustomEvent('gp:quests')); } catch(e){} }
+  function _questOnRun(gid, isDaily){ const s=_questState(); s.runs=(s.runs||0)+1;
+    if (gid && (s.games||[]).indexOf(gid)<0) s.games.push(gid);
+    if (isDaily) s.daily=1; _questSave(s); emitQuests(); }
+  function _questOnCoins(n){ const s=_questState(); s.coins=(s.coins||0)+n; _questSave(s); emitQuests(); }
+  // Liste des 3 quêtes du jour avec progression + état de récupération.
+  function getDailyQuests(){ const s=_questState();
+    return _questPick().map(q => { const v=_questVal(s,q.metric); return {
+      id:q.id, title:t(q.fr,q.en), reward:q.reward, target:q.target,
+      value:Math.min(v,q.target), done:v>=q.target, claimed:(s.claimed||[]).indexOf(q.id)>=0 }; }); }
+  // Récupère la récompense d'une quête terminée (une seule fois).
+  function claimQuest(id){ const s=_questState(); const q=_questPick().find(x=>x.id===id);
+    if (!q) return { ok:false, reason:'unknown' };
+    if ((s.claimed||[]).indexOf(id)>=0) return { ok:false, reason:'claimed' };
+    if (_questVal(s,q.metric) < q.target) return { ok:false, reason:'incomplete' };
+    (s.claimed=s.claimed||[]).push(id); _questSave(s);
+    addCoins(q.reward, 'quest'); emitQuests();
+    return { ok:true, reward:q.reward }; }
+
   // ---- Toasts (injectés ; marchent dans les jeux ET le portail) ----
   let toastWrap=null;
   function ensureToast(){ injectUI(); if(toastWrap) return;
@@ -478,6 +526,7 @@
     saveProgress, loadProgress,
     promptUsername, renderTop, finishRun, esc: escapeHtml,
     daily, submitDaily, getDailyLeaderboard, getStreak,
+    getDailyQuests, claimQuest,
     track,
     getCoins, addCoins, spendCoins, setCoins,
     getXP, addXP, getLevel,
