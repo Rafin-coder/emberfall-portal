@@ -191,7 +191,7 @@ button:hover{filter:brightness(1.08)}button:active{transform:translateY(2px)}
   <div id="hud" class="hidden">
     <div class="hudtop">
       <div class="hleft">
-        <div class="lvltag">NV <b id="lvl">1</b></div>
+        <div class="lvltag"><span data-i18n-en="LV">NV</span> <b id="lvl">1</b></div>
         <div class="xpcol"><div class="xpbar"><i id="xpfill"></i></div><div class="xptxt" id="xptxt">0/5</div></div>
       </div>
       <div class="hcenter"><div class="timer" id="time">0:00</div><div class="difftag" id="diffTag">NORMAL</div></div>
@@ -201,8 +201,8 @@ button:hover{filter:brightness(1.08)}button:active{transform:translateY(2px)}
       </div>
     </div>
     <div class="hudvitals">
-      <div class="vrow"><span class="vlabel">VIE</span><div class="hpbar"><i id="hpfill"></i><span class="barnum" id="hptxt">120/120</span></div></div>
-      <div class="vrow"><span class="vlabel">SURCHARGE</span><div class="frbar"><i id="frfill"></i><span class="barnum" id="frtxt">0%</span></div></div>
+      <div class="vrow"><span class="vlabel" data-i18n-en="HP">VIE</span><div class="hpbar"><i id="hpfill"></i><span class="barnum" id="hptxt">120/120</span></div></div>
+      <div class="vrow"><span class="vlabel" data-i18n-en="OVERLOAD">SURCHARGE</span><div class="frbar"><i id="frfill"></i><span class="barnum" id="frtxt">0%</span></div></div>
       <div id="load" class="load"></div>
     </div>
     <div class="hudbtns">
@@ -216,19 +216,19 @@ button:hover{filter:brightness(1.08)}button:active{transform:translateY(2px)}
     <div class="scrim"></div>
     <div class="card">
       <div class="kicker">survivor roguelite</div>
-      <h1>Emberfall<small>tiens face à la nuit</small></h1>
-      <p class="desc">Tu es la dernière <b>braise</b>. Ta lumière repousse les ténèbres — mais elles
+      <h1>Emberfall<small data-i18n-en="hold against the night">tiens face à la nuit</small></h1>
+      <p class="desc" data-i18n-en-html="You are the last <b>ember</b>. Your light drives back the darkness — but it swells without end. Absorb soul shards, collect gold, and grow your flame run after run.">Tu es la dernière <b>braise</b>. Ta lumière repousse les ténèbres — mais elles
         affluent sans fin. Aspire les éclats d'âme, ramasse l'or, et fais grandir ta flamme partie après partie.</p>
-      <div class="keys"><span><b>Z Q S D</b> / flèches</span><span><b>maintenir clic / doigt</b></span><span><b>1 2 3</b> — améliorations</span></div>
-      <div class="goldline">◉ <b id="menuGold">0</b> or en banque</div>
+      <div class="keys"><span data-i18n-en-html="<b>W A S D</b> / arrows"><b>Z Q S D</b> / flèches</span><span data-i18n-en-html="<b>hold click / finger</b>"><b>maintenir clic / doigt</b></span><span data-i18n-en-html="<b>1 2 3</b> — upgrades"><b>1 2 3</b> — améliorations</span></div>
+      <div class="goldline">◉ <b id="menuGold">0</b> <span data-i18n-en="gold banked">or en banque</span></div>
       <div class="menubtns">
-        <button id="startBtn">Allumer la flamme</button>
-        <button id="charBtn" class="btn2">Personnages — <span id="charName">La Braise</span></button>
-        <button id="shopBtn" class="btn2">Sanctuaire ◉</button>
-        <button id="achvBtn" class="btn2">Succès</button>
-        <button id="optsBtn" class="btn2">Options</button>
-        <button id="diffBtn" class="btn2">Difficulté : <span id="diffName">Normal</span></button>
-        <button id="resetBtn" class="btn3">Réinitialiser le compte</button>
+        <button id="startBtn" data-i18n-en="Light the flame">Allumer la flamme</button>
+        <button id="charBtn" class="btn2"><span data-i18n-en="Characters —">Personnages —</span> <span id="charName">La Braise</span></button>
+        <button id="shopBtn" class="btn2" data-i18n-en="Sanctuary ◉">Sanctuaire ◉</button>
+        <button id="achvBtn" class="btn2" data-i18n-en="Achievements">Succès</button>
+        <button id="optsBtn" class="btn2" data-i18n-en="Options">Options</button>
+        <button id="diffBtn" class="btn2"><span data-i18n-en="Difficulty:">Difficulté :</span> <span id="diffName">Normal</span></button>
+        <button id="resetBtn" class="btn3" data-i18n-en="Reset account">Réinitialiser le compte</button>
       </div>
     </div>
   </div>
@@ -236,87 +236,87 @@ button:hover{filter:brightness(1.08)}button:active{transform:translateY(2px)}
   <div id="shop" class="screen hidden">
     <div class="scrim"></div>
     <div class="card">
-      <div class="shophead"><h2>Sanctuaire</h2><div class="bank">◉ <b id="shopGold">0</b></div></div>
-      <p class="d" style="opacity:.7;margin-bottom:16px">Améliorations permanentes — conservées entre les parties.</p>
+      <div class="shophead"><h2 data-i18n-en="Sanctuary">Sanctuaire</h2><div class="bank">◉ <b id="shopGold">0</b></div></div>
+      <p class="d" style="opacity:.7;margin-bottom:16px" data-i18n-en="Permanent upgrades — kept between runs.">Améliorations permanentes — conservées entre les parties.</p>
       <div id="shopList"></div>
-      <button id="shopBack" class="btn2">Retour</button>
+      <button id="shopBack" class="btn2" data-i18n-en="Back">Retour</button>
     </div>
   </div>
 
   <div id="opts" class="screen hidden">
     <div class="scrim"></div>
     <div class="card invcard">
-      <div class="shophead"><h2>Options</h2></div>
-      <div class="optrow"><label>Musique <span id="mvVal">100%</span></label><input id="mv" type="range" min="0" max="100" step="5"></div>
-      <div class="optrow"><label>Effets sonores <span id="svVal">100%</span></label><input id="sv" type="range" min="0" max="100" step="5"></div>
-      <div class="optrow"><label>Tremblement d'écran <span id="shVal">100%</span></label><input id="sh" type="range" min="0" max="150" step="10"></div>
-      <button id="optsBack" class="btn2">Retour</button>
+      <div class="shophead"><h2 data-i18n-en="Options">Options</h2></div>
+      <div class="optrow"><label><span data-i18n-en="Music">Musique</span> <span id="mvVal">100%</span></label><input id="mv" type="range" min="0" max="100" step="5"></div>
+      <div class="optrow"><label><span data-i18n-en="Sound effects">Effets sonores</span> <span id="svVal">100%</span></label><input id="sv" type="range" min="0" max="100" step="5"></div>
+      <div class="optrow"><label><span data-i18n-en="Screen shake">Tremblement d'écran</span> <span id="shVal">100%</span></label><input id="sh" type="range" min="0" max="150" step="10"></div>
+      <button id="optsBack" class="btn2" data-i18n-en="Back">Retour</button>
     </div>
   </div>
 
   <div id="chars" class="screen hidden">
     <div class="scrim"></div>
     <div class="card invcard">
-      <div class="shophead"><h2>Personnages</h2><div class="bank">◉ <b id="charGold">0</b></div></div>
-      <p class="d" style="opacity:.7;margin-bottom:14px">Chacun démarre avec un atout unique. Débloque-les avec ton or.</p>
+      <div class="shophead"><h2 data-i18n-en="Characters">Personnages</h2><div class="bank">◉ <b id="charGold">0</b></div></div>
+      <p class="d" style="opacity:.7;margin-bottom:14px" data-i18n-en="Each starts with a unique perk. Unlock them with your gold.">Chacun démarre avec un atout unique. Débloque-les avec ton or.</p>
       <div id="charList"></div>
-      <button id="charBack" class="btn2">Retour</button>
+      <button id="charBack" class="btn2" data-i18n-en="Back">Retour</button>
     </div>
   </div>
 
   <div id="achv" class="screen hidden">
     <div class="scrim"></div>
     <div class="card invcard">
-      <div class="shophead"><h2>Succès</h2></div>
-      <p class="d" style="opacity:.7;margin-bottom:14px">Chaque succès débloqué accorde un bonus permanent, actif dans toutes tes parties.</p>
+      <div class="shophead"><h2 data-i18n-en="Achievements">Succès</h2></div>
+      <p class="d" style="opacity:.7;margin-bottom:14px" data-i18n-en="Each achievement unlocked grants a permanent bonus, active in all your runs.">Chaque succès débloqué accorde un bonus permanent, actif dans toutes tes parties.</p>
       <div id="achvList"></div>
-      <button id="achvBack" class="btn2">Retour</button>
+      <button id="achvBack" class="btn2" data-i18n-en="Back">Retour</button>
     </div>
   </div>
 
   <div id="pause" class="screen hidden">
     <div class="scrim"></div>
     <div class="card invcard">
-      <div class="shophead"><h2>Inventaire</h2><div class="bank">⏱ <b id="pauseTime">0:00</b></div></div>
+      <div class="shophead"><h2 data-i18n-en="Inventory">Inventaire</h2><div class="bank">⏱ <b id="pauseTime">0:00</b></div></div>
       <div id="pauseBody"></div>
-      <div style="margin-top:14px"><button id="resumeBtn">Reprendre</button></div>
-      <button id="quitBtn" class="btn2">Menu principal</button>
+      <div style="margin-top:14px"><button id="resumeBtn" data-i18n-en="Resume">Reprendre</button></div>
+      <button id="quitBtn" class="btn2" data-i18n-en="Main menu">Menu principal</button>
     </div>
   </div>
 
   <div id="levelup" class="screen hidden">
     <div class="scrim"></div>
-    <div class="card"><div class="lvlhead"><span class="kicker">niveau supérieur</span><h2>La flamme grandit</h2></div>
+    <div class="card"><div class="lvlhead"><span class="kicker" data-i18n-en="level up">niveau supérieur</span><h2 data-i18n-en="The flame grows">La flamme grandit</h2></div>
       <div class="choices" id="choices"></div>
       <div class="luactions" id="luactions"></div></div>
   </div>
 
   <div id="relicpick" class="screen hidden">
     <div class="scrim"></div>
-    <div class="card"><div class="lvlhead"><span class="kicker">relique trouvée</span><h2>Un don des cendres</h2></div>
+    <div class="card"><div class="lvlhead"><span class="kicker" data-i18n-en="relic found">relique trouvée</span><h2 data-i18n-en="A gift from the ashes">Un don des cendres</h2></div>
       <div class="choices"><div class="choice" data-r="epic">
         <div class="ic" id="relicIc">✦</div>
         <div><div class="t" id="relicT">…</div><div class="d" id="relicD">…</div></div></div></div>
       <div class="luactions">
-        <button class="lubtn" id="relicTake">✓ Prendre (1)</button>
-        <button class="lubtn" id="relicSkip">→ Laisser (2)</button></div></div>
+        <button class="lubtn" id="relicTake" data-i18n-en="✓ Take (1)">✓ Prendre (1)</button>
+        <button class="lubtn" id="relicSkip" data-i18n-en="→ Leave (2)">→ Laisser (2)</button></div></div>
   </div>
 
   <div id="gameover" class="screen hidden">
     <div class="scrim"></div>
     <div class="card">
-      <div class="kicker" style="color:var(--danger)">les ténèbres l'emportent</div>
-      <h1 style="color:#ff7d8e;text-shadow:0 0 46px rgba(255,59,92,.45)">Éteinte</h1>
+      <div class="kicker" style="color:var(--danger)" data-i18n-en="the darkness prevails">les ténèbres l'emportent</div>
+      <h1 style="color:#ff7d8e;text-shadow:0 0 46px rgba(255,59,92,.45)" data-i18n-en="Extinguished">Éteinte</h1>
       <div class="stats">
-        <div><div class="n" id="goTime">0:00</div><div class="l">tenu</div></div>
-        <div><div class="n" id="goLvl">1</div><div class="l">niveau</div></div>
-        <div><div class="n" id="goKills">0</div><div class="l">éliminés</div></div>
+        <div><div class="n" id="goTime">0:00</div><div class="l" data-i18n-en="survived">tenu</div></div>
+        <div><div class="n" id="goLvl">1</div><div class="l" data-i18n-en="level">niveau</div></div>
+        <div><div class="n" id="goKills">0</div><div class="l" data-i18n-en="kills">éliminés</div></div>
       </div>
       <div class="best" id="best"></div>
       <div class="lbbox" id="lbBox"></div>
-      <button id="retryBtn">Rallumer</button>
-      <button id="goShop" class="btn2">Sanctuaire ◉</button>
-      <button id="goMenuBtn" class="btn2">Menu principal</button>
+      <button id="retryBtn" data-i18n-en="Reignite">Rallumer</button>
+      <button id="goShop" class="btn2" data-i18n-en="Sanctuary ◉">Sanctuaire ◉</button>
+      <button id="goMenuBtn" class="btn2" data-i18n-en="Main menu">Menu principal</button>
     </div>
   </div>
 </div>
@@ -324,6 +324,98 @@ button:hover{filter:brightness(1.08)}button:active{transform:translateY(2px)}
 <script>
 (()=>{
 "use strict";
+/* ---------- i18n (langue fixée au chargement de la partie) ---------- */
+const EN=()=> !!(window.GamePortal&&GamePortal.lang==='en');
+const T=(fr,en)=> EN()?en:fr;
+const EMAP = {
+ // difficultés / biomes
+ 'Cauchemar':'Nightmare','Enfer':'Inferno','CAUCHEMAR':'NIGHTMARE','ENFER':'INFERNO',
+ 'Crépuscule':'Twilight','Toundra':'Tundra','Cendres':'Ashes','Abysse':'Abyss',
+ // reliques
+ 'Calice de sang':'Blood chalice','Soigne 1 PV à chaque élimination.':'Heals 1 HP on each kill.',
+ 'Cœur instable':'Unstable heart','Les ennemis explosent à leur mort (dégâts de zone).':'Enemies explode on death (area damage).',
+ 'Givre éternel':'Eternal frost','Tes coups ont une chance de ralentir les ennemis.':'Your hits can slow enemies.',
+ "Carapace d'épines":'Thorn shell','Renvoie des dégâts aux ennemis proches quand tu es touché.':'Reflects damage to nearby enemies when you are hit.',
+ 'Main de Midas':'Midas touch','+1 or à chaque élimination.':'+1 gold on each kill.',
+ 'Pacte du verre':'Glass pact','+45% dégâts, mais -30% PV max. Risqué.':'+45% damage, but -30% max HP. Risky.',
+ 'Soif de sang':'Bloodlust','+25% dégâts, mais tu subis +20% de dégâts.':'+25% damage, but you take +20% damage.',
+ 'Avarice':'Avarice','+60% or, mais les ennemis ont +18% de PV.':'+60% gold, but enemies have +18% HP.',
+ // armes (WINFO) noms / desc / synergies
+ 'Tir ardent / Comète':'Burning bolt / Comet',"Projectiles automatiques vers l'ennemi le plus proche.":'Automatic projectiles toward the nearest enemy.','Salve, Précision, Exécution':'Volley, Precision, Execution',
+ 'Cendres / Anneau solaire':'Ashes / Sun ring','Braises orbitales qui brûlent au contact.':'Orbiting embers that burn on contact.','Déflagration (taille)':'Blast (size)',
+ 'Onde / Cataclysme':'Wave / Cataclysm','Déflagration périodique tout autour de toi.':'Periodic blast all around you.','Déflagration, Puissance':'Blast, Power',
+ 'Brasier / Fournaise':'Blaze / Furnace','Aura de feu qui brûle en continu les ennemis proches.':'Fire aura that continuously burns nearby enemies.','Déflagration, Régénération':'Blast, Regeneration',
+ 'Foudre / Tempête':'Lightning / Storm','Éclair qui frappe puis rebondit entre ennemis.':'A bolt that strikes then bounces between enemies.','Précision, foule dense':'Precision, dense crowd',
+ 'Tourelle / Bastion':'Turret / Bastion','Déploie des tourelles fixes qui tirent seules.':'Deploys fixed turrets that fire on their own.','Puissance, mobilité':'Power, mobility',
+ 'Missiles / Essaim':'Missiles / Swarm','Projectiles à tête chercheuse qui pourchassent.':'Homing projectiles that chase enemies.','Puissance, foule dense':'Power, dense crowd',
+ 'Pluie de météores / Déluge':'Meteor rain / Deluge',"Météores qui s'abattent sur les ennemis proches.":'Meteors that crash down on nearby enemies.',
+ // personnages
+ 'La Braise':'The Ember','Équilibrée, sans faiblesse. La survivante par défaut.':'Balanced, no weakness. The default survivor.',
+ 'Pyromancienne':'Pyromancer','Démarre avec le Brasier et +12% de zones. En échange, -22% PV.':'Starts with the Blaze and +12% area. In exchange, -22% HP.',
+ 'Artilleuse':'Gunner','Démarre avec une Tourelle et +15% dégâts. Mais -10% vitesse.':'Starts with a Turret and +15% damage. But -10% speed.',
+ 'Spectre':'Wraith','+18% vitesse et dash plus rapide. En échange, -18% PV.':'+18% speed and faster dash. In exchange, -18% HP.',
+ 'Avare':'Miser','+40% or trouvé. Mais -10% dégâts.':'+40% gold found. But -10% damage.',
+ // succès
+ 'Premier sang':'First blood','100 éliminations en une partie.':'100 kills in one run.','+5 PV de départ':'+5 starting HP',
+ 'Survivante':'Survivor','Tenir 5 minutes.':'Last 5 minutes.','+0.2 PV/s':'+0.2 HP/s',
+ 'Vétérane':'Veteran','Tenir 10 minutes.':'Last 10 minutes.','+8% dégâts':'+8% damage',
+ 'Massacre':'Slaughter','1000 éliminations en une partie.':'1000 kills in one run.','+3% critique':'+3% crit',
+ 'Tueuse de titans':'Titan slayer','Vaincre un boss.':'Defeat a boss.','+5% or':'+5% gold',
+ 'Petite fortune':'Small fortune','500 or en une partie.':'500 gold in one run.',
+ 'Apothéose':'Apotheosis','Faire évoluer une arme.':'Evolve a weapon.','+10% taille des zones':'+10% area size',
+ 'Ascension':'Ascension','Atteindre le niveau 20.':'Reach level 20.','+1 projectile de départ':'+1 starting projectile',
+ // boutique (META)
+ 'Vitalité':'Vitality','+18 PV max au départ':'+18 starting max HP',
+ 'Puissance':'Power','+7% dégâts':'+7% damage',
+ 'Déflagration':'Blast','+8% taille de toutes les zones (onde, brasier, météores)':'+8% size of all areas (wave, blaze, meteors)',
+ 'Salve':'Volley','+1 projectile pour TOUTES les armes':'+1 projectile for ALL weapons',
+ 'Sagesse':'Wisdom','+10% XP gagné en jeu':'+10% XP gained in game',
+ 'Précision':'Precision','+3% de critique au départ':'+3% starting crit',
+ 'Célérité':'Celerity','+4% vitesse':'+4% speed',
+ 'Aimant':'Magnet','+12% portée de ramassage':'+12% pickup range',
+ 'Régénération':'Regeneration','+0.3 PV/s':'+0.3 HP/s','Tu récupères de la vie en continu.':'You recover health continuously.',
+ 'Fortune':'Fortune','+12% or trouvé':'+12% gold found',
+ 'Clairvoyance':'Clairvoyance','+1 relance de choix par partie':'+1 choice reroll per run',
+ 'Arsenal':'Arsenal',"+1 emplacement d'arme (4 de base, 7 max)":'+1 weapon slot (4 base, 7 max)',
+ 'Reliquaire':'Reliquary','+1 relique max (3 de base, 6 max)':'+1 max relic (3 base, 6 max)',
+ // choix de montée de niveau (POOL) titres + descriptions
+ 'Tir multiple':'Multishot',"+1 projectile vers l'ennemi le plus proche.":'+1 projectile toward the nearest enemy.',
+ 'Charge ardente':'Burning charge','Tes projectiles frappent plus fort.':'Your projectiles hit harder.',
+ 'Cadence':'Fire rate','Tu tires plus vite.':'You fire faster.',
+ 'Cendres tournoyantes':'Whirling ashes','Des braises orbitent et brûlent au contact.':'Embers orbit and burn on contact.',
+ 'Cendres incandescentes':'Glowing ashes','Les braises orbitales font plus mal.':'Orbiting embers hurt more.',
+ 'Onde de lumière':'Wave of light','Une déflagration éclate régulièrement autour de toi.':'A blast bursts regularly around you.',
+ 'Embrasement':'Ignition',"L'onde de lumière frappe plus fort.":'The wave of light hits harder.',
+ 'Cœur de braise':'Ember heart','+25 vie max et soin complet.':'+25 max HP and full heal.',
+ 'Pas léger':'Light step','Tu te déplaces plus vite.':'You move faster.',
+ "Aimant d'âmes":'Soul magnet','Portée de ramassage étendue.':'Extended pickup range.',
+ 'Œil ardent':'Burning eye','Augmente tes chances de coup critique.':'Increases your critical hit chance.',
+ 'Exécution':'Execution','Tes coups critiques frappent encore plus fort.':'Your critical hits hit even harder.',
+ 'Brasier':'Blaze','Une aura ardente brûle les ennemis proches en continu.':'A burning aura continuously burns nearby enemies.',
+ 'Fournaise vive':'Roaring furnace','Le brasier inflige plus de dégâts.':'The blaze deals more damage.',
+ 'Arc de foudre':'Lightning arc','La foudre frappe un ennemi puis rebondit sur ses voisins.':'Lightning strikes an enemy then bounces to its neighbors.',
+ 'Haute tension':'High voltage','La foudre frappe plus fort.':'Lightning hits harder.',
+ '★ Comète':'★ Comet','ÉVOLUTION — tes projectiles transpercent et frappent bien plus fort.':'EVOLUTION — your projectiles pierce and hit much harder.',
+ '★ Anneau solaire':'★ Sun ring',"ÉVOLUTION — les braises s'élargissent et brûlent davantage.":'EVOLUTION — the embers grow wider and burn more.',
+ '★ Cataclysme':'★ Cataclysm',"ÉVOLUTION — l'onde devient immense et frappe sans répit.":'EVOLUTION — the wave becomes huge and strikes relentlessly.',
+ '★ Fournaise':'★ Furnace','ÉVOLUTION — le brasier double de portée et de puissance.':'EVOLUTION — the blaze doubles in range and power.',
+ '★ Tempête':'★ Storm','ÉVOLUTION — la foudre rebondit bien plus loin et plus fort.':'EVOLUTION — lightning bounces much farther and harder.',
+ 'Tourelle':'Turret','Déploie des tourelles fixes qui tirent toutes seules.':'Deploys fixed turrets that fire on their own.',
+ 'Calibre lourd':'Heavy caliber','Les tourelles tirent plus fort.':'Turrets fire harder.',
+ 'Missiles traqueurs':'Tracking missiles','Lance des projectiles qui pourchassent les ennemis.':'Launches projectiles that chase enemies.',
+ 'Charge creuse':'Shaped charge','Les missiles frappent plus fort.':'Missiles hit harder.',
+ '★ Bastion':'★ Bastion','ÉVOLUTION — tourelles bien plus durables et puissantes.':'EVOLUTION — far more durable and powerful turrets.',
+ '★ Essaim':'★ Swarm','ÉVOLUTION — bien plus de missiles, plus mortels.':'EVOLUTION — many more missiles, deadlier.',
+ 'Pluie de météores':'Meteor rain',"Des météores s'abattent régulièrement sur les ennemis.":'Meteors crash down on enemies regularly.',
+ 'Cœur de magma':'Magma heart','Les météores frappent plus fort.':'Meteors hit harder.',
+ '★ Déluge':'★ Deluge','ÉVOLUTION — plus de météores, plus larges, plus mortels.':'EVOLUTION — more meteors, wider, deadlier.',
+ // hints get() fixes
+ 'tir +20%':'fire +20%','+1 braise':'+1 ember','NOUVELLE arme':'NEW weapon','rayon + cadence':'radius + rate',
+ '+25 PV max':'+25 max HP','vitesse +12%':'speed +12%','aimant +40%':'magnet +40%','+0.8 PV/s':'+0.8 HP/s',
+ 'ÉVOLUTION':'EVOLUTION','+ portée / dégâts':'+ range / dmg','+ rebonds / dégâts':'+ bounces / dmg',
+ '+ cadence / durée':'+ rate / duration','+ missiles / dégâts':'+ missiles / dmg','+ cadence / zone':'+ rate / area',
+};
+const L=(s)=> (EN() && EMAP[s]!=null) ? EMAP[s] : s;   // traduit au moment de l'appel (comme T)
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
 let W=0,H=0,DPR=1;
 function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;
@@ -374,21 +466,21 @@ const WINFO=[
 ];
 const RELIC_BASE=3;
 function grantRelic(){const owned=RELICS.filter(r=>G.relics[r.id]).length,avail=RELICS.filter(r=>!G.relics[r.id]);
-  if(owned>=G.relicCap||!avail.length){G.run.gold+=200;banner('RELIQUE → +200 ◉','#ffd27a');return;}
+  if(owned>=G.relicCap||!avail.length){G.run.gold+=200;banner(T('RELIQUE','RELIC')+' → +200 ◉','#ffd27a');return;}
   const r=avail[Math.floor(Math.random()*avail.length)];G.relics[r.id]=true;if(r.apply)r.apply();
-  banner('RELIQUE : '+r.name,'#c08bff');sfx.over();}
+  banner(T('RELIQUE','RELIC')+' : '+L(r.name),'#c08bff');sfx.over();}
 let pendingRelic=null;
 function offerRelic(){const avail=RELICS.filter(r=>!G.relics[r.id]);
-  if(!avail.length||RELICS.filter(r=>G.relics[r.id]).length>=G.relicCap){G.run.gold+=200;banner('RELIQUE → +200 ◉','#ffd27a','Reliques au maximum — convertie en or.');return;}
+  if(!avail.length||RELICS.filter(r=>G.relics[r.id]).length>=G.relicCap){G.run.gold+=200;banner(T('RELIQUE','RELIC')+' → +200 ◉','#ffd27a',T('Reliques au maximum — convertie en or.','Relics maxed — converted to gold.'));return;}
   pendingRelic=avail[Math.floor(Math.random()*avail.length)];
   document.getElementById('relicIc').textContent=pendingRelic.ic;
-  document.getElementById('relicT').textContent=pendingRelic.name;
-  document.getElementById('relicD').textContent=pendingRelic.desc;
+  document.getElementById('relicT').textContent=L(pendingRelic.name);
+  document.getElementById('relicD').textContent=L(pendingRelic.desc);
   G.state='relic';sfx.over();show('relicpick');}
 function takeRelic(){if(!pendingRelic)return;const r=pendingRelic;G.relics[r.id]=true;if(r.apply)r.apply();
-  banner('RELIQUE : '+r.name,'#c08bff',r.desc);pendingRelic=null;hide('relicpick');G.state='playing';G.last=performance.now();tryOpenChoice();}
+  banner(T('RELIQUE','RELIC')+' : '+L(r.name),'#c08bff',L(r.desc));pendingRelic=null;hide('relicpick');G.state='playing';G.last=performance.now();tryOpenChoice();}
 function skipRelic(){pendingRelic=null;hide('relicpick');G.state='playing';G.last=performance.now();
-  banner('RELIQUE LAISSÉE','#9aa','Elle pourra réapparaître plus tard.');tryOpenChoice();}
+  banner(T('RELIQUE LAISSÉE','RELIC LEFT'),'#9aa',T('Elle pourra réapparaître plus tard.','It may reappear later.'));tryOpenChoice();}
 function anyEvo(w){return w.boltEvo||w.orbEvo||w.novaEvo||w.auraEvo||w.arcEvo||w.turretEvo||w.homingEvo;}
 const CHARS=[
  {id:'ember',ic:'❂',name:'La Braise',desc:'Équilibrée, sans faiblesse. La survivante par défaut.',cost:0,apply:()=>{}},
@@ -413,7 +505,7 @@ function getAchv(){try{return JSON.parse(localStorage.getItem('ember_achv'))||[]
 function applyChar(){const c=CHARS.find(x=>x.id===getChar());if(c)c.apply(); refreshSkin();}
 function applyAchv(){const un=getAchv();for(const a of ACHV)if(un.includes(a.id))a.ap(G);}
 function checkAchv(){const un=getAchv();let changed=false;
-  for(const a of ACHV){if(un.includes(a.id))continue;if(a.chk(G)){un.push(a.id);changed=true;banner('SUCCÈS : '+a.name,'#ffd27a');sfx.over();}}
+  for(const a of ACHV){if(un.includes(a.id))continue;if(a.chk(G)){un.push(a.id);changed=true;banner(T('SUCCÈS','ACHIEVEMENT')+' : '+L(a.name),'#ffd27a');sfx.over();}}
   if(changed)localStorage.setItem('ember_achv',JSON.stringify(un));}
 
 /* ---------- sprite cache ---------- */
@@ -796,32 +888,32 @@ function hitDmg(k){const w=G.w;switch(k){
   case 'homing': return 14*w.homingDmg*w.dmgMul;
   case 'meteor': return 22*w.meteorDmg*w.dmgMul*(w.meteorEvo?1.4:1);
 } return 0;}
-function nextDmg(k,mult){const c=hitDmg(k);return Math.round(c)+' → '+Math.round(c*mult)+' dég.';}
+function nextDmg(k,mult){const c=hitDmg(k);return Math.round(c)+' → '+Math.round(c*mult)+T(' dég.',' dmg');}
 function renderPause(){
   document.getElementById('pauseTime').textContent=fmt(G.t);
   const p=G.p,w=G.w;let h='<div class="invstats">';
-  const st=[['Niveau',p.lvl],['Éliminés',p.kills],['Or',G.run.gold],['Vie',Math.ceil(p.hp)+'/'+Math.round(p.maxhp)],
-    ['DPS moyen',Math.round(G.dmgTotal/Math.max(1,G.t))],['Critique',Math.round(w.crit*100)+'%'],['Crit ×','×'+w.critMul.toFixed(1)],
-    ['× Dégâts','×'+w.dmgMul.toFixed(2)],['Vitesse',Math.round(p.speed)],['× Zones','×'+w.aoeMul.toFixed(2)]];
+  const st=[[T('Niveau','Level'),p.lvl],[T('Éliminés','Kills'),p.kills],[T('Or','Gold'),G.run.gold],[T('Vie','Health'),Math.ceil(p.hp)+'/'+Math.round(p.maxhp)],
+    [T('DPS moyen','Avg DPS'),Math.round(G.dmgTotal/Math.max(1,G.t))],[T('Critique','Crit'),Math.round(w.crit*100)+'%'],[T('Crit ×','Crit ×'),'×'+w.critMul.toFixed(1)],
+    [T('× Dégâts','× Damage'),'×'+w.dmgMul.toFixed(2)],[T('Vitesse','Speed'),Math.round(p.speed)],[T('× Zones','× Areas'),'×'+w.aoeMul.toFixed(2)]];
   for(const s of st)h+='<div><span>'+s[0]+'</span><b>'+s[1]+'</b></div>';
-  h+='</div><div class="invsec">Armes</div>';let any=false;
+  h+='</div><div class="invsec">'+T('Armes','Weapons')+'</div>';let any=false;
   const totalDmg=Math.max(1,G.dmgTotal);
   for(const wi of WINFO){const lv=w[wi.k];if(!lv)continue;any=true;const evo=w[wi.evo];
-    const dmg=Math.round(hitDmg(wi.k)),per=wi.k==='aura'?' dég./s':' dég./coup';
+    const dmg=Math.round(hitDmg(wi.k)),per=wi.k==='aura'?T(' dég./s',' dmg/s'):T(' dég./coup',' dmg/hit');
     const share=Math.round((G.dmgBy[wi.k]||0)/totalDmg*100);
-    h+='<div class="invrow"><div class="ic">'+wi.ic+'</div><div class="ii"><div class="t">'+wi.name+
-      ' <span class="lv">'+(evo?'ÉVOLUÉE':'Nv '+lv)+'</span></div><div class="d">'+wi.desc+'</div>'+
+    h+='<div class="invrow"><div class="ic">'+wi.ic+'</div><div class="ii"><div class="t">'+L(wi.name)+
+      ' <span class="lv">'+(evo?T('ÉVOLUÉE','EVOLVED'):T('Nv','Lv')+' '+lv)+'</span></div><div class="d">'+L(wi.desc)+'</div>'+
       '<div style="display:flex;align-items:center;gap:8px;font-family:monospace;font-size:11px;color:#e8c99a;margin:6px 0 2px">'+
         '<span style="min-width:104px">'+dmg+per+'</span>'+
         '<span style="flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden"><span style="display:block;height:100%;width:'+share+'%;background:linear-gradient(90deg,#ff7a3c,#ffb04d)"></span></span>'+
-        '<span style="color:#8d8aa0;min-width:52px;text-align:right">'+share+'% dég.</span>'+
+        '<span style="color:#8d8aa0;min-width:52px;text-align:right">'+share+T('% dég.','% dmg')+'</span>'+
       '</div>'+
-      '<div class="syn">⚙ '+wi.syn+'</div></div></div>';}
-  if(!any)h+='<div class="invempty">Aucune arme secondaire pour l\'instant — choisis-en une à la prochaine montée de niveau.</div>';
-  h+='<div class="invsec">Reliques</div>';
+      '<div class="syn">⚙ '+L(wi.syn)+'</div></div></div>';}
+  if(!any)h+='<div class="invempty">'+T("Aucune arme secondaire pour l'instant — choisis-en une à la prochaine montée de niveau.",'No secondary weapon yet — pick one at your next level-up.')+'</div>';
+  h+='<div class="invsec">'+T('Reliques','Relics')+'</div>';
   const rel=RELICS.filter(r=>G.relics[r.id]);
-  if(rel.length)for(const r of rel)h+='<div class="invrow"><div class="ic" style="color:#c08bff;border-color:rgba(192,139,255,.4);background:rgba(192,139,255,.1)">'+r.ic+'</div><div class="ii"><div class="t">'+r.name+'</div><div class="d">'+r.desc+'</div></div></div>';
-  else h+='<div class="invempty">Aucune relique — terrasse des boss pour en trouver.</div>';
+  if(rel.length)for(const r of rel)h+='<div class="invrow"><div class="ic" style="color:#c08bff;border-color:rgba(192,139,255,.4);background:rgba(192,139,255,.1)">'+r.ic+'</div><div class="ii"><div class="t">'+L(r.name)+'</div><div class="d">'+L(r.desc)+'</div></div></div>';
+  else h+='<div class="invempty">'+T('Aucune relique — terrasse des boss pour en trouver.','No relic — defeat bosses to find some.')+'</div>';
   document.getElementById('pauseBody').innerHTML=h;
 }
 
@@ -844,14 +936,14 @@ function die(){G.state='dead';sfx.die();
   document.getElementById('goKills').textContent=G.p.kills;
   const dps=Math.round(G.dmgTotal/Math.max(1,G.t));
   let bk='—',bv=0;for(const k in G.dmgBy)if(G.dmgBy[k]>bv){bv=G.dmgBy[k];bk=k;}
-  const wn={bolt:'Tir',orb:'Cendres',nova:'Onde',aura:'Brasier',arc:'Foudre',turret:'Tourelle',homing:'Missiles'}[bk]||'—';
-  document.getElementById('best').innerHTML='meilleur temps : <b>'+fmt(best)+'</b> &nbsp;·&nbsp; or gagné : <b>'+G.run.gold+'</b> ◉<br>DPS moyen <b>'+dps+'</b> &nbsp;·&nbsp; arme reine <b>'+wn+'</b>';
+  const wn=(EN()?{bolt:'Bolt',orb:'Ashes',nova:'Wave',aura:'Blaze',arc:'Lightning',turret:'Turret',homing:'Missiles'}:{bolt:'Tir',orb:'Cendres',nova:'Onde',aura:'Brasier',arc:'Foudre',turret:'Tourelle',homing:'Missiles'})[bk]||'—';
+  document.getElementById('best').innerHTML=T('meilleur temps','best time')+' : <b>'+fmt(best)+'</b> &nbsp;·&nbsp; '+T('or gagné','gold earned')+' : <b>'+G.run.gold+'</b> ◉<br>'+T('DPS moyen','avg DPS')+' <b>'+dps+'</b> &nbsp;·&nbsp; '+T('arme reine','top weapon')+' <b>'+wn+'</b>';
   let lb=[];try{lb=JSON.parse(localStorage.getItem('ember_lb'))||[];}catch(e){}
   lb.push({t:Math.floor(G.t),c:getChar(),d:diffGet()});lb.sort((a,b)=>b.t-a.t);lb=lb.slice(0,5);
   localStorage.setItem('ember_lb',JSON.stringify(lb));
-  const cn={ember:'Braise',pyro:'Pyro',gunner:'Artilleuse',wraith:'Spectre',midas:'Avare'};
-  let lbh='<div class="lbtitle">Records — Top 5</div>';
-  lb.forEach((r,i)=>{lbh+='<div class="lbrow"><span class="lbn">'+(i+1)+'</span><b>'+fmt(r.t)+'</b><span class="lbm">'+(cn[r.c]||r.c)+' · '+(DIFFS[r.d]?DIFFS[r.d].name:r.d)+'</span></div>';});
+  const cn=EN()?{ember:'Ember',pyro:'Pyro',gunner:'Gunner',wraith:'Wraith',midas:'Miser'}:{ember:'Braise',pyro:'Pyro',gunner:'Artilleuse',wraith:'Spectre',midas:'Avare'};
+  let lbh='<div class="lbtitle">'+T('Records — Top 5','Records — Top 5')+'</div>';
+  lb.forEach((r,i)=>{lbh+='<div class="lbrow"><span class="lbn">'+(i+1)+'</span><b>'+fmt(r.t)+'</b><span class="lbm">'+(cn[r.c]||r.c)+' · '+(DIFFS[r.d]?L(DIFFS[r.d].name):r.d)+'</span></div>';});
   document.getElementById('lbBox').innerHTML=lbh;
   if(window.GamePortal){const cn={ember:'Braise',pyro:'Pyro',gunner:'Artilleuse',wraith:'Spectre',midas:'Avare'};
     const meta={lvl:G.p.lvl,kills:G.p.kills,char:cn[getChar()]||getChar(),diff:DIFFS[diffGet()].name};
@@ -862,7 +954,7 @@ function gainXP(v){G.p.xp+=Math.round(v*comboMul()*G.run.xpMul);sfx.xp();
   while(G.p.xp>=G.p.xpNext){G.p.xp-=G.p.xpNext;G.p.lvl++;G.p.xpNext=Math.round(G.p.xpNext*1.18+3);queueLevelUp();}}
 
 const POOL=[
- {id:'bolt+',r:'common',ic:'✦',t:'Tir multiple',d:'+1 projectile vers l\'ennemi le plus proche.',can:w=>w.bolt<5&&!w.boltEvo,get:()=>'→ '+(G.w.bolt+1)+' tirs',ap:w=>w.bolt++},
+ {id:'bolt+',r:'common',ic:'✦',t:'Tir multiple',d:'+1 projectile vers l\'ennemi le plus proche.',can:w=>w.bolt<5&&!w.boltEvo,get:()=>'→ '+(G.w.bolt+1)+T(' tirs',' shots'),ap:w=>w.bolt++},
  {id:'boltdmg',r:'common',ic:'⚡',t:'Charge ardente',d:'Tes projectiles frappent plus fort.',can:w=>!w.boltEvo,get:()=>nextDmg('bolt',1.35),ap:w=>w.boltDmg*=1.35},
  {id:'boltrate',r:'common',ic:'»',t:'Cadence',d:'Tu tires plus vite.',can:w=>w.boltRate>0.45&&!w.boltEvo,get:()=>'tir +20%',ap:w=>w.boltRate*=0.8},
  {id:'orb',r:'epic',ic:'◍',t:'Cendres tournoyantes',d:'Des braises orbitent et brûlent au contact.',can:w=>w.orb<5&&!w.orbEvo,get:w=>w.orb?'+1 braise':'NOUVELLE arme',ap:w=>w.orb++},
@@ -908,18 +1000,18 @@ function replaceChoice(i){const used=new Set(current.map(c=>c&&c.id));
 function renderLevelUp(){const box=document.getElementById('choices');box.innerHTML='';
   current.forEach((o,i)=>{if(!o)return;const el=document.createElement('div');el.className='choice';el.dataset.r=o.r;
     el.innerHTML=`<span class="num">${i+1}</span><div class="ic">${o.ic}</div>
-      <div><div class="t">${o.t}</div><div class="d">${o.d}</div></div><div class="badge">${o.get(G.w,G.p)}</div>`+
-      (G.banishes>0?`<button class="banx" title="Bannir cette amélioration">✖</button>`:'');
+      <div><div class="t">${L(o.t)}</div><div class="d">${L(o.d)}</div></div><div class="badge">${L(o.get(G.w,G.p))}</div>`+
+      (G.banishes>0?`<button class="banx" title="${T('Bannir cette amélioration','Banish this upgrade')}">✖</button>`:'');
     el.querySelector('.banx')?.addEventListener('click',ev=>{ev.stopPropagation();banishChoice(i);});
     el.addEventListener('click',()=>pick(i));
     box.appendChild(el);});
   const act=document.getElementById('luactions');
-  act.innerHTML=`<button class="lubtn" id="rerollBtn" ${G.rerolls>0?'':'disabled'}>↻ Relancer (${G.rerolls})</button>`+
-    `<button class="lubtn" id="skipBtn">→ Passer (+soin)</button>`+
-    `<span class="lutok">🗡 Armes ${ownedWeapons(G.w)}/${weaponSlots()}</span>`+
-    (G.banishes>0?`<span class="lutok">✖ Bannir : ${G.banishes}</span>`:'');
+  act.innerHTML=`<button class="lubtn" id="rerollBtn" ${G.rerolls>0?'':'disabled'}>↻ ${T('Relancer','Reroll')} (${G.rerolls})</button>`+
+    `<button class="lubtn" id="skipBtn">→ ${T('Passer (+soin)','Skip (+heal)')}</button>`+
+    `<span class="lutok">🗡 ${T('Armes','Weapons')} ${ownedWeapons(G.w)}/${weaponSlots()}</span>`+
+    (G.banishes>0?`<span class="lutok">✖ ${T('Bannir','Banish')} : ${G.banishes}</span>`:'');
   document.getElementById('rerollBtn').onclick=()=>{if(G.rerolls<=0)return;G.rerolls--;drawChoices();renderLevelUp();blip(660,.08,'square',.03);};
-  document.getElementById('skipBtn').onclick=()=>{G.p.hp=Math.min(G.p.maxhp,G.p.hp+G.p.maxhp*0.1);banner('PASSÉ — +10% PV','#9bf5e4');closeLevelUp();};}
+  document.getElementById('skipBtn').onclick=()=>{G.p.hp=Math.min(G.p.maxhp,G.p.hp+G.p.maxhp*0.1);banner(T('PASSÉ — +10% PV','SKIPPED — +10% HP'),'#9bf5e4');closeLevelUp();};}
 function banishChoice(i){if(G.banishes<=0||!current[i])return;G.banished[current[i].id]=true;G.banishes--;replaceChoice(i);renderLevelUp();blip(300,.1,'sawtooth',.03);}
 function openLevelUp(){G.state='levelup';sfx.level();drawChoices();renderLevelUp();show('levelup');}
 // File d'attente : plusieurs niveaux gagnés d'un coup (ou coffre + palier) = un choix CHACUN.
@@ -929,13 +1021,13 @@ function closeLevelUp(){hide('levelup');G.state='playing';G.last=performance.now
 function pick(i){const o=current[i];if(!o)return;
   const isEvo=o.id.indexOf('evo_')===0, wasNew=/NOUVELLE/.test(o.get(G.w,G.p));
   o.ap(G.w,G.p);
-  if(isEvo){ banner('★ '+o.t.replace('★ ','')+' ★','#ffd27a','Arme évoluée : sa forme ultime, bien plus puissante.'); G.shake=18; G.hitstop=0.12; G.dmgFlash=0;
+  if(isEvo){ banner('★ '+L(o.t).replace('★ ','')+' ★','#ffd27a',T('Arme évoluée : sa forme ultime, bien plus puissante.','Weapon evolved: its ultimate form, far more powerful.')); G.shake=18; G.hitstop=0.12; G.dmgFlash=0;
     G.rings.push({x:G.p.x,y:G.p.y,r:20,max:300,col:'255,210,120',life:0.9,t:0});
     G.rings.push({x:G.p.x,y:G.p.y,r:14,max:180,col:'255,255,210',life:0.6,t:0});
     blip(300,.1,'sawtooth',.05); blip(620,.13,'square',.05); blip(1240,.2,'triangle',.05);
   } else { blip(880,.12,'triangle',.05);
-    if(wasNew){ banner('NOUVELLE ARME','#ffd27a','Une arme inédite rejoint ton arsenal.'); G.shake=12; G.rings.push({x:G.p.x,y:G.p.y,r:16,max:200,col:'255,210,120',life:0.7,t:0}); }
-    else banner('NIVEAU '+G.p.lvl,'#9bf5e4'); }
+    if(wasNew){ banner(T('NOUVELLE ARME','NEW WEAPON'),'#ffd27a',T('Une arme inédite rejoint ton arsenal.','A brand-new weapon joins your arsenal.')); G.shake=12; G.rings.push({x:G.p.x,y:G.p.y,r:16,max:200,col:'255,210,120',life:0.7,t:0}); }
+    else banner(T('NIVEAU','LEVEL')+' '+G.p.lvl,'#9bf5e4'); }
   closeLevelUp();}
 
 /* ---------- screens ---------- */
@@ -953,8 +1045,8 @@ function goMenu(){G.state='menu';['pause','gameover','levelup','shop','chars','a
   document.getElementById('hud').classList.add('hidden');
   refreshMenuGold();refreshDiff();refreshChar();show('menu');}
 document.getElementById('diffBtn').onclick=()=>{const i=DIFFORDER.indexOf(diffGet());localStorage.setItem('ember_diff',DIFFORDER[(i+1)%DIFFORDER.length]);refreshDiff();};
-function refreshDiff(){document.getElementById('diffName').textContent=DIFFS[diffGet()].name;}
-function refreshChar(){const c=CHARS.find(x=>x.id===getChar());document.getElementById('charName').textContent=c?c.name:'La Braise';}
+function refreshDiff(){document.getElementById('diffName').textContent=L(DIFFS[diffGet()].name);}
+function refreshChar(){const c=CHARS.find(x=>x.id===getChar());document.getElementById('charName').textContent=c?L(c.name):L('La Braise');}
 document.getElementById('charBtn').onclick=()=>{ensureAudio();openChars();};
 document.getElementById('achvBtn').onclick=openAchv;
 document.getElementById('charBack').onclick=closeChars;
@@ -978,10 +1070,10 @@ function renderChars(){document.getElementById('charGold').textContent=getGold()
   const list=document.getElementById('charList');list.innerHTML='';const un=getChars(),cur=getChar();
   CHARS.forEach(c=>{const owned=un.includes(c.id),sel=cur===c.id,afford=getGold()>=c.cost;
     const row=document.createElement('div');row.className='srow';let btn;
-    if(sel)btn='<button class="buy max">SÉLECTIONNÉ</button>';
-    else if(owned)btn='<button class="buy" data-sel="'+c.id+'">Choisir</button>';
+    if(sel)btn='<button class="buy max">'+T('SÉLECTIONNÉ','SELECTED')+'</button>';
+    else if(owned)btn='<button class="buy" data-sel="'+c.id+'">'+T('Choisir','Select')+'</button>';
     else btn='<button class="buy '+(afford?'':'dis')+'" data-buy="'+c.id+'">◉ '+c.cost+'</button>';
-    row.innerHTML='<div class="ic" data-skin="'+c.id+'"></div><div class="si"><div class="t">'+c.name+'</div><div class="d">'+c.desc+'</div></div>'+btn;
+    row.innerHTML='<div class="ic" data-skin="'+c.id+'"></div><div class="si"><div class="t">'+L(c.name)+'</div><div class="d">'+L(c.desc)+'</div></div>'+btn;
     list.appendChild(row);});
   list.querySelectorAll('[data-skin]').forEach(d=>{const sp=SP_CHARS[d.dataset.skin];if(!sp)return;
     const cv=document.createElement('canvas');cv.width=cv.height=46;cv.style.width=cv.style.height='46px';
@@ -993,16 +1085,16 @@ function renderChars(){document.getElementById('charGold').textContent=getGold()
       sfx.buy();refreshChar();renderChars();};});}
 function renderAchv(){const list=document.getElementById('achvList');list.innerHTML='';const un=getAchv();
   ACHV.forEach(a=>{const ok=un.includes(a.id);const row=document.createElement('div');row.className='srow';row.style.opacity=ok?'1':'0.5';
-    row.innerHTML='<div class="ic">'+(ok?a.ic:'⊘')+'</div><div class="si"><div class="t">'+a.name+(ok?' ✓':'')+'</div><div class="d">'+a.desc+'</div>'+
-      '<div class="syn" style="color:var(--xp);margin-top:4px">Bonus : '+a.bonus+'</div></div>';
+    row.innerHTML='<div class="ic">'+(ok?a.ic:'⊘')+'</div><div class="si"><div class="t">'+L(a.name)+(ok?' ✓':'')+'</div><div class="d">'+L(a.desc)+'</div>'+
+      '<div class="syn" style="color:var(--xp);margin-top:4px">'+T('Bonus','Bonus')+' : '+L(a.bonus)+'</div></div>';
     list.appendChild(row);});}
 let resetArmed=false,resetTO=null;
 document.getElementById('resetBtn').onclick=()=>{const b=document.getElementById('resetBtn');
-  if(!resetArmed){resetArmed=true;b.textContent='Confirmer ? (efface tout)';b.classList.add('armed');
-    resetTO=setTimeout(()=>{resetArmed=false;b.textContent='Réinitialiser le compte';b.classList.remove('armed');},3000);}
+  if(!resetArmed){resetArmed=true;b.textContent=T('Confirmer ? (efface tout)','Confirm? (erases all)');b.classList.add('armed');
+    resetTO=setTimeout(()=>{resetArmed=false;b.textContent=T('Réinitialiser le compte','Reset account');b.classList.remove('armed');},3000);}
   else{clearTimeout(resetTO);['ember_gold','ember_meta','ember_best','ember_diff','ember_chars','ember_char','ember_achv','ember_lb'].forEach(k=>localStorage.removeItem(k));
-    resetArmed=false;b.classList.remove('armed');b.textContent='Compte réinitialisé ✓';
-    refreshMenuGold();refreshDiff();refreshChar();setTimeout(()=>{b.textContent='Réinitialiser le compte';},1500);}};
+    resetArmed=false;b.classList.remove('armed');b.textContent=T('Compte réinitialisé ✓','Account reset ✓');
+    refreshMenuGold();refreshDiff();refreshChar();setTimeout(()=>{b.textContent=T('Réinitialiser le compte','Reset account');},1500);}};
 document.getElementById('shopBtn').onclick=()=>{ensureAudio();openShop('menu');};
 document.getElementById('goShop').onclick=()=>{openShop('gameover');};
 document.getElementById('shopBack').onclick=closeShop;
@@ -1019,8 +1111,8 @@ function renderShop(){
     if(maxed)btn=`<button class="buy max">MAX</button>`;
     else btn=`<button class="buy ${afford?'':'dis'}" data-id="${u.id}">◉ ${cost}</button>`;
     row.innerHTML=`<div class="ic">${u.ic}</div>
-      <div class="si"><div class="t">${u.name} <span style="opacity:.5;font-weight:400">Nv ${lvl}/${u.max}</span></div>
-        <div class="d">${u.desc}</div><div class="pips">${pips}</div></div>${btn}`;
+      <div class="si"><div class="t">${L(u.name)} <span style="opacity:.5;font-weight:400">${T('Nv','Lv')} ${lvl}/${u.max}</span></div>
+        <div class="d">${L(u.desc)}</div><div class="pips">${pips}</div></div>${btn}`;
     list.appendChild(row);});
   list.querySelectorAll('.buy[data-id]').forEach(b=>{if(b.classList.contains('dis'))return;
     b.onclick=()=>{const id=b.dataset.id,m2=loadMeta(),lvl=m2[id]||0,u=META.find(x=>x.id===id),cost=u.cost(lvl);
@@ -1031,12 +1123,12 @@ function start(){ensureAudio();playMusic();reset();
   // (seuls le personnage et la difficulté imposés du jour comptent). En partie normale, tout s'applique.
   if(!window.__DAILY){applyMeta();applyAchv();}
   applyChar();G.run.goldMul*=DIFFS[diffGet()].gold;G.state='playing';mStep=0;mAcc=0;
-  document.getElementById('diffTag').textContent=DIFFS[diffGet()].label;
+  document.getElementById('diffTag').textContent=L(DIFFS[diffGet()].label);
   hide('menu');hide('gameover');hide('levelup');hide('shop');hide('pause');
   document.getElementById('hud').classList.remove('hidden');updateLoadout();G.last=performance.now();}
 function updateLoadout(){const l=document.getElementById('load');l.innerHTML='';
   const add=(ic,n,evo)=>{const d=document.createElement('div');d.className='wchip'+(evo?' evo':'');
-    d.innerHTML=evo?`<span class="gi">★ ${ic}</span> <b>ÉVO</b>`:`<span class="gi">${ic}</span> Nv <b>${n}</b>`;l.appendChild(d);};
+    d.innerHTML=evo?`<span class="gi">★ ${ic}</span> <b>${T('ÉVO','EVO')}</b>`:`<span class="gi">${ic}</span> ${T('Nv','Lv')} <b>${n}</b>`;l.appendChild(d);};
   add('✦',G.w.bolt,G.w.boltEvo);
   if(G.w.orb>0)add('◍',G.w.orb,G.w.orbEvo);
   if(G.w.nova>0)add('◎',G.w.nova,G.w.novaEvo);
@@ -1046,6 +1138,9 @@ function updateLoadout(){const l=document.getElementById('load');l.innerHTML='';
   if(G.w.homing>0)add('➹',G.w.homing,G.w.homingEvo);
   if(G.w.meteor>0)add('☄',G.w.meteor,G.w.meteorEvo);}
 refreshMenuGold();refreshDiff();refreshChar();
+// Le SDK est chargé APRÈS cet IIFE : la langue n'est pas connue au démarrage.
+// Quand applyLang s'exécute (DOMContentLoaded) elle émet 'gp:lang' → on re-traduit le menu.
+window.addEventListener('gp:lang',()=>{ refreshMenuGold(); refreshDiff(); refreshChar(); });
 
 /* ---------- update ---------- */
 function update(dt){
@@ -1060,21 +1155,21 @@ function update(dt){
   checkAchv();
   const bi=Math.floor(G.t/180)%BIOMES.length;
   if(bi!==G.biome){const first=G.biome<0;G.biome=bi;
-    if(!first){banner('RÉGION : '+BIOMES[bi].name,'#9bf5e4');
+    if(!first){banner(T('RÉGION','REGION')+' : '+L(BIOMES[bi].name),'#9bf5e4');
       if(G.t>90){const m=diffMul(),a=rand(0,TAU),d=520;
         const g=mkEnemy('boss',G.p.x+Math.cos(a)*d,G.p.y+Math.sin(a)*d,520,40,18,m);
         g.hp*=1.8;g.maxhp*=1.8;g.guardian=true;G.enemies.push(g);
-        banner('GARDIEN DE '+BIOMES[bi].name.toUpperCase(),'#c08bff');}}}
+        banner(T('GARDIEN DE','GUARDIAN OF')+' '+L(BIOMES[bi].name).toUpperCase(),'#c08bff');}}}
   if(G.banner){G.banner.t-=dt;if(G.banner.t<=0)G.banner=null;}
   // mini-événements
   G.eventT-=dt;
   if(G.eventT<=0){G.eventT=rand(38,55);
     if(Math.random()<0.5){ // pluie de météores
-      banner('PLUIE DE MÉTÉORES','#ff8a3c');
+      banner(T('PLUIE DE MÉTÉORES','METEOR RAIN'),'#ff8a3c');
       const n=8+Math.floor(G.t/60);
       for(let i=0;i<n;i++)G.meteors.push({x:p.x+rand(-340,340),y:p.y+rand(-340,340),r:rand(34,52),warn:rand(1.0,1.9),t:0,done:false});
     } else { // assaut d'élites
-      banner("ASSAUT D'ÉLITES",'#ff5d6c');
+      banner(T("ASSAUT D'ÉLITES",'ELITE ASSAULT'),'#ff5d6c');
       const m=diffMul(),n=3+Math.floor(G.t/120);
       for(let i=0;i<n;i++){const a=rand(0,TAU),d=rand(380,520),et=Math.random()<0.5?'warden':'brute';
         G.enemies.push(mkEnemy(et,p.x+Math.cos(a)*d,p.y+Math.sin(a)*d,et==='warden'?60:34,et==='warden'?52:46,12,m));}
@@ -1106,7 +1201,7 @@ function update(dt){
 
   G.spawnT-=dt;const interval=Math.max(0.18,0.82-G.t*0.007);
   if(G.spawnT<=0){G.spawnT=interval;const Bc=BIOMES[G.biome<0?0:G.biome];const n=Math.round((2+Math.floor(G.t/15))*Bc.countM);for(let i=0;i<n;i++)spawnEnemy();}
-  G.surgeT-=dt;if(G.surgeT<=0){G.surgeT=rand(34,50);const c=6+Math.floor(G.t/40);for(let i=0;i<c;i++)spawnEnemy();if(G.t>30)banner('DÉFERLEMENT','#ff9a3c','Une vague massive d\'ennemis arrive sur toi.');}
+  G.surgeT-=dt;if(G.surgeT<=0){G.surgeT=rand(34,50);const c=6+Math.floor(G.t/40);for(let i=0;i<c;i++)spawnEnemy();if(G.t>30)banner(T('DÉFERLEMENT','SURGE'),'#ff9a3c',T('Une vague massive d\'ennemis arrive sur toi.','A massive wave of enemies is coming for you.'));}
 
   G.boltT-=dt;if(G.boltT<=0){G.boltT=0.6*G.w.boltRate*(G.overdrive>0?0.42:1);shootBolt();}
   if(G.w.nova>0){G.novaT-=dt;if(G.novaT<=0){G.novaT=Math.max(0.8,(2.6-G.w.nova*0.22)*(G.w.novaEvo?0.6:1));castNova();}}
@@ -1198,10 +1293,10 @@ function update(dt){
       if(g.type==='xp')gainXP(g.value);
       else if(g.type==='gold'){const add=Math.max(1,Math.round(g.value*G.run.goldMul*comboMul()*0.38));G.run.gold+=add;sfx.gold();floatTxt(p.x,p.y-22,'+'+add+' ◉','#ffcf4d');}
       else if(g.type==='vacuum'){activateVacuum();floatTxt(p.x,p.y-22,'VACUUM','#9bf5e4');}
-      else if(g.type==='chest'){banner('COFFRE !','#ffd27a','Choisis une amélioration bonus.');sfx.over();queueLevelUp();}
+      else if(g.type==='chest'){banner(T('COFFRE !','CHEST!'),'#ffd27a',T('Choisis une amélioration bonus.','Choose a bonus upgrade.'));sfx.over();queueLevelUp();}
       else if(g.type==='bomb'){bombBlast();}
       else if(g.type==='heart'){G.p.hp=Math.min(G.p.maxhp,G.p.hp+G.p.maxhp*0.4);floatTxt(p.x,p.y-22,'+VIE','#ff8a9a');blip(700,.12,'sine',.04);}
-      else if(g.type==='magnet'){G.magBoost=7;banner('AIMANT','#9bf5e4');floatTxt(p.x,p.y-22,'AIMANT','#9bf5e4');blip(900,.1,'sine',.03);}
+      else if(g.type==='magnet'){G.magBoost=7;banner(T('AIMANT','MAGNET'),'#9bf5e4');floatTxt(p.x,p.y-22,T('AIMANT','MAGNET'),'#9bf5e4');blip(900,.1,'sine',.03);}
       else if(g.type==='relic'){offerRelic();}
       G.loot.splice(i,1);}
   }
@@ -1396,7 +1491,7 @@ GamePortal.init({gameId:'emberfall'});
   const cn={ember:'La Braise',pyro:'Pyromancienne',gunner:'Artilleuse',wraith:'Spectre',midas:'Avare'};
   const dn={normal:'Normal',nightmare:'Cauchemar',inferno:'Enfer'};
   const b=document.getElementById('dailyBadge');
-  if(b){ b.textContent='DÉFI DU JOUR · '+cn[char]+' · '+dn[diff]; b.style.display='block'; }
+  if(b){ b.textContent=T('DÉFI DU JOUR','DAILY CHALLENGE')+' · '+L(cn[char])+' · '+L(dn[diff]); b.style.display='block'; }
 })();
 </script>
 </body>
