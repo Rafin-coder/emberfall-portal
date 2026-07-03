@@ -43,8 +43,34 @@
   [headers.values]
     Cache-Control = "public, max-age=86400"
 
-# Favicon : cache long.
+# Favicon & icônes PWA : cache long.
 [[headers]]
   for = "/favicon.png"
   [headers.values]
     Cache-Control = "public, max-age=604800"
+[[headers]]
+  for = "/icon-192.png"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+[[headers]]
+  for = "/icon-512.png"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+[[headers]]
+  for = "/apple-touch-icon.png"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+# PWA : le service worker ne doit JAMAIS être mis en cache (sinon les MAJ ne passent plus).
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Service-Worker-Allowed = "/"
+
+# Manifeste : type MIME correct + cache court.
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"
+    Cache-Control = "public, max-age=86400"

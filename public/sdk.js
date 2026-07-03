@@ -488,3 +488,11 @@
   };
   window.GamePortal = GamePortal;
 })();
+
+// PWA : enregistre le service worker (jeu hors-ligne + chargements plus rapides).
+// Chargé sur toutes les pages via sdk.js → un seul point d'enregistrement, portée '/'.
+if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/sw.js').catch(function () {});
+  });
+}
