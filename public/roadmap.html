@@ -45,108 +45,110 @@
   <div class="timeline">
 
     <div class="phase done">
-      <div class="tag">livré</div>
-      <h3>Les jeux</h3>
+      <div class="tag" data-i18n-en="shipped">livré</div>
+      <h3 data-i18n-en="The games">Les jeux</h3>
       <ul>
-        <li><b style="color:var(--text)">Emberfall</b> — survivor roguelite complet : 7 armes + évolutions, ennemis variés, boss, reliques, biomes, méta-progression, 5 personnages, succès, options, 3 difficultés.</li>
-        <li><b style="color:var(--text)">Lumen</b> — arcade de lumière nerveux, combos et accélération.</li>
-        <li><b style="color:var(--text)">Conquête des Âges</b> — stratégie de couloir à travers 5 ères : unités, tourelles, évolution d'ère, pouvoirs spéciaux, IA adverse, modes campagne + endless, musique de fond.</li>
-        <li><b style="color:var(--text)">Ember Hill</b> — conduite physique façon Hill Climb : <b style="color:var(--text)">physique revue</b> (suspension, tremplins, contrôle en l'air), collines sans fin, carburant, score à la distance, <b style="color:var(--text)">3 véhicules, 3 stages, garage d'améliorations</b> et <b style="color:var(--text)">menu pause</b> (terminer en enregistrant).</li>
-        <li><b style="color:var(--text)">Prismbreak</b> — casse-briques néon : balles multiples, power-ups (multiballe, laser, perçant…), briques spéciales, combos, niveaux, défi du jour.</li>
+        <li data-i18n-en-html="<b style=&quot;color:var(--text)&quot;>Emberfall</b> — full survivor roguelite: 7 weapons + evolutions, varied enemies, bosses, relics, biomes, meta-progression, 5 characters, achievements, options, 3 difficulties."><b style="color:var(--text)">Emberfall</b> — survivor roguelite complet : 7 armes + évolutions, ennemis variés, boss, reliques, biomes, méta-progression, 5 personnages, succès, options, 3 difficultés.</li>
+        <li data-i18n-en-html="<b style=&quot;color:var(--text)&quot;>Lumen</b> — snappy light arcade, combos and acceleration."><b style="color:var(--text)">Lumen</b> — arcade de lumière nerveux, combos et accélération.</li>
+        <li data-i18n-en-html="<b style=&quot;color:var(--text)&quot;>Age of Conquest</b> — lane strategy across 5 eras: units, turrets, era evolution, special powers, enemy AI, campaign + endless modes, background music."><b style="color:var(--text)">Conquête des Âges</b> — stratégie de couloir à travers 5 ères : unités, tourelles, évolution d'ère, pouvoirs spéciaux, IA adverse, modes campagne + endless, musique de fond.</li>
+        <li data-i18n-en-html="<b style=&quot;color:var(--text)&quot;>Ember Hill</b> — Hill-Climb-style physics driving: <b style=&quot;color:var(--text)&quot;>reworked physics</b> (suspension, ramps, air control), endless hills, fuel, distance scoring, <b style=&quot;color:var(--text)&quot;>6 vehicles, 6 stages, an upgrade garage</b> and a <b style=&quot;color:var(--text)&quot;>pause menu</b> (end while saving)."><b style="color:var(--text)">Ember Hill</b> — conduite physique façon Hill Climb : <b style="color:var(--text)">physique revue</b> (suspension, tremplins, contrôle en l'air), collines sans fin, carburant, score à la distance, <b style="color:var(--text)">6 véhicules, 6 stages, garage d'améliorations</b> et <b style="color:var(--text)">menu pause</b> (terminer en enregistrant).</li>
+        <li data-i18n-en-html="<b style=&quot;color:var(--text)&quot;>Prismbreak</b> — neon brick-breaker: multiple balls, power-ups (multiball, laser, pierce…), special bricks, combos, levels, daily challenge."><b style="color:var(--text)">Prismbreak</b> — casse-briques néon : balles multiples, power-ups (multiballe, laser, perçant…), briques spéciales, combos, niveaux, défi du jour.</li>
       </ul>
     </div>
 
     <div class="phase done">
-      <div class="tag">livré</div>
-      <h3>Le portail & le socle</h3>
+      <div class="tag" data-i18n-en="shipped">livré</div>
+      <h3 data-i18n-en="The portal &amp; the foundation">Le portail & le socle</h3>
       <ul>
-        <li>Salle d'arcade : accueil, fiches de jeux, classements, roadmap.</li>
-        <li>SDK commun — chaque nouveau jeu hérite des comptes, classements et sauvegardes.</li>
-        <li>Comptes (connexion invitée), pseudo modifiable, sauvegarde cloud.</li>
-        <li>Classements partagés, vérifiés côté serveur (RLS + plafonds anti-triche).</li>
-        <li>Défi du jour : graine commune, classement quotidien, série (streak).</li>
-        <li>Finition : fenêtre de pseudo, top en ligne sur les écrans de fin.</li>
-        <li>Déploiement Git → Netlify, clés en variables d'environnement (fini les copier-coller).</li>
-        <li>Analytics maison : instrumentation en place (événements ouverture, score, défi) prête à être lue.</li>
+        <li data-i18n-en="Arcade: home, game pages, leaderboards, roadmap.">Salle d'arcade : accueil, fiches de jeux, classements, roadmap.</li>
+        <li data-i18n-en="Shared SDK — every new game inherits accounts, leaderboards and saves.">SDK commun — chaque nouveau jeu hérite des comptes, classements et sauvegardes.</li>
+        <li data-i18n-en="Accounts (guest login), editable name, cloud save.">Comptes (connexion invitée), pseudo modifiable, sauvegarde cloud.</li>
+        <li data-i18n-en="Shared leaderboards, server-verified (RLS + anti-cheat caps).">Classements partagés, vérifiés côté serveur (RLS + plafonds anti-triche).</li>
+        <li data-i18n-en="Daily challenge: shared seed, daily leaderboard, streak.">Défi du jour : graine commune, classement quotidien, série (streak).</li>
+        <li data-i18n-en="Polish: name dialog, online top scores on end screens.">Finition : fenêtre de pseudo, top en ligne sur les écrans de fin.</li>
+        <li data-i18n-en="Git → Netlify deploy, keys in environment variables (no more copy-paste).">Déploiement Git → Netlify, clés en variables d'environnement (fini les copier-coller).</li>
+        <li data-i18n-en="In-house analytics: instrumentation in place (open, score, challenge events) ready to be read.">Analytics maison : instrumentation en place (événements ouverture, score, défi) prête à être lue.</li>
+        <li data-i18n-en-html="<b style=&quot;color:var(--text)&quot;>Bilingual FR/EN interface</b> across the whole site and all 5 games (one click)."><b style="color:var(--text)">Interface bilingue FR/EN</b> sur tout le site et les 5 jeux (en un clic).</li>
+        <li data-i18n-en-html="<b style=&quot;color:var(--text)&quot;>Installable app (PWA)</b> on mobile + offline play (service worker)."><b style="color:var(--text)">Application installable (PWA)</b> sur mobile + jeu hors-ligne (service worker).</li>
       </ul>
     </div>
 
     <div class="phase done">
-      <div class="tag">livré</div>
-      <h3>Rétention &amp; économie — le socle</h3>
+      <div class="tag" data-i18n-en="shipped">livré</div>
+      <h3 data-i18n-en="Retention &amp; economy — the foundation">Rétention &amp; économie — le socle</h3>
       <ul>
-        <li><b style="color:var(--text)">Niveau de compte global</b> — XP gagnée dans n'importe quel jeu, un niveau de profil commun (barre du haut + page profil).</li>
-        <li><b style="color:var(--text)">Succès par jeu</b> récompensés en <b style="color:var(--text)">Ember Coins</b>, débloquables et suivis sur l'accueil.</li>
-        <li><b style="color:var(--text)">Ember Coins</b> — la monnaie commune du site, gagnée en jouant aux jeux et via les succès. <span style="color:var(--muted)">(Chaque jeu peut garder sa propre monnaie interne — ex. les pièces d'Ember Hill.)</span></li>
-        <li><b style="color:var(--text)">Durée de vie</b> de chaque jeu affichée sur sa fiche.</li>
-        <li>Premier passage de sécurité : correctif XSS du classement, en-têtes CSP/HSTS, plafonds anti-triche resserrés.</li>
+        <li data-i18n-en-html="<b style=&quot;color:var(--text)&quot;>Global account level</b> — XP earned in any game, one shared profile level (top bar + profile page)."><b style="color:var(--text)">Niveau de compte global</b> — XP gagnée dans n'importe quel jeu, un niveau de profil commun (barre du haut + page profil).</li>
+        <li data-i18n-en-html="<b style=&quot;color:var(--text)&quot;>Per-game achievements</b> rewarded in <b style=&quot;color:var(--text)&quot;>Ember Coins</b>, unlockable and tracked on the home page."><b style="color:var(--text)">Succès par jeu</b> récompensés en <b style="color:var(--text)">Ember Coins</b>, débloquables et suivis sur l'accueil.</li>
+        <li data-i18n-en-html="<b style=&quot;color:var(--text)&quot;>Ember Coins</b> — the site's common currency, earned by playing and through achievements. <span style=&quot;color:var(--muted)&quot;>(Each game may keep its own internal currency — e.g. Ember Hill's coins.)</span>"><b style="color:var(--text)">Ember Coins</b> — la monnaie commune du site, gagnée en jouant aux jeux et via les succès. <span style="color:var(--muted)">(Chaque jeu peut garder sa propre monnaie interne — ex. les pièces d'Ember Hill.)</span></li>
+        <li data-i18n-en-html="<b style=&quot;color:var(--text)&quot;>Lifespan</b> of each game shown on its card."><b style="color:var(--text)">Durée de vie</b> de chaque jeu affichée sur sa fiche.</li>
+        <li data-i18n-en="First security pass: leaderboard XSS fix, CSP/HSTS headers, tightened anti-cheat caps.">Premier passage de sécurité : correctif XSS du classement, en-têtes CSP/HSTS, plafonds anti-triche resserrés.</li>
       </ul>
     </div>
 
     <div class="phase">
-      <div class="tag">en parallèle — à activer avec l'audience</div>
-      <h3>Fondations : fiabiliser & exploiter les données</h3>
-      <p style="color:var(--muted);font-size:13px;margin:0 0 8px">Important mais pas bloquant tant qu'il y a peu de joueurs — on avance sur le contenu en priorité et on branche ça dès que le trafic le justifie.</p>
+      <div class="tag" data-i18n-en="in parallel — enable with the audience">en parallèle — à activer avec l'audience</div>
+      <h3 data-i18n-en="Foundations: harden & exploit the data">Fondations : fiabiliser & exploiter les données</h3>
+      <p style="color:var(--muted);font-size:13px;margin:0 0 8px" data-i18n-en="Important but not blocking while there are few players — we prioritise content and wire this up as soon as traffic justifies it.">Important mais pas bloquant tant qu'il y a peu de joueurs — on avance sur le contenu en priorité et on branche ça dès que le trafic le justifie.</p>
       <ul>
-        <li>Lire les analytics régulièrement : combien de joueurs, où ils décrochent, ce qui accroche, le taux de retour.</li>
-        <li>Suivi d'erreurs (alertes quand un jeu plante chez un joueur).</li>
-        <li>Sauvegardes automatiques de la base de données.</li>
-        <li>Approfondir la sécurité : <b style="color:var(--text)">validation des scores côté serveur</b> (rejeu / Edge Function) avant toute récompense réelle — un premier passage est fait (XSS, CSP/HSTS, plafonds anti-triche).</li>
+        <li data-i18n-en="Read analytics regularly: how many players, where they drop off, what hooks them, the return rate.">Lire les analytics régulièrement : combien de joueurs, où ils décrochent, ce qui accroche, le taux de retour.</li>
+        <li data-i18n-en="Error tracking (alerts when a game crashes for a player).">Suivi d'erreurs (alertes quand un jeu plante chez un joueur).</li>
+        <li data-i18n-en="Automatic database backups.">Sauvegardes automatiques de la base de données.</li>
+        <li data-i18n-en-html="Deepen security: <b style=&quot;color:var(--text)&quot;>server-side score validation</b> (replay / Edge Function) before any real reward — a first pass is done (XSS, CSP/HSTS, anti-cheat caps).">Approfondir la sécurité : <b style="color:var(--text)">validation des scores côté serveur</b> (rejeu / Edge Function) avant toute récompense réelle — un premier passage est fait (XSS, CSP/HSTS, plafonds anti-triche).</li>
       </ul>
     </div>
 
     <div class="phase">
-      <div class="tag">prévu — rétention</div>
-      <h3>Donner envie de revenir</h3>
+      <div class="tag" data-i18n-en="planned — retention">prévu — rétention</div>
+      <h3 data-i18n-en="Make players want to come back">Donner envie de revenir</h3>
       <ul>
-        <li>Classements hebdomadaires et entre amis, pas seulement all-time.</li>
-        <li>Quêtes quotidiennes & hebdomadaires avec récompenses.</li>
-        <li>Saisons : le défi du jour agrégé en classement saisonnier.</li>
-        <li>Succès transversaux, partage de score, notifications de retour (opt-in).</li>
+        <li data-i18n-en="Weekly and friends leaderboards, not just all-time.">Classements hebdomadaires et entre amis, pas seulement all-time.</li>
+        <li data-i18n-en="Daily &amp; weekly quests with rewards.">Quêtes quotidiennes & hebdomadaires avec récompenses.</li>
+        <li data-i18n-en="Seasons: the daily challenge aggregated into a seasonal ranking.">Saisons : le défi du jour agrégé en classement saisonnier.</li>
+        <li data-i18n-en="Cross-game achievements, score sharing, return notifications (opt-in).">Succès transversaux, partage de score, notifications de retour (opt-in).</li>
       </ul>
     </div>
 
     <div class="phase">
-      <div class="tag">prévu — portail</div>
-      <h3>Attractivité & première impression</h3>
+      <div class="tag" data-i18n-en="planned — portal">prévu — portail</div>
+      <h3 data-i18n-en="Appeal &amp; first impression">Attractivité & première impression</h3>
       <ul>
-        <li>Onboarding en un clic : jouer immédiatement.</li>
-        <li>Catégories, recherche et filtres dès qu'il y aura plus de jeux.</li>
-        <li>Page profil publique : niveau, meilleurs scores, badges.</li>
-        <li>Thème clair/sombre, accessibilité, installable sur mobile (PWA).</li>
+        <li data-i18n-en="One-click onboarding: play immediately.">Onboarding en un clic : jouer immédiatement.</li>
+        <li data-i18n-en="Categories, search and filters once there are more games.">Catégories, recherche et filtres dès qu'il y aura plus de jeux.</li>
+        <li data-i18n-en="Public profile page: level, best scores, badges.">Page profil publique : niveau, meilleurs scores, badges.</li>
+        <li data-i18n-en="Light/dark theme and accessibility.">Thème clair/sombre et accessibilité.</li>
       </ul>
     </div>
 
     <div class="phase">
-      <div class="tag">prévu — contenu</div>
-      <h3>Plus de jeu, plus de profondeur</h3>
+      <div class="tag" data-i18n-en="planned — content">prévu — contenu</div>
+      <h3 data-i18n-en="More game, more depth">Plus de jeu, plus de profondeur</h3>
       <ul>
-        <li><b style="color:var(--text)">Conquête des Âges</b> : équilibrage continu, plus d'unités/tourelles par ère, meilleurs effets visuels.</li>
-        <li>Emberfall : <b style="color:var(--text)">arme Pluie de météores</b> + ennemis <b style="color:var(--text)">Colosse</b> et <b style="color:var(--text)">Limier</b> ajoutés. À venir : encore des armes/ennemis, vrais boss par biome, évolutions conditionnelles, codex, arbre de talents.</li>
-        <li>Emberfall : <b style="color:var(--text)">plusieurs cartes aux terrains variés</b> (pas un seul décor vide), à débloquer en progressant.</li>
-        <li>Ember Hill : <b style="color:var(--text)">plus de stages et véhicules</b>, terrains plus travaillés.</li>
-        <li>Template de jeu vide branché au SDK pour aller plus vite.</li>
+        <li data-i18n-en-html="<b style=&quot;color:var(--text)&quot;>Age of Conquest</b>: ongoing balancing, more units/turrets per era, better visual effects."><b style="color:var(--text)">Conquête des Âges</b> : équilibrage continu, plus d'unités/tourelles par ère, meilleurs effets visuels.</li>
+        <li data-i18n-en-html="Emberfall: <b style=&quot;color:var(--text)&quot;>Meteor Rain weapon</b> + <b style=&quot;color:var(--text)&quot;>Colossus</b> and <b style=&quot;color:var(--text)&quot;>Hound</b> enemies added. Coming: more weapons/enemies, true per-biome bosses, conditional evolutions, codex, talent tree.">Emberfall : <b style="color:var(--text)">arme Pluie de météores</b> + ennemis <b style="color:var(--text)">Colosse</b> et <b style="color:var(--text)">Limier</b> ajoutés. À venir : encore des armes/ennemis, vrais boss par biome, évolutions conditionnelles, codex, arbre de talents.</li>
+        <li data-i18n-en-html="Emberfall: <b style=&quot;color:var(--text)&quot;>several maps with varied terrain</b> (not a single empty backdrop), unlocked as you progress.">Emberfall : <b style="color:var(--text)">plusieurs cartes aux terrains variés</b> (pas un seul décor vide), à débloquer en progressant.</li>
+        <li data-i18n-en-html="Ember Hill: <b style=&quot;color:var(--text)&quot;>more stages and vehicles</b>, more polished terrain.">Ember Hill : <b style="color:var(--text)">plus de stages et véhicules</b>, terrains plus travaillés.</li>
+        <li data-i18n-en="Empty game template wired to the SDK to move faster.">Template de jeu vide branché au SDK pour aller plus vite.</li>
       </ul>
     </div>
 
     <div class="phase">
-      <div class="tag">prévu — économie</div>
-      <h3>Les Ember Coins — la suite</h3>
+      <div class="tag" data-i18n-en="planned — economy">prévu — économie</div>
+      <h3 data-i18n-en="Ember Coins — what's next">Les Ember Coins — la suite</h3>
       <ul>
-        <li><b style="color:var(--text)">Donner des usages aux Ember Coins</b> : boutique de skins &amp; cosmétiques à l'échelle du site (sans toucher aux monnaies internes des jeux).</li>
-        <li>Échangeables contre des récompenses réelles : bons d'achat, cartes cadeaux, voire argent réel <span style="color:var(--muted)">(selon ce qui sera faisable légalement — et seulement après la validation des scores côté serveur)</span>.</li>
-        <li><b style="color:var(--text)">Skins &amp; cosmétiques</b> achetables en Ember Coins : apparences de personnages, véhicules, effets — toujours sans avantage de jeu.</li>
-        <li><b style="color:var(--text)">Abonnement payant</b> : un tier premium avec des avantages encore à définir (ex. bonus d'Ember Coins, skins exclusifs, sans publicité).</li>
-        <li>Publicité non-intrusive en tout dernier recours, jamais pendant une partie.</li>
+        <li data-i18n-en-html="<b style=&quot;color:var(--text)&quot;>Give Ember Coins real uses</b>: a site-wide skins &amp; cosmetics shop (without touching the games' internal currencies)."><b style="color:var(--text)">Donner des usages aux Ember Coins</b> : boutique de skins &amp; cosmétiques à l'échelle du site (sans toucher aux monnaies internes des jeux).</li>
+        <li data-i18n-en-html="Redeemable for real rewards: vouchers, gift cards, even real money <span style=&quot;color:var(--muted)&quot;>(depending on what's legally feasible — and only after server-side score validation)</span>.">Échangeables contre des récompenses réelles : bons d'achat, cartes cadeaux, voire argent réel <span style="color:var(--muted)">(selon ce qui sera faisable légalement — et seulement après la validation des scores côté serveur)</span>.</li>
+        <li data-i18n-en-html="<b style=&quot;color:var(--text)&quot;>Skins &amp; cosmetics</b> buyable with Ember Coins: character looks, vehicles, effects — always without gameplay advantage."><b style="color:var(--text)">Skins &amp; cosmétiques</b> achetables en Ember Coins : apparences de personnages, véhicules, effets — toujours sans avantage de jeu.</li>
+        <li data-i18n-en-html="<b style=&quot;color:var(--text)&quot;>Paid subscription</b>: a premium tier with perks still to define (e.g. Ember Coins bonus, exclusive skins, ad-free)."><b style="color:var(--text)">Abonnement payant</b> : un tier premium avec des avantages encore à définir (ex. bonus d'Ember Coins, skins exclusifs, sans publicité).</li>
+        <li data-i18n-en="Non-intrusive advertising as a last resort, never during a game.">Publicité non-intrusive en tout dernier recours, jamais pendant une partie.</li>
       </ul>
     </div>
 
     <div class="phase">
-      <div class="tag">exploration</div>
-      <h3>Vision long terme</h3>
+      <div class="tag" data-i18n-en="exploration">exploration</div>
+      <h3 data-i18n-en="Long-term vision">Vision long terme</h3>
       <ul>
-        <li>Compétition asynchrone (fantômes, duels de score), puis prototype multijoueur temps réel sur un seul jeu.</li>
-        <li>Internationalisation (FR/EN), ouverture à d'autres créateurs de jeux.</li>
+        <li data-i18n-en="Async competition (ghosts, score duels), then a real-time multiplayer prototype on a single game.">Compétition asynchrone (fantômes, duels de score), puis prototype multijoueur temps réel sur un seul jeu.</li>
+        <li data-i18n-en-html="Internationalisation (FR/EN) — <b style=&quot;color:var(--text)&quot;>done</b>. Next: opening up to other game creators.">Internationalisation (FR/EN) — <b style="color:var(--text)">fait</b>. Ensuite : ouverture à d'autres créateurs de jeux.</li>
       </ul>
     </div>
 
