@@ -4,10 +4,11 @@
      - autres GET même origine (js/css/png/mp3) : stale-while-revalidate (rapide + mise à jour en arrière-plan)
      - cross-origin (Supabase, esm.sh, Google Fonts) : jamais interceptés
    Pour publier une nouvelle version du shell, incrémente VERSION. */
-const VERSION = 'ember-v1';
+const VERSION = 'ember-v2';
 const CORE = [
-  '/', '/index.html', '/styles.css', '/sdk.js',
-  '/daily.html', '/leaderboard.html', '/roadmap.html',
+  '/', '/index.html', '/styles.css', '/sdk.js', '/fonts.css',
+  '/fonts/space-grotesk-latin.woff2', '/fonts/inter-latin.woff2', '/fonts/jetbrains-mono-latin.woff2',
+  '/daily.html', '/leaderboard.html', '/roadmap.html', '/mentions-legales.html',
   '/favicon.png', '/icon-192.png', '/icon-512.png', '/manifest.webmanifest'
 ];
 
@@ -30,6 +31,9 @@ self.addEventListener('fetch', e => {
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;          // laisse passer les API / CDN
   if (url.pathname === '/config.js') return;            // config runtime : toujours réseau
+  // Lecture audio/vidéo (<audio>) : requêtes partielles « Range ». Les servir depuis le cache
+  // renvoie une réponse complète que Safari refuse -> la musique ne se lançait pas. On laisse passer.
+  if (req.headers.has('range') || req.destination === 'audio' || req.destination === 'video') return;
 
   if (req.mode === 'navigate') {                        // pages : réseau d'abord
     e.respondWith((async () => {

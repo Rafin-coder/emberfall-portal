@@ -11,20 +11,25 @@ emberfall-portal/
 │   ├── leaderboard.html     Classements
 │   ├── daily.html           Défi du jour (classements quotidiens + série)
 │   ├── roadmap.html         Feuille de route publique
+│   ├── mentions-legales.html Mentions légales + politique de confidentialité
 │   ├── config.js            ⚠️ À REMPLIR (clés Supabase)
 │   ├── sdk.js               Le SDK commun à tous les jeux
 │   ├── styles.css           Identité visuelle partagée
+│   ├── fonts.css + fonts/   Polices hébergées sur le site (aucun appel à Google Fonts)
+│   ├── robots.txt, sitemap.xml  Référencement
 │   └── games/
 │       ├── emberfall/index.html   Survivor roguelite, branché au SDK
 │       ├── lumen/index.html       Arcade de lumière, branché au SDK
 │       ├── ageofwar/index.html    Stratégie de couloir (campagne + endless), branché au SDK
-│       └── emberhill/index.html   Conduite physique façon Hill Climb (distance), branché au SDK
+│       ├── emberhill/index.html   Conduite physique façon Hill Climb (distance), branché au SDK
+│       └── prismbreak/index.html  Casse-briques néon (multiballe, power-ups), branché au SDK
 ├── supabase/
 │   ├── schema.sql                 Base de données + sécurité (RLS) + anti-triche
 │   ├── catalogue_sync.sql         Synchro du catalogue en ligne + plafonds anti-triche (idempotent ; remplace les add_*.sql)
 │   ├── fix_leaderboard_daily.sql  Exclut les runs du Défi du jour du classement all-time
 │   ├── daily.sql                  Active le Défi du jour (colonne + vue + série) — à exécuter une fois
 │   ├── analytics.sql              Journal d'événements privé (mesure d'audience) — à exécuter une fois
+│   ├── hardening.sql              Durcissement (audit oct. 2026) : limites, anti-spam, dates du défi — à exécuter une fois
 │   └── analytics_queries.sql      Requêtes prêtes à l'emploi (DAU, entonnoir, rétention…)
 ├── build-config.js                Génère config.js depuis les variables d'env (déploiement Git)
 └── netlify.toml                   Config de déploiement
@@ -109,7 +114,11 @@ Le jeu apparaît dans la salle, dans les classements, avec comptes et sauvegarde
 sans réécrire quoi que ce soit.
 
 > Exemple concret : **Lumen** (2ᵉ jeu) a été ajouté exactement comme ça — trois
-> lignes de script + une ligne dans la table `games` (voir `supabase/add_lumen.sql`).
+> lignes de script + une ligne dans la table `games` (voir `supabase/catalogue_sync.sql`).
+
+Pour le défi du jour, repars de `GamePortal.daily().rng` **à chaque nouvelle partie**
+(dans ta fonction de remise à zéro) : sinon « Rejouer » continue la suite aléatoire et
+la partie n'est plus la même que celle des autres joueurs.
 
 ## L'API du SDK (`window.GamePortal`)
 
@@ -120,7 +129,14 @@ sans réécrire quoi que ce soit.
 | `submitScore(valeur, meta)` | Envoyer un score (+ miroir local). |
 | `getLeaderboard({ gameId, limit })` | Meilleur score par joueur, classé. |
 | `saveProgress(clé, data)` / `loadProgress(clé)` | Sauvegarde cloud + local. |
+| `finishRun(valeur, meta, opts)` | Fin de partie standard : score (normal ou défi) + quêtes + top en ligne. |
+| `daily()` | Date, graine et générateur aléatoire du défi du jour (identiques pour tous). |
+| `addCoins(n)` / `addXP(n)` / `unlock(id)` | Ember Coins, XP de compte et succès (synchronisés en ligne). |
+| `renderQuests({ list, section, sub, onClaim })` | Affiche les quêtes du jour (accueil et page Défi). |
 | `online` | `true` si Supabase est connecté. |
+
+Les envois réseau attendent la fin de `init()` (8 s max) : une partie très courte,
+terminée avant la connexion, envoie quand même son score.
 
 ## Anti-triche : ce qui est en place
 
@@ -129,11 +145,20 @@ Les scores partent du navigateur, donc ils sont vérifiés **côté serveur** :
 - **RLS** : on ne peut écrire qu'avec son propre identifiant — impossible de poster
   au nom d'un autre.
 - **Plausibilité** : tout score au-dessus du plafond `max_value` du jeu est rejeté.
-- **Anti-spam** : maximum 5 scores / 10 s par joueur.
+- **Anti-spam** : maximum 5 scores / 10 s par joueur, 120 événements / minute.
+- **Limites** (avec `hardening.sql`) : pseudo 1–24 caractères, taille des données libres
+  bornée, date d'un score de défi = aujourd'hui (UTC).
 
 Ce n'est pas inviolable (un joueur peut toujours soumettre un score atteignable mais
 faux). L'étape suivante, si un classement le mérite, sera la validation par rejeu
 côté serveur — l'architecture est prête pour ça.
+
+## Retours des joueurs (« Signaler / Suggérer »)
+
+Le bouton de l'accueil envoie un **formulaire Netlify** (`feedback`) : les messages arrivent
+dans Netlify → *Forms*. Active la détection des formulaires dans Netlify
+(**Site configuration → Forms**). Tant qu'elle n'est pas active, le bouton ouvre la
+messagerie du joueur en secours.
 
 ## Pubs
 

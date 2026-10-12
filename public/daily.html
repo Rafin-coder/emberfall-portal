@@ -12,9 +12,10 @@
 <meta name="apple-mobile-web-app-title" content="Ember Arcade">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Défi du jour — Ember Arcade</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="description" content="Chaque jour, les mêmes conditions pour tous sur les jeux d'Ember Arcade : classement quotidien, quêtes du jour et série de jours à garder.">
+<link rel="canonical" href="https://emberstudio.tech/daily.html">
+<link rel="preload" href="/fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts.css">
 <link rel="stylesheet" href="/styles.css">
 <style>
 .daycard{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:16px}
@@ -30,21 +31,21 @@
 </style>
 </head>
 <body>
-<nav class="nav"><div class="wrap row">
-  <a class="brand" href="/"><span class="dot"></span><span id="brand">EMBER ARCADE</span></a>
+<nav class="nav" aria-label="Navigation principale"><div class="wrap row">
+  <a class="brand" href="/"><span class="dot" aria-hidden="true"></span><span id="brand">EMBER ARCADE</span></a>
   <div class="navlinks">
     <a href="/" data-i18n-en="Games">Jeux</a>
-    <a href="/daily.html" class="on" data-i18n-en="Daily">Défi</a>
+    <a href="/daily.html" class="on" aria-current="page" data-i18n-en="Daily">Défi</a>
     <a href="/leaderboard.html" data-i18n-en="Leaderboard">Classement</a>
     <a href="/roadmap.html" data-i18n-en="Roadmap">Roadmap</a>
   </div>
-  <button class="chip" id="langChip" title="Langue / Language" style="cursor:pointer;font:700 11px 'JetBrains Mono',monospace">FR</button>
+  <button type="button" class="chip" id="langChip" title="Langue / Language" aria-label="Langue / Language" style="font:700 11px 'JetBrains Mono',monospace">FR</button>
   <a class="chip" href="/#profil" id="profilChip" title="Ton profil & tes succès" style="text-decoration:none">
     <span style="font:700 12px 'JetBrains Mono',monospace;color:#ffd27a">Nv&nbsp;<b id="navLvl">1</b></span>
-    <span style="width:46px;height:6px;border-radius:3px;background:rgba(255,255,255,.13);overflow:hidden;display:inline-block"><span id="navXp" style="display:block;height:100%;width:0;background:linear-gradient(90deg,#9fe8ff,#7ad7ff)"></span></span>
+    <span class="xpmini" style="width:46px;height:6px;border-radius:3px;background:rgba(255,255,255,.13);overflow:hidden;display:inline-block"><span id="navXp" style="display:block;height:100%;width:0;background:linear-gradient(90deg,#9fe8ff,#7ad7ff)"></span></span>
     <span style="font:700 12px 'JetBrains Mono',monospace;color:#ffb04d">◉&nbsp;<b id="navCoins">0</b></span>
   </a>
-  <div class="chip" id="userChip" title="Changer de pseudo"><span class="av"></span><span data-i18n-en="Name">Pseudo</span> <b id="uname">…</b></div>
+  <button type="button" class="chip" id="userChip" title="Changer de pseudo"><span class="av" aria-hidden="true"></span><span class="lbl" data-i18n-en="Name">Pseudo</span> <b id="uname">…</b></button>
 </div></nav>
 
 <header class="hero" style="padding:54px 0 26px"><div class="scan"></div><div class="wrap">
@@ -68,7 +69,14 @@
   <div id="cards"></div>
 </main>
 
-<footer class="foot"><div class="wrap" style="display:flex;gap:16px;align-items:center;width:100%"><a href="/" data-i18n-en="← Back to the arcade">← Retour à la salle</a><span class="mono" style="margin-left:auto;color:var(--faint)" data-i18n-en="© AofZ Inc. — site &amp; content">© AofZ Inc. — site &amp; contenu</span></div></footer>
+<footer class="foot"><div class="wrap">
+  <span id="footName">Ember Arcade</span>
+  <a href="/" data-i18n-en="Games">Jeux</a>
+  <a href="/leaderboard.html" data-i18n-en="Leaderboard">Classement</a>
+  <a href="/roadmap.html" data-i18n-en="Roadmap">Roadmap</a>
+  <a href="/mentions-legales.html" data-i18n-en="Legal &amp; privacy">Mentions légales &amp; confidentialité</a>
+  <span class="by mono">© <a href="https://azunivers.netlify.app/" rel="noopener">AZ Univers</a> <span data-i18n-en="— site &amp; content">— site &amp; contenu</span></span>
+</div></footer>
 
 <script src="/config.js"></script>
 <script src="/sdk.js"></script>
@@ -106,9 +114,11 @@ const COND = {
 };
 
 function cardHTML(g){
-  const cond = COND[g.id] ? COND[g.id]() : 'conditions du jour';
+  const id = String(g.id).replace(/[^a-z0-9_-]/gi,''), esc = GamePortal.esc;
+  const cond = COND[id] ? COND[id]() : GamePortal.t('conditions du jour','today\'s conditions');
+  g = { id, title: esc(g.title||id) };
   return `<div class="daycard" data-g="${g.id}">
-    <div class="top"><span class="ttl">${g.title}</span><span class="cond">${cond}</span></div>
+    <div class="top"><h2 class="ttl" style="margin:0">${g.title}</h2><span class="cond">${cond}</span></div>
     <a class="play" href="/games/${g.id}/index.html?daily=1" data-i18n-en="Play the challenge ▸">Jouer le défi ▸</a>
     <div class="lb" id="lb-${g.id}"></div>
   </div>`;
@@ -121,30 +131,10 @@ function fillNav(){ const set=(id,v)=>{const e=document.getElementById(id);if(e)
   set('uname', GamePortal.getUsername?GamePortal.getUsername():'Invité'); }
 window.addEventListener('gp:wallet', fillNav);
 
-// ---- Quêtes du jour (mêmes que l'accueil) ----
+// ---- Quêtes du jour (mêmes que l'accueil) : rendu partagé par le SDK ----
 function renderQuests(){
-  if(!GamePortal.getDailyQuests) return;
-  const list=document.getElementById('questList'), sec=document.getElementById('quests');
-  if(!list||!sec) return;
-  const qs=GamePortal.getDailyQuests(); if(!qs.length){ sec.style.display='none'; return; }
-  sec.style.display='block';
-  const tr=GamePortal.t||((fr)=>fr), esc=GamePortal.esc||((s)=>s);
-  const claimed=qs.filter(q=>q.claimed).length;
-  const sub=document.getElementById('questSub'); if(sub) sub.textContent=claimed+'/'+qs.length;
-  list.innerHTML=qs.map(q=>{
-    const pct=Math.max(0,Math.min(100,Math.round(q.value/q.target*100)));
-    let action;
-    if(q.claimed) action=`<span style="flex:none;font:700 12px 'JetBrains Mono',monospace;color:#5fe3c8">${tr('Récupéré ✓','Claimed ✓')}</span>`;
-    else if(q.done) action=`<button data-claim="${q.id}" style="flex:none;border:none;cursor:pointer;border-radius:10px;padding:9px 13px;font:700 12px 'JetBrains Mono',monospace;color:#0c0a08;background:linear-gradient(120deg,#ffd27a,#ffe6b0)">${tr('Récupérer','Claim')} ◉${q.reward}</button>`;
-    else action=`<span style="flex:none;font:700 12px 'JetBrains Mono',monospace;color:#8d8aa0">◉ ${q.reward}</span>`;
-    return `<div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.03);border:1px solid ${q.done&&!q.claimed?'rgba(255,210,122,.42)':'rgba(255,255,255,.08)'};border-radius:14px;padding:14px 16px">
-      <div style="flex:1;min-width:0">
-        <div style="font:600 14px 'Space Grotesk',sans-serif;color:#ece9f5;margin-bottom:8px">${esc(q.title)}</div>
-        <div style="height:7px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden"><span style="display:block;height:100%;width:${pct}%;background:linear-gradient(90deg,#ff7a3c,#ffd27a);transition:width .4s"></span></div>
-        <div style="font:600 11px 'JetBrains Mono',monospace;color:#8d8aa0;margin-top:5px">${q.value} / ${q.target}</div>
-      </div>${action}</div>`;
-  }).join('');
-  list.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>{ const r=GamePortal.claimQuest(b.dataset.claim); if(r&&r.ok){ renderQuests(); fillNav(); } });
+  GamePortal.renderQuests({ list:document.getElementById('questList'), section:document.getElementById('quests'),
+    sub:document.getElementById('questSub'), onClaim:fillNav });
 }
 window.addEventListener('gp:quests', renderQuests);
 window.addEventListener('gp:wallet', renderQuests);
