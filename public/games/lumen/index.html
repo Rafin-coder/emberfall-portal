@@ -11,17 +11,17 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Ember Arcade">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Lumen — Ember Arcade</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Lumen — jeu d'arcade gratuit en ligne | Ember Arcade</title>
+<meta name="description" content="Lumen : guide un serpent de lumière, ramasse les braises et enchaîne les combos. Jeu d'arcade gratuit, sans installation, sur ordinateur et mobile.">
+<link rel="canonical" href="https://emberstudio.tech/games/lumen/index.html">
+<link rel="stylesheet" href="/fonts.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--bg:#08080e;--text:#ece9f5;--muted:#8d8aa0;--ember:#ff7a3c;--ember2:#ffb04d;--cool:#5fe3c8;--danger:#ff5d6c;--line:rgba(255,255,255,.1)}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Space Grotesk",system-ui,sans-serif;overflow:hidden;touch-action:none}
 #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
 canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px var(--line),0 30px 90px -40px rgba(255,122,60,.5)}
-#hud{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;gap:14px;padding:14px 18px;
+#hud{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;gap:14px;padding:14px 18px 14px 112px;
   font-family:"JetBrains Mono",monospace;font-size:13px;pointer-events:none;z-index:10}
 #hud .sc{font-size:22px;font-weight:500;color:var(--text)}
 #hud .cmb{color:var(--ember2);opacity:0;transition:opacity .2s}
@@ -56,7 +56,7 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
   <span class="cmb" id="combo">×2</span>
   <span class="best" id="best" data-i18n-en="best —">record —</span>
 </div>
-<div id="stage"><canvas id="c"></canvas></div>
+<div id="stage"><canvas id="c" role="img" aria-label="Plateau de jeu de Lumen"></canvas></div>
 <div id="keysHud" style="position:fixed;bottom:10px;left:50%;transform:translateX(-50%);z-index:8;font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:rgba(255,255,255,.38);pointer-events:none" data-i18n-en="↑ ↓ ← →&nbsp; ·&nbsp; WASD&nbsp; ·&nbsp; swipe">↑ ↓ ← →&nbsp; ·&nbsp; ZQSD&nbsp; ·&nbsp; glisse du doigt</div>
 
 <div class="overlay" id="menu">
@@ -76,6 +76,15 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
   </div>
 </div>
 
+<div class="overlay hidden" id="pauseOv">
+  <div class="panel">
+    <div class="eyebrow" data-i18n-en="pause">pause</div>
+    <div class="big" style="font-size:34px" data-i18n-en="Paused">En pause</div>
+    <button class="btn" id="resumeBtn" data-i18n-en="Resume">Reprendre</button>
+    <div class="keys" data-i18n-en="Esc / P to resume">Échap / P pour reprendre</div>
+  </div>
+</div>
+
 <div class="overlay hidden" id="over">
   <div class="panel">
     <div class="eyebrow" style="color:var(--danger)" data-i18n-en="extinguished">extinction</div>
@@ -85,7 +94,7 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
     <div id="lbBox" style="margin:10px 0 2px"></div>
     <button class="btn" id="retryBtn" data-i18n-en="Replay">Rejouer</button>
     <button id="toMenuBtn" style="margin-top:9px;background:transparent;border:1px solid rgba(255,255,255,.18);color:#bfb9d6;font:600 14px 'Space Grotesk';border-radius:11px;padding:11px 22px;cursor:pointer" data-i18n-en="Main menu">Menu principal</button>
-    <div class="keys"><a href="/leaderboard.html" style="color:var(--cool);text-decoration:none" data-i18n-en="view leaderboard →">voir le classement →</a></div>
+    <div class="keys"><a href="/leaderboard.html?game=lumen" style="color:var(--cool);text-decoration:none" data-i18n-en="view leaderboard →">voir le classement →</a></div>
   </div>
 </div>
 
@@ -132,6 +141,7 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
   };
   function lumBanner(t,col){ if(!S)return; S.banner=t; S.bannerCol=col||'255,255,255'; S.bannerT=1.4; }
   function reset(){
+    if(DAILY) RNG=GamePortal.daily().rng;
     S={ snake:[{x:11,y:11},{x:10,y:11},{x:9,y:11}], prev:[], dir:{x:1,y:0}, queue:[],
         food:null, acc:0, interval:0.16, score:0, combo:1, comboT:0, parts:[], shake:0,
         state:'play', foodPulse:0, eaten:0, placed:0,
@@ -149,6 +159,11 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
     S.placed=(S.placed||0)+1;
     S.food.special = (S.placed%7===0) ? SPECIALS[(Math.floor(S.placed/7)-1)%SPECIALS.length] : null;
   }
+  function safeTurn(){
+    const h=S.snake[0], d=S.dir, opts=[{x:d.y,y:-d.x},{x:-d.y,y:d.x}];
+    for(const o of opts){ const nx=h.x+o.x, ny=h.y+o.y;
+      if(nx>=0&&nx<GRID&&ny>=0&&ny<GRID&&!S.snake.some((s,i)=>i<S.snake.length-1&&s.x===nx&&s.y===ny)){ S.dir=o; return; } }
+  }
   function setCombo(c){ const el=document.getElementById('combo'); el.textContent='×'+c; el.classList.toggle('on', c>1); }
 
   // ---------- input ----------
@@ -161,29 +176,31 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
     else if(['arrowdown','s'].includes(k)){turn(0,1);e.preventDefault();}
     else if(['arrowleft','q','a'].includes(k)){turn(-1,0);e.preventDefault();}
     else if(['arrowright','d'].includes(k)){turn(1,0);e.preventDefault();}
-    else if(k===' '){ if(S&&S.state==='menu') startGame(); }
+    else if(k==='p'||k==='escape'){ togglePause(); e.preventDefault(); }
+    else if(k===' '||k==='enter'){ if(S&&(S.state==='menu'||S.state==='dead')&&document.getElementById(S.state==='menu'?'menu':'over').classList.contains('hidden')===false){ startGame(); e.preventDefault(); }
+      else if(S&&S.state==='paused'){ togglePause(); e.preventDefault(); } }
   });
   let tsx=0,tsy=0,td=false;
-  cv.addEventListener('touchstart',e=>{const t=e.touches[0];tsx=t.clientX;tsy=t.clientY;td=true;},{passive:true});
-  cv.addEventListener('touchmove',e=>{ if(!td) return; const t=e.touches[0],dx=t.clientX-tsx,dy=t.clientY-tsy;
+  window.addEventListener('touchstart',e=>{ if(!S||S.state!=='play') return; const t=e.touches[0];tsx=t.clientX;tsy=t.clientY;td=true;},{passive:true});
+  window.addEventListener('touchmove',e=>{ if(!td||!S||S.state!=='play') return; const t=e.touches[0],dx=t.clientX-tsx,dy=t.clientY-tsy;
     if(Math.abs(dx)+Math.abs(dy)<22) return;
     if(Math.abs(dx)>Math.abs(dy)) turn(dx>0?1:-1,0); else turn(0,dy>0?1:-1);
     tsx=t.clientX; tsy=t.clientY; },{passive:true});
-  cv.addEventListener('touchend',()=>{td=false;});
+  window.addEventListener('touchend',()=>{td=false;});
 
   // ---------- step ----------
   function step(){
     if(S.queue.length) S.dir=S.queue.shift();
     const head=S.snake[0], nh={x:head.x+S.dir.x, y:head.y+S.dir.y};
     if(nh.x<0||nh.x>=GRID||nh.y<0||nh.y>=GRID){
-      if(S.shield>0){ S.shield--; S.queue=[]; lumBanner(T('Halo consommé','Halo used'),'95,227,200'); blip(520,.12,'square',.05); return; }
+      if(S.shield>0){ S.shield--; S.queue=[]; safeTurn(); lumBanner(T('Halo consommé','Halo used'),'95,227,200'); blip(520,.12,'square',.05); return; }
       return die(); }
     const eat = S.food && nh.x===S.food.x && nh.y===S.food.y;
     S.prev = S.snake.map(s=>({x:s.x,y:s.y}));
     S.snake.unshift(nh);
     if(!eat) S.snake.pop();
     for(let i=1;i<S.snake.length;i++){ if(S.snake[i].x===nh.x&&S.snake[i].y===nh.y){
-      if(S.shield>0){ S.shield--; S.snake=S.prev.map(s=>({x:s.x,y:s.y})); S.queue=[]; lumBanner(T('Halo consommé','Halo used'),'95,227,200'); blip(520,.12,'square',.05); return; }
+      if(S.shield>0){ S.shield--; S.snake=S.prev.map(s=>({x:s.x,y:s.y})); S.queue=[]; safeTurn(); lumBanner(T('Halo consommé','Halo used'),'95,227,200'); blip(520,.12,'square',.05); return; }
       return die(); } }
     if(eat){
       S.eaten++;
@@ -216,9 +233,9 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
         col: Math.random()<.5?'255,176,77':'95,227,200'}); } }
 
   function die(){
-    S.state='dead'; S.shake=12; blip(180,.3,'sawtooth',.06); blip(90,.45,'triangle',.05);
-    const best=Math.max(+(localStorage.getItem('gp:lumen:best')||0), S.score);
-    localStorage.setItem('gp:lumen:best', best);
+    S.state='dead'; S.shake=12; needsRender=true; blip(180,.3,'sawtooth',.06); blip(90,.45,'triangle',.05);
+    if(!DAILY){ const best=Math.max(+(localStorage.getItem('gp:lumen:best')||0), S.score);
+      try{ localStorage.setItem('gp:lumen:best', best); }catch(e){} }
     if(window.GamePortal&&GamePortal.addCoins){
       GamePortal.addCoins(Math.floor(S.score/20),'lumen');
       GamePortal.addXP(Math.floor(S.score/12),'lumen');
@@ -249,8 +266,10 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
     }
     if(S.shake>0) S.shake=Math.max(0,S.shake-dt*30);
     for(let i=S.parts.length-1;i>=0;i--){ const p=S.parts[i]; p.t+=dt; p.x+=p.dx*dt; p.y+=p.dy*dt; p.dx*=.92; p.dy*=.92; if(p.t>=p.life) S.parts.splice(i,1); }
-    render();
+    if(S.state==='play'||S.parts.length||S.shake>0||S.bannerT>0||needsRender){ needsRender=false; render(); }
   }
+  let needsRender=true;
+  window.addEventListener('resize',()=>{ needsRender=true; });
   function render(){
     ctx.clearRect(0,0,SIZE,SIZE);
     const sh=S.shake, ox=sh?(Math.random()*2-1)*sh:0, oy=sh?(Math.random()*2-1)*sh:0;
@@ -302,8 +321,16 @@ canvas{display:block;background:#06060c;border-radius:14px;box-shadow:0 0 0 1px 
   }
 
   // ---------- flow ----------
-  function startGame(){ ac(); reset(); document.getElementById('menu').classList.add('hidden'); document.getElementById('over').classList.add('hidden'); }
-  function toMenu(){ document.getElementById('over').classList.add('hidden'); reset(); S.state='menu';
+  function startGame(){ ac(); if(AC&&AC.state==='suspended') AC.resume(); reset(); needsRender=true;
+    document.getElementById('menu').classList.add('hidden'); document.getElementById('over').classList.add('hidden'); document.getElementById('pauseOv').classList.add('hidden'); }
+  function togglePause(){ if(!S) return;
+    if(S.state==='play'){ S.state='paused'; needsRender=true; document.getElementById('pauseOv').classList.remove('hidden'); }
+    else if(S.state==='paused'){ S.state='play'; last=performance.now(); document.getElementById('pauseOv').classList.add('hidden'); } }
+  // pause automatique si l'onglet est masqué ou la fenêtre perd le focus (plus de mort « dans le dos »)
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden&&S&&S.state==='play') togglePause(); });
+  window.addEventListener('blur',()=>{ if(S&&S.state==='play') togglePause(); });
+  document.getElementById('resumeBtn').onclick=togglePause;
+  function toMenu(){ document.getElementById('over').classList.add('hidden'); reset(); S.state='menu'; needsRender=true;
     document.getElementById('best').textContent=T('record','best')+' '+(+(localStorage.getItem('gp:lumen:best')||0));
     document.getElementById('menu').classList.remove('hidden'); }
   document.getElementById('startBtn').onclick=startGame;

@@ -11,46 +11,56 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Ember Arcade">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Classement — Ember Arcade</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Classements — Ember Arcade</title>
+<meta name="description" content="Les meilleurs scores de chaque jeu d'Ember Arcade : Emberfall, Lumen, Conquête des Âges, Ember Hill et Prismbreak.">
+<link rel="canonical" href="https://emberstudio.tech/leaderboard.html">
+<link rel="preload" href="/fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts.css">
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-<nav class="nav"><div class="wrap row">
-  <a class="brand" href="/"><span class="dot"></span><span id="brand">EMBER ARCADE</span></a>
+<nav class="nav" aria-label="Navigation principale"><div class="wrap row">
+  <a class="brand" href="/"><span class="dot" aria-hidden="true"></span><span id="brand">EMBER ARCADE</span></a>
   <div class="navlinks">
     <a href="/" data-i18n-en="Games">Jeux</a>
     <a href="/daily.html" data-i18n-en="Daily">Défi</a>
-    <a href="/leaderboard.html" class="on" data-i18n-en="Leaderboard">Classement</a>
+    <a href="/leaderboard.html" class="on" aria-current="page" data-i18n-en="Leaderboard">Classement</a>
     <a href="/roadmap.html" data-i18n-en="Roadmap">Roadmap</a>
   </div>
-  <button class="chip" id="langChip" title="Langue / Language" style="cursor:pointer;font:700 11px 'JetBrains Mono',monospace">FR</button>
+  <button type="button" class="chip" id="langChip" title="Langue / Language" aria-label="Langue / Language" style="font:700 11px 'JetBrains Mono',monospace">FR</button>
   <a class="chip" href="/#profil" id="profilChip" title="Ton profil & tes succès" style="text-decoration:none">
     <span style="font:700 12px 'JetBrains Mono',monospace;color:#ffd27a">Nv&nbsp;<b id="navLvl">1</b></span>
-    <span style="width:46px;height:6px;border-radius:3px;background:rgba(255,255,255,.13);overflow:hidden;display:inline-block"><span id="navXp" style="display:block;height:100%;width:0;background:linear-gradient(90deg,#9fe8ff,#7ad7ff)"></span></span>
+    <span class="xpmini" style="width:46px;height:6px;border-radius:3px;background:rgba(255,255,255,.13);overflow:hidden;display:inline-block"><span id="navXp" style="display:block;height:100%;width:0;background:linear-gradient(90deg,#9fe8ff,#7ad7ff)"></span></span>
     <span style="font:700 12px 'JetBrains Mono',monospace;color:#ffb04d">◉&nbsp;<b id="navCoins">0</b></span>
   </a>
-  <div class="chip" id="userChip" title="Changer de pseudo"><span class="av"></span><span data-i18n-en="Name">Pseudo</span> <b id="uname">…</b></div>
+  <button type="button" class="chip" id="userChip" title="Changer de pseudo"><span class="av" aria-hidden="true"></span><span class="lbl" data-i18n-en="Name">Pseudo</span> <b id="uname">…</b></button>
 </div></nav>
 
 <main class="wrap sec" style="padding-top:46px">
   <div class="sechead"><h2 data-i18n-en="Leaderboard">Classement</h2><span class="c" data-i18n-en="best score per player">meilleur score par joueur</span><span class="line"></span></div>
 
   <div class="controls">
+    <label for="gameSel" class="sr" data-i18n-en="Game">Jeu</label>
     <select id="gameSel"></select>
     <span class="mono" id="netInfo" style="color:var(--faint);font-size:12px"></span>
   </div>
 
   <table class="lb">
+    <caption class="sr" data-i18n-en="Best score per player">Meilleur score par joueur</caption>
     <thead><tr><th class="rk">#</th><th data-i18n-en="Player">Joueur</th><th style="text-align:right" data-i18n-en="Score">Score</th></tr></thead>
     <tbody id="rows"></tbody>
   </table>
   <div class="empty" id="empty" style="display:none" data-i18n-en="No score yet. Be the first to put your name down.">Aucun score pour l'instant. Sois le premier à inscrire ton nom.</div>
 </main>
 
-<footer class="foot"><div class="wrap" style="display:flex;gap:16px;align-items:center;width:100%"><a href="/" data-i18n-en="← Back to the arcade">← Retour à la salle</a><span class="mono" style="margin-left:auto;color:var(--faint)" data-i18n-en="© AofZ Inc. — site &amp; content">© AofZ Inc. — site &amp; contenu</span></div></footer>
+<footer class="foot"><div class="wrap">
+  <span id="footName">Ember Arcade</span>
+  <a href="/" data-i18n-en="Games">Jeux</a>
+  <a href="/leaderboard.html" data-i18n-en="Leaderboard">Classement</a>
+  <a href="/roadmap.html" data-i18n-en="Roadmap">Roadmap</a>
+  <a href="/mentions-legales.html" data-i18n-en="Legal &amp; privacy">Mentions légales &amp; confidentialité</a>
+  <span class="by mono">© <a href="https://azunivers.netlify.app/" rel="noopener">AZ Univers</a> <span data-i18n-en="— site &amp; content">— site &amp; contenu</span></span>
+</div></footer>
 
 <script src="/config.js"></script>
 <script src="/sdk.js"></script>
@@ -65,7 +75,7 @@ const UNIT={lumen:'pts',ageofwar:'pts',emberhill:'m',prismbreak:'pts'};
 function fmtVal(gid,v){ if(TIME_GAMES.has(gid))return fmtTime(v); return String(v)+' '+(UNIT[gid]||'pts'); }
 // Échappe tout ce qui vient du joueur (pseudo, méta) avant insertion en HTML — anti-XSS.
 const esc = GamePortal.esc;  // échappement HTML partagé (défini dans le SDK)
-function fmtMeta(m){ if(!m) return ''; const p=[]; if(m.char)p.push(esc(m.char)); if(m.diff)p.push(esc(m.diff)); if(m.lvl)p.push('niv '+(parseInt(m.lvl,10)||0)); return p.join(' · '); }
+function fmtMeta(m){ if(!m) return ''; const p=[]; if(m.char)p.push(esc(m.char)); if(m.diff)p.push(esc(m.diff)); if(m.lvl)p.push(GamePortal.t('niv ','lvl ')+(parseInt(m.lvl,10)||0)); return p.join(' · '); }
 
 async function render(gid){
   const rows = document.getElementById('rows'), empty = document.getElementById('empty');
@@ -77,7 +87,7 @@ async function render(gid){
     const meta = fmtMeta(r.meta);
     return `<tr class="row ${r.is_me?'me':''}">
       <td class="rk">${r.rank}</td>
-      <td class="who">${esc(r.username||'—')}${r.is_me?'<span class="me-tag">toi</span>':''}${meta?`<span class="mono" style="color:var(--faint);font-size:11px;margin-left:8px">${meta}</span>`:''}</td>
+      <td class="who">${esc(r.username||'—')}${r.is_me?'<span class="me-tag">'+GamePortal.t('toi','you')+'</span>':''}${meta?`<span class="mono" style="color:var(--faint);font-size:11px;margin-left:8px">${meta}</span>`:''}</td>
       <td class="val">${fmtVal(gid,r.value)}</td></tr>`;
   }).join('');
 }
@@ -95,8 +105,11 @@ async function boot(){
   let games = await GamePortal.getGames();
   if(!games || !games.length) games = FALLBACK_GAMES;
   const sel = document.getElementById('gameSel');
-  sel.innerHTML = games.map(g=>`<option value="${g.id}">${g.title}</option>`).join('');
-  sel.onchange = ()=>render(sel.value);
+  sel.innerHTML = games.map(g=>`<option value="${esc(g.id)}">${esc(g.title)}</option>`).join('');
+  // lien direct vers un jeu : /leaderboard.html?game=lumen
+  const want = new URLSearchParams(location.search).get('game');
+  if (want && games.some(g=>g.id===want)) sel.value = want;
+  sel.onchange = ()=>{ history.replaceState(null,'','?game='+encodeURIComponent(sel.value)); render(sel.value); };
   render(sel.value);
 }
 

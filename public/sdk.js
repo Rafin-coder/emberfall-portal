@@ -15,8 +15,22 @@
   const hasCloud = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY);
 
   let sb = null, user = null, profile = null, gameId = null;
-  let readyResolve;
+  let readyResolve, initCalled = false;
   const ready = new Promise((r) => (readyResolve = r));
+  // Attend la fin de init() (max 8 s) avant tout appel réseau : sinon une partie très courte
+  // terminée avant la connexion envoyait son score en "hors-ligne" et il n'arrivait jamais en ligne.
+  function whenReady() {
+    if (!initCalled) return Promise.resolve();
+    return Promise.race([ready, new Promise((r) => setTimeout(r, 8000))]);
+  }
+
+  // Accès au stockage local protégé : en navigation privée ou avec le stockage bloqué,
+  // localStorage peut lever une exception — le jeu doit continuer à tourner.
+  const LS = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+    del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  };
 
   async function loadSupabase() {
     if (sb) return sb;
@@ -45,6 +59,7 @@
 
   async function init(opts) {
     gameId = (opts && opts.gameId) || "unknown";
+    initCalled = true;
     if (!hasCloud) { readyResolve(); return GamePortal; }
     try {
       await loadSupabase();
@@ -57,6 +72,7 @@
       user = session.user;
       await loadProfile();
       await loadWallet();
+      syncWallet();   // pousse aussi les gains faits hors-ligne ou avant la connexion (fusion : on garde le meilleur)
       track('open', { path: (typeof location !== 'undefined' && location.pathname) || '' });
     } catch (e) {
       console.warn("[GamePortal] mode hors-ligne :", e.message);
@@ -76,33 +92,41 @@
     }
     profile = data;
     // si un pseudo local existait avant la connexion, on l'adopte
-    const local = localStorage.getItem("gp:username");
-    if (local && local !== profile.username) await setUsername(local);
+    const local = LS.get("gp:username");
+    if (local && local !== profile.username) {
+      const r = await setUsername(local);
+      if (!r.ok) LS.set("gp:username", profile.username);   // nom local refusé (déjà pris) : on garde celui du serveur
+    }
   }
 
   function getUsername() {
     if (profile) return profile.username;
-    return localStorage.getItem("gp:username") || "Invité";
+    return LS.get("gp:username") || "Invité";
   }
 
   async function setUsername(name) {
     // on retire les chevrons (défense en profondeur anti-XSS) ; l'échappement à l'affichage reste la vraie protection
     name = (name || "").replace(/[<>]/g, "").trim().slice(0, 24);
-    if (!name) return { ok: false, error: "Pseudo vide" };
-    localStorage.setItem("gp:username", name);
+    if (!name) return { ok: false, error: t("Pseudo vide.", "Empty name.") };
     if (sb && user) {
       const { error } = await sb.from("profiles").update({ username: name }).eq("id", user.id);
-      if (!error && profile) profile.username = name;
-      return { ok: !error, error: error && error.message };
+      if (error) {
+        const taken = error.code === "23505" || /duplicate|unique/i.test(error.message || "");
+        return { ok: false, error: taken ? t("Ce pseudo est déjà pris.", "This name is already taken.")
+                                         : t("Pseudo refusé, essaie un autre nom.", "Name rejected, try another one.") };
+      }
+      if (profile) profile.username = name;
     }
+    LS.set("gp:username", name);
     return { ok: true };
   }
 
   async function submitScore(value, meta) {
     value = Math.max(0, Math.floor(value || 0));
     const k = lsKey("best");
-    const prev = +(localStorage.getItem(k) || 0);
-    if (value > prev) localStorage.setItem(k, value);
+    const prev = +(LS.get(k) || 0);
+    if (value > prev) LS.set(k, value);
+    await whenReady();
     if (!sb || !user) return { ok: true, online: false, best: Math.max(prev, value) };
     try {
       const { error } = await sb.from("scores").insert({
@@ -121,8 +145,9 @@
     o = o || {};
     const gid = o.gameId || gameId;
     const limit = o.limit || 20;
+    await whenReady();
     if (!sb) {
-      const v = +(localStorage.getItem("gp:" + gid + ":best") || 0);
+      const v = +(LS.get("gp:" + gid + ":best") || 0);
       return v ? [{ rank: 1, username: getUsername(), value: v, is_me: true }] : [];
     }
     try {
@@ -146,7 +171,8 @@
   }
 
   async function saveProgress(key, data) {
-    localStorage.setItem(lsKey("prog:" + key), JSON.stringify(data));
+    LS.set(lsKey("prog:" + key), JSON.stringify(data));
+    await whenReady();
     if (sb && user) {
       try { await sb.from("progress").upsert({ user_id: user.id, game_id: gameId, key, data }); }
       catch (e) { /* silencieux : le local fait foi */ }
@@ -155,6 +181,7 @@
   }
 
   async function loadProgress(key) {
+    await whenReady();
     if (sb && user) {
       try {
         const { data } = await sb.from("progress").select("data")
@@ -162,8 +189,8 @@
         if (data) return data.data;
       } catch (e) { /* repli local */ }
     }
-    const raw = localStorage.getItem(lsKey("prog:" + key));
-    return raw ? JSON.parse(raw) : null;
+    const raw = LS.get(lsKey("prog:" + key));
+    try { return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
   }
 
   // ---------- UI partagée (dispo pour tous les jeux) ----------
@@ -206,6 +233,17 @@
 .gp-toast-ach{border-color:rgba(255,210,122,.75)}
 .gp-toast-level{border-color:rgba(159,232,255,.7)}
 .gp-toast-coin{border-color:rgba(255,176,77,.55)}
+.gp-q{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px}
+.gp-q.gp-ready{border-color:rgba(255,210,122,.42)}
+.gp-q-main{flex:1;min-width:0}
+.gp-q-t{font:600 14px "Space Grotesk",system-ui,sans-serif;color:#ece9f5;margin-bottom:8px}
+.gp-q-bar{height:7px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden}
+.gp-q-bar span{display:block;height:100%;background:linear-gradient(90deg,#ff7a3c,#ffd27a);transition:width .4s}
+.gp-q-v{font:600 11px "JetBrains Mono",monospace;color:#8d8aa0;margin-top:5px}
+.gp-q-act{flex:none;font:700 12px "JetBrains Mono",monospace;color:#8d8aa0}
+.gp-q-act.gp-done{color:#5fe3c8}
+.gp-q-claim{flex:none;border:none;cursor:pointer;border-radius:10px;padding:9px 13px;font:700 12px "JetBrains Mono",monospace;color:#0c0a08;background:linear-gradient(120deg,#ffd27a,#ffe6b0)}
+.gp-q-claim:focus-visible,.gp-btn:focus-visible{outline:2px solid #5fe3c8;outline-offset:2px}
 `;
     const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
   }
@@ -215,10 +253,10 @@
     injectUI();
     return new Promise((resolve) => {
       const ov = document.createElement('div'); ov.className = 'gp-ov';
-      ov.innerHTML = `<div class="gp-modal">
-        <div class="gp-h">${t('Ton pseudo','Your name')}</div>
+      ov.innerHTML = `<div class="gp-modal" role="dialog" aria-modal="true" aria-labelledby="gpNameTitle">
+        <div class="gp-h" id="gpNameTitle">${t('Ton pseudo','Your name')}</div>
         <div class="gp-sub">${t('Visible dans les classements.','Shown on the leaderboards.')}</div>
-        <input class="gp-input" maxlength="24" value="${escapeHtml(getUsername())}">
+        <input class="gp-input" maxlength="24" aria-labelledby="gpNameTitle" autocomplete="nickname" value="${escapeHtml(getUsername())}">
         <div class="gp-row2"><button class="gp-btn gp-ghost" data-x="cancel">${t('Annuler','Cancel')}</button>
           <button class="gp-btn" data-x="ok">${t('Enregistrer','Save')}</button></div>
         <div class="gp-err"></div></div>`;
@@ -235,7 +273,8 @@
         if (r.ok) close(getUsername()); else err.textContent = r.error || t('Pseudo indisponible.','Name unavailable.');
       }
       ov.querySelector('[data-x="ok"]').onclick = save;
-      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') close(null); });
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); });
+      ov.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(null); });
     });
   }
 
@@ -272,14 +311,16 @@
     const r = isDaily ? await submitDaily(value, meta) : await submitScore(value, meta);
     _questOnRun(opts.gameId || gameId, isDaily);   // progression des quêtes du jour
     if (opts.netEl){
-      let txt = sb ? (isDaily ? 'défi du jour envoyé' : 'score envoyé au classement')
-                   : (isDaily ? 'hors-ligne — score local' : 'hors-ligne — score gardé en local');
-      if (isDaily){ const st = getStreak(); if (st && st.count > 0) txt += ' · série ' + st.count + ' j'; }
+      let txt;
+      if (sb && r && r.ok === false) txt = t('score non envoyé — réessaie plus tard', 'score not sent — try again later');
+      else txt = sb ? (isDaily ? t('défi du jour envoyé', 'daily challenge sent') : t('score envoyé au classement', 'score sent to the leaderboard'))
+                    : (isDaily ? t('hors-ligne — score local', 'offline — local score') : t('hors-ligne — score gardé en local', 'offline — score kept locally'));
+      if (isDaily){ const st = getStreak(); if (st && st.count > 0) txt += ' · ' + t('série', 'streak') + ' ' + st.count + t(' j', ' d'); }
       opts.netEl.textContent = txt;
     }
     if (opts.lbEl && sb){
       const o = { gameId: opts.gameId || gameId, limit: opts.limit || 5, daily: isDaily,
-                  title: opts.title || (isDaily ? 'Défi du jour' : 'Classement en ligne'), format: opts.format };
+                  title: opts.title || (isDaily ? t('Défi du jour', 'Daily challenge') : t('Classement en ligne', 'Online leaderboard')), format: opts.format };
       setTimeout(() => renderTop(opts.lbEl, o), 350);
     }
     return r;
@@ -296,7 +337,8 @@
     const date = dayStr();
     value = Math.max(0, Math.floor(value || 0));
     const k = 'gp:' + gameId + ':daily:' + date;
-    const prev = +(localStorage.getItem(k) || 0); if (value > prev) localStorage.setItem(k, value);
+    const prev = +(LS.get(k) || 0); if (value > prev) LS.set(k, value);
+    await whenReady();
     bumpStreak(date);
     if (!sb || !user) return { ok: true, online: false };
     try {
@@ -312,7 +354,8 @@
 
   async function getDailyLeaderboard(o){
     o = o || {}; const gid = o.gameId || gameId; const date = o.date || dayStr(); const limit = o.limit || 60;
-    if (!sb) { const v = +(localStorage.getItem('gp:' + gid + ':daily:' + date) || 0); return v ? [{ rank: 1, username: getUsername(), value: v, is_me: true }] : []; }
+    await whenReady();
+    if (!sb) { const v = +(LS.get('gp:' + gid + ':daily:' + date) || 0); return v ? [{ rank: 1, username: getUsername(), value: v, is_me: true }] : []; }
     try {
       const { data, error } = await sb.from('v_daily').select('*')
         .eq('game_id', gid).eq('day', date).order('rank', { ascending: true }).limit(limit);
@@ -323,7 +366,7 @@
 
   // Série de jours consécutifs avec un défi joué.
   function getStreak(){
-    try { return JSON.parse(localStorage.getItem('gp:streak')) || { count: 0, best: 0, last: null }; }
+    try { return JSON.parse(LS.get('gp:streak')) || { count: 0, best: 0, last: null }; }
     catch (e) { return { count: 0, best: 0, last: null }; }
   }
   function bumpStreak(date){
@@ -332,18 +375,18 @@
     const yesterday = dayStr(new Date(Date.now() - 86400000));
     s.count = (s.last === yesterday) ? (s.count || 0) + 1 : 1;
     s.last = date; s.best = Math.max(s.best || 0, s.count);
-    localStorage.setItem('gp:streak', JSON.stringify(s));
-    if (sb && user) { try { sb.from('progress').upsert({ user_id: user.id, game_id: '_portal', key: 'streak', data: s }); } catch (e) {} }
+    LS.set('gp:streak', JSON.stringify(s));
+    if (sb && user) { sb.from('progress').upsert({ user_id: user.id, game_id: '_portal', key: 'streak', data: s }).then(() => {}, () => {}); }
     return s;
   }
 
   // ================= Ember Coins · Niveau global · Succès =================
   // Stockage local : même origine => partagé entre le portail et TOUS les jeux.
   const W = { coins:'gp:coins', xp:'gp:xp', ach:'gp:ach' };
-  function _int(k){ return Math.max(0, Math.floor(+(localStorage.getItem(k)||0))); }
+  function _int(k){ return Math.max(0, Math.floor(+(LS.get(k)||0))); }
   function getCoins(){ return _int(W.coins); }
   function getXP(){ return _int(W.xp); }
-  function _achMap(){ try { return JSON.parse(localStorage.getItem(W.ach)) || {}; } catch(e){ return {}; } }
+  function _achMap(){ try { return JSON.parse(LS.get(W.ach)) || {}; } catch(e){ return {}; } }
 
   function emitWallet(){ try { window.dispatchEvent(new CustomEvent('gp:wallet', { detail:{ coins:getCoins(), xp:getXP(), level:getLevel() } })); } catch(e){} }
 
@@ -352,8 +395,8 @@
     if (!sb || !user) return;
     clearTimeout(_syncT);
     _syncT = setTimeout(() => {
-      try { sb.from('progress').upsert({ user_id:user.id, game_id:'_portal', key:'wallet',
-        data:{ coins:getCoins(), xp:getXP(), ach:_achMap() } }); } catch(e){}
+      sb.from('progress').upsert({ user_id:user.id, game_id:'_portal', key:'wallet',
+        data:{ coins:getCoins(), xp:getXP(), ach:_achMap() } }).then(() => {}, () => {});
     }, 800);
   }
   async function loadWallet(){ if(!sb||!user) return;
@@ -361,17 +404,17 @@
       const { data } = await sb.from('progress').select('data')
         .eq('user_id',user.id).eq('game_id','_portal').eq('key','wallet').maybeSingle();
       if (data && data.data){ const s=data.data; // adopte le meilleur (pas de perte entre appareils)
-        if ((s.coins||0) > getCoins()) localStorage.setItem(W.coins, Math.floor(s.coins));
-        if ((s.xp||0) > getXP()) localStorage.setItem(W.xp, Math.floor(s.xp));
+        if ((s.coins||0) > getCoins()) LS.set(W.coins, Math.floor(s.coins));
+        if ((s.xp||0) > getXP()) LS.set(W.xp, Math.floor(s.xp));
         const m=_achMap(), sm=s.ach||{}; let ch=false;
         for (const k in sm){ if(!m[k]){ m[k]=sm[k]; ch=true; } }
-        if (ch) localStorage.setItem(W.ach, JSON.stringify(m));
+        if (ch) LS.set(W.ach, JSON.stringify(m));
         emitWallet();
       }
     } catch(e){}
   }
 
-  function setCoins(v){ localStorage.setItem(W.coins, Math.max(0, Math.floor(v||0))); emitWallet(); syncWallet(); }
+  function setCoins(v){ LS.set(W.coins, Math.max(0, Math.floor(v||0))); emitWallet(); syncWallet(); }
   function addCoins(n, reason, opts){ n=Math.floor(n||0); if(n<=0) return getCoins();
     setCoins(getCoins()+n);
     if(reason!=='quest') _questOnCoins(n);   // compte pour les quêtes (sauf récompense de quête)
@@ -388,7 +431,7 @@
   function getLevel(){ return levelFromXP(getXP()); }
   function addXP(n, reason){ n=Math.floor(n||0); if(n<=0) return getLevel();
     const before=getLevel().level;
-    localStorage.setItem(W.xp, getXP()+n); emitWallet(); syncWallet();
+    LS.set(W.xp, getXP()+n); emitWallet(); syncWallet();
     const after=getLevel().level;
     if (after>before) toast('Niveau '+after+' atteint', { kind:'level', icon:'★' });
     track('xp', { n:n, reason:reason||'' });
@@ -426,7 +469,7 @@
   function isUnlocked(id){ return !!_achMap()[id]; }
   function unlock(id){ const a=ACH_BY_ID[id]; if(!a) return { ok:false, error:'unknown' };
     const m=_achMap(); if (m[id]) return { ok:true, already:true };
-    m[id]=new Date().toISOString(); localStorage.setItem(W.ach, JSON.stringify(m));
+    m[id]=new Date().toISOString(); LS.set(W.ach, JSON.stringify(m));
     addCoins(a.coin, 'ach:'+id, { silent:true });
     toast('Succès — '+a.name, { kind:'ach', icon:'🏆', sub:'+'+a.coin+' Ember Coins · '+a.desc });
     emitWallet(); syncWallet(); track('achievement', { id:id });
@@ -451,13 +494,13 @@
     return metrics.slice(0,3).map(m => { const opts=QUEST_POOL[m]; const q=opts[Math.floor(rng()*opts.length)]; return Object.assign({ metric:m }, q); });
   }
   function _questState(){ const date=dayStr(); const k='gp:quests:'+date; let s=null;
-    try { s=JSON.parse(localStorage.getItem(k)); } catch(e){}
+    try { s=JSON.parse(LS.get(k)); } catch(e){}
     if (!s || s.date!==date){ s={ date:date, runs:0, games:[], coins:0, daily:0, claimed:[] };
       try { for (let i=0;i<localStorage.length;i++){ const kk=localStorage.key(i);   // purge des jours passés
         if (kk && kk.indexOf('gp:quests:')===0 && kk!==k){ localStorage.removeItem(kk); i--; } } } catch(e){}
     }
     return s; }
-  function _questSave(s){ try { localStorage.setItem('gp:quests:'+s.date, JSON.stringify(s)); } catch(e){} }
+  function _questSave(s){ try { LS.set('gp:quests:'+s.date, JSON.stringify(s)); } catch(e){} }
   function _questVal(s,m){ return m==='games' ? (s.games||[]).length : (s[m]||0); }
   function emitQuests(){ try { window.dispatchEvent(new CustomEvent('gp:quests')); } catch(e){} }
   function _questOnRun(gid, isDaily){ const s=_questState(); s.runs=(s.runs||0)+1;
@@ -478,10 +521,37 @@
     addCoins(q.reward, 'quest'); emitQuests();
     return { ok:true, reward:q.reward }; }
 
+  // Rendu partagé des quêtes du jour (accueil + page Défi) : avant, le même code était copié dans les deux pages.
+  //   opts = { list, section, sub, onClaim }
+  function renderQuests(opts){
+    opts = opts || {}; const list = opts.list, sec = opts.section;
+    if (!list || !sec) return;
+    injectUI();
+    const qs = getDailyQuests();
+    if (!qs.length) { sec.style.display = 'none'; return; }
+    sec.style.display = 'block';
+    if (opts.sub) opts.sub.textContent = qs.filter(q => q.claimed).length + '/' + qs.length;
+    list.innerHTML = qs.map(q => {
+      const pct = Math.max(0, Math.min(100, Math.round(q.value / q.target * 100)));
+      let action;
+      if (q.claimed) action = '<span class="gp-q-act gp-done">' + t('Récupéré ✓', 'Claimed ✓') + '</span>';
+      else if (q.done) action = '<button type="button" class="gp-q-claim" data-claim="' + escapeHtml(q.id) + '">' + t('Récupérer', 'Claim') + ' ◉' + q.reward + '</button>';
+      else action = '<span class="gp-q-act">◉ ' + q.reward + '</span>';
+      return '<div class="gp-q' + (q.done && !q.claimed ? ' gp-ready' : '') + '"><div class="gp-q-main">' +
+        '<div class="gp-q-t">' + escapeHtml(q.title) + '</div>' +
+        '<div class="gp-q-bar" role="progressbar" aria-label="' + escapeHtml(q.title) + '" aria-valuemin="0" aria-valuemax="' + q.target + '" aria-valuenow="' + q.value + '"><span style="width:' + pct + '%"></span></div>' +
+        '<div class="gp-q-v">' + q.value + ' / ' + q.target + '</div></div>' + action + '</div>';
+    }).join('');
+    list.querySelectorAll('[data-claim]').forEach(b => b.onclick = () => {
+      const r = claimQuest(b.dataset.claim);
+      if (r && r.ok) { renderQuests(opts); if (opts.onClaim) opts.onClaim(); }
+    });
+  }
+
   // ---- Toasts (injectés ; marchent dans les jeux ET le portail) ----
   let toastWrap=null;
   function ensureToast(){ injectUI(); if(toastWrap) return;
-    toastWrap=document.createElement('div'); toastWrap.className='gp-toasts'; document.body.appendChild(toastWrap); }
+    toastWrap=document.createElement('div'); toastWrap.className='gp-toasts'; toastWrap.setAttribute('role','status'); toastWrap.setAttribute('aria-live','polite'); document.body.appendChild(toastWrap); }
   function toast(text, opts){ opts=opts||{}; ensureToast();
     const t=document.createElement('div'); t.className='gp-toast gp-toast-'+(opts.kind||'info');
     t.innerHTML='<div class="gp-toast-main">'+(opts.icon?'<span class="gp-toast-ic">'+opts.icon+'</span>':'')+escapeHtml(text)+'</div>'+
@@ -493,7 +563,7 @@
   // ---------- i18n (FR/EN) ----------
   // Le HTML reste en français ; on ajoute data-i18n-en="..." (texte) ou
   // data-i18n-en-html="..." (HTML) sur les éléments à traduire. applyLang() bascule.
-  let lang = (function(){ try{ return localStorage.getItem('gp:lang')==='en' ? 'en' : 'fr'; }catch(e){ return 'fr'; } })();
+  let lang = (function(){ try{ return LS.get('gp:lang')==='en' ? 'en' : 'fr'; }catch(e){ return 'fr'; } })();
   function t(fr,en){ return (lang==='en' && en!=null) ? en : fr; }
   function applyLang(){
     try{ document.documentElement.lang = lang; }catch(e){}
@@ -509,7 +579,7 @@
     const chip=document.getElementById('langChip'); if(chip) chip.textContent = lang==='en' ? 'EN' : 'FR';
     try{ window.dispatchEvent(new CustomEvent('gp:lang', { detail:{ lang:lang } })); }catch(e){}
   }
-  function setLang(l){ lang = (l==='en') ? 'en' : 'fr'; try{ localStorage.setItem('gp:lang',lang); }catch(e){} applyLang(); }
+  function setLang(l){ lang = (l==='en') ? 'en' : 'fr'; try{ LS.set('gp:lang',lang); }catch(e){} applyLang(); }
   function initI18n(){ const chip=document.getElementById('langChip');
     if(chip) chip.addEventListener('click', ()=> setLang(lang==='en'?'fr':'en'));
     applyLang(); }
@@ -526,7 +596,7 @@
     saveProgress, loadProgress,
     promptUsername, renderTop, finishRun, esc: escapeHtml,
     daily, submitDaily, getDailyLeaderboard, getStreak,
-    getDailyQuests, claimQuest,
+    getDailyQuests, claimQuest, renderQuests,
     track,
     getCoins, addCoins, spendCoins, setCoins,
     getXP, addXP, getLevel,

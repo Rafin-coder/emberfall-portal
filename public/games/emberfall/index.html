@@ -11,7 +11,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Ember Arcade">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>EMBERFALL</title>
+<title>Emberfall — survivor roguelite gratuit en ligne | Ember Arcade</title>
+<meta name="description" content="Emberfall : survis aux vagues de ténèbres, choisis tes armes et leurs évolutions, affronte les boss. Survivor roguelite gratuit dans le navigateur, sur ordinateur et mobile.">
+<link rel="canonical" href="https://emberstudio.tech/games/emberfall/index.html">
 <style>
 :root{
   --ink:#f6ecd6; --ember:#ff9a3c; --ember-hi:#ffe6b0; --gold:#ffce7a;
@@ -189,11 +191,21 @@ button:hover{filter:brightness(1.08)}button:active{transform:translateY(2px)}
 .choice .badge{font-size:13px}
 .menubtns button{font-size:15px}
 @media(max-width:560px){.hudtop{padding-left:104px}.timer{font-size:25px}}
+@media(max-width:560px){
+  .hudtop{gap:6px;padding:12px 10px 10px 100px}
+  .timer{font-size:21px} .difftag{font-size:9px}
+  .lvltag{font-size:12px;padding:4px 7px} .lvltag b{font-size:15px}
+  .xpcol{min-width:36px} .xptxt{font-size:10px}
+  .hright{gap:5px} .chip{font-size:13px;padding:5px 8px}
+  .hudvitals{width:calc(100vw - 132px);left:12px;bottom:12px;gap:7px}
+  .vlabel{width:56px;font-size:10px} .hpbar,.frbar{height:18px} .barnum{font-size:11px}
+  .hudbtns{right:12px;bottom:12px} #sound{display:none}
+}
 </style>
 </head>
 <body>
 <div id="wrap">
-  <canvas id="cv"></canvas>
+  <canvas id="cv" role="img" aria-label="Arène d'Emberfall"></canvas>
   <div id="hud" class="hidden">
     <div class="hudtop">
       <div class="hleft">
@@ -443,7 +455,7 @@ function loadMeta(){try{return JSON.parse(localStorage.getItem('ember_meta'))||{
 function saveMeta(m){localStorage.setItem('ember_meta',JSON.stringify(m));}
 const DIFFS={normal:{hp:1,dmg:1,gold:1,label:'NORMAL',name:'Normal'},nightmare:{hp:1.9,dmg:1.55,gold:1.85,label:'CAUCHEMAR',name:'Cauchemar'},inferno:{hp:3.0,dmg:2.1,gold:2.8,label:'ENFER',name:'Enfer'}};
 const DIFFORDER=['normal','nightmare','inferno'];
-function diffGet(){if(window.__DAILY)return window.__DAILY.diff;return localStorage.getItem('ember_diff')||'normal';}
+function diffGet(){if(window.__DAILY)return window.__DAILY.diff;if(G&&G.diff)return G.diff;try{return localStorage.getItem('ember_diff')||'normal';}catch(e){return 'normal';}}
 const BIOMES=[
  {name:'Crépuscule',bg0:'#0c0a14',bg1:'#040308',grid:'rgba(255,200,130,0.05)',ember:'255,150,70',root:55,hpM:1,dmgM:1,spdM:1,countM:1,goldM:1,tint:null},
  {name:'Toundra',bg0:'#08131c',bg1:'#020810',grid:'rgba(140,200,255,0.06)',ember:'130,200,255',root:49,hpM:1,dmgM:0.9,spdM:0.85,countM:1.3,goldM:1,tint:'40,120,210'},
@@ -487,7 +499,7 @@ function takeRelic(){if(!pendingRelic)return;const r=pendingRelic;G.relics[r.id]
   banner(T('RELIQUE','RELIC')+' : '+L(r.name),'#c08bff',L(r.desc));pendingRelic=null;hide('relicpick');G.state='playing';G.last=performance.now();tryOpenChoice();}
 function skipRelic(){pendingRelic=null;hide('relicpick');G.state='playing';G.last=performance.now();
   banner(T('RELIQUE LAISSÉE','RELIC LEFT'),'#9aa',T('Elle pourra réapparaître plus tard.','It may reappear later.'));tryOpenChoice();}
-function anyEvo(w){return w.boltEvo||w.orbEvo||w.novaEvo||w.auraEvo||w.arcEvo||w.turretEvo||w.homingEvo;}
+function anyEvo(w){return w.boltEvo||w.orbEvo||w.novaEvo||w.auraEvo||w.arcEvo||w.turretEvo||w.homingEvo||w.meteorEvo;}
 const CHARS=[
  {id:'ember',ic:'❂',name:'La Braise',desc:'Équilibrée, sans faiblesse. La survivante par défaut.',cost:0,apply:()=>{}},
  {id:'pyro',ic:'✷',name:'Pyromancienne',desc:'Démarre avec le Brasier et +12% de zones. En échange, -22% PV.',cost:600,apply:()=>{G.w.aura=1;G.w.aoeMul*=1.12;G.p.maxhp*=0.78;G.p.hp=G.p.maxhp;}},
@@ -510,7 +522,8 @@ function getChar(){if(window.__DAILY)return window.__DAILY.char;const c=localSto
 function getAchv(){try{return JSON.parse(localStorage.getItem('ember_achv'))||[];}catch(e){return [];}}
 function applyChar(){const c=CHARS.find(x=>x.id===getChar());if(c)c.apply(); refreshSkin();}
 function applyAchv(){const un=getAchv();for(const a of ACHV)if(un.includes(a.id))a.ap(G);}
-function checkAchv(){const un=getAchv();let changed=false;
+let ACHV_UN=null;   // succès débloqués, gardés en mémoire pendant la partie (avant : relus 60 fois par seconde)
+function checkAchv(){const un=ACHV_UN||(ACHV_UN=getAchv());let changed=false;
   for(const a of ACHV){if(un.includes(a.id))continue;if(a.chk(G)){un.push(a.id);changed=true;banner(T('SUCCÈS','ACHIEVEMENT')+' : '+L(a.name),'#ffd27a');sfx.over();}}
   if(changed)localStorage.setItem('ember_achv',JSON.stringify(un));}
 
@@ -621,7 +634,7 @@ const SP_HEART=(()=>{const r=10,pad=14,size=(r+pad)*2,c=spr(size),g=c.getContext
   g.beginPath();g.moveTo(0,r*0.7);g.bezierCurveTo(-r*1.3,-r*0.2,-r*0.5,-r*1.1,0,-r*0.35);
   g.bezierCurveTo(r*0.5,-r*1.1,r*1.3,-r*0.2,0,r*0.7);g.closePath();g.fill();
   g.shadowBlur=0;g.fillStyle='rgba(255,255,255,.5)';g.beginPath();g.arc(-r*0.35,-r*0.3,r*0.18,0,TAU);g.fill();return {c,half:size/2};})();
-const SP_MAGNET=(()=>{const r=11,pad=16,size=(r+pad)*2,c=spr(size),g=c.getContext('2d');g.translate(size/2,-2);
+const SP_MAGNET=(()=>{const r=11,pad=16,size=(r+pad)*2,c=spr(size),g=c.getContext('2d');g.translate(size/2,size/2);
   g.shadowColor='#6ab7ff';g.shadowBlur=14;g.lineWidth=6;g.strokeStyle='#d24b4b';
   g.beginPath();g.arc(0,2,r,Math.PI,TAU);g.stroke();g.shadowBlur=0;
   g.beginPath();g.moveTo(-r,2);g.lineTo(-r,2+r*0.7);g.moveTo(r,2);g.lineTo(r,2+r*0.7);g.stroke();
@@ -655,7 +668,7 @@ const sfx={shoot:()=>blip(rand(620,720),.05,'square',.03),
   gold:()=>blip(rand(1180,1320),.06,'square',.022),
   vac:()=>{blip(300,.18,'sine',.06);setTimeout(()=>blip(900,.18,'sine',.05),70);},
   level:()=>{[523,659,784,1046].forEach((f,i)=>setTimeout(()=>blip(f,.18,'triangle',.06),i*70));},
-  nova:()=>blip(160,.3,'sine',.05),hurt:()=>blip(90,.18,'sawtooth',.07),
+  nova:()=>blip(160,.3,'sine',.05),hurt:()=>blip(90,.18,'sawtooth',.07),bomb:()=>blip(110,.25,'sawtooth',.05),
   over:()=>{[440,660,880,1320].forEach((f,i)=>setTimeout(()=>blip(f,.2,'square',.05),i*55));},
   buy:()=>{blip(700,.1,'triangle',.05);setTimeout(()=>blip(1050,.12,'triangle',.05),60);}};
 // ---- musique via Web Audio (même moteur que les effets => fiable, pas de blocage <audio>) ----
@@ -697,7 +710,11 @@ addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;
   if(G.state==='levelup'&&(k==='1'||k==='2'||k==='3'))pick(+k-1);
   if(G.state==='relic'){if(k==='1')takeRelic();else if(k==='2')skipRelic();}
   if(k===' '){tryDash();e.preventDefault();}
-  if(k==='p')togglePause();});
+  if(k==='p'||k==='escape')togglePause();});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){ if(G.state==='playing')togglePause(); for(const k in keys)keys[k]=false; if(AC&&AC.state==='running')AC.suspend(); }
+  else if(AC&&AC.state==='suspended')AC.resume(); });
+addEventListener('blur',()=>{ for(const k in keys)keys[k]=false; ptr.active=false; if(G.state==='playing')togglePause(); });
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
 let ptr={active:false,x:0,y:0};
 function pos(e){const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top};}
@@ -834,16 +851,16 @@ function onKill(e){
   burst(e.x,e.y,ETYPE[e.t].col,e.t==='boss'?48:Math.min(18,9+(G.combo>>3)));
   dropLoot(e);
   if(G.overdrive<=0){G.frenzy+=e.t==='boss'?0.5:e.t==='brute'?0.06:e.t==='caster'?0.05:0.026;
-    if(G.frenzy>=1){G.frenzy=0;G.overdrive=6;banner('SURCHARGE !','#ffd27a','Dégâts et cadence de tir boostés un court instant.');G.shake=Math.min(10,G.shake+5);sfx.over();}}
+    if(G.frenzy>=1){G.frenzy=0;G.overdrive=6;banner(T('SURCHARGE !','OVERLOAD!'),'#ffd27a',T('Dégâts et cadence de tir boostés un court instant.','Damage and fire rate boosted for a moment.'));G.shake=Math.min(10,G.shake+5);sfx.over();}}
   if(G.killCd<=0){G.killCd=0.05;blip(560+Math.min(1000,G.combo*16),0.05,'square',0.02);}
-  if(e.t==='boss'){G.shake=24;G.hitstop=0.14;G.bossKills++;banner(e.guardian?'GARDIEN VAINCU':'BOSS VAINCU','#ff7d8e',e.guardian?'Le gardien du biome tombe : gros butin !':'Boss éliminé : or, coffre et butin largués.');
+  if(e.t==='boss'){G.shake=24;G.hitstop=0.14;G.bossKills++;banner(e.guardian?T('GARDIEN VAINCU','GUARDIAN DEFEATED'):T('BOSS VAINCU','BOSS DEFEATED'),'#ff7d8e',e.guardian?T('Le gardien du biome tombe : gros butin !','The biome guardian falls: big loot!'):T('Boss éliminé : or, coffre et butin largués.','Boss down: gold, chest and loot dropped.'));
     G.rings.push({x:e.x,y:e.y,r:10,max:340,col:'255,120,90',life:1,t:0});
     G.rings.push({x:e.x,y:e.y,r:10,max:200,col:'255,210,140',life:0.7,t:0});
     const gn=e.guardian?14:8;for(let i=0;i<gn;i++){const a=rand(0,TAU),sp=rand(60,160);
       pushLoot({type:'gold',value:Math.round(rand(6,14)),x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,forced:false});}
     pushLoot({type:'chest',value:0,x:e.x,y:e.y,vx:0,vy:0,forced:false});
     if(e.guardian)pushLoot({type:'vacuum',value:0,x:e.x,y:e.y,vx:0,vy:0,forced:false});}
-  if(MILES.includes(G.p.kills)){banner(G.p.kills+' ÉLIMINÉS — RÉCOMPENSE','#9bf5e4','Palier d\'éliminations atteint : choix bonus.');queueLevelUp();}
+  if(MILES.includes(G.p.kills)){banner(G.p.kills+T(' ÉLIMINÉS — RÉCOMPENSE',' KILLS — REWARD'),'#9bf5e4',T('Palier d\'éliminations atteint : choix bonus.','Kill milestone reached: bonus choice.'));queueLevelUp();}
   if(e.t==='splitter'){const m=diffMul();for(let s=0;s<2;s++){const a=rand(0,TAU);
     G.enemies.push(mkEnemy('swift',e.x+Math.cos(a)*14,e.y+Math.sin(a)*14,4,120,4,m));}}
   if(G.relics.lifesteal)G.p.hp=Math.min(G.p.maxhp,G.p.hp+1);
@@ -877,7 +894,7 @@ function dropLoot(e){
 }
 function activateVacuum(){G.vacFlash=.35;sfx.vac();
   for(const it of G.loot){if(it.type==='xp'||it.type==='gold')it.forced=true;}}
-function bombBlast(){G.shake=14;G.bombFlash=0.5;banner('DÉTONATION','#ff9a3c','Explosion : gros dégâts à tous les ennemis autour.');sfx.over();
+function bombBlast(){G.shake=14;G.bombFlash=0.5;banner(T('DÉTONATION','DETONATION'),'#ff9a3c',T('Explosion : gros dégâts à tous les ennemis autour.','Explosion: heavy damage to every enemy around.'));sfx.over();
   for(const e of G.enemies){e.hp-=e.maxhp*0.6+200;e.hit=.14;}
   for(let i=0;i<40;i++){const a=rand(0,TAU),s=rand(80,440);G.parts.push({x:G.p.x,y:G.p.y,dx:Math.cos(a)*s,dy:Math.sin(a)*s,r:rand(2,4.2),life:rand(.4,.85),t:0,col:'#ffb24d'});}}
 function tryDash(){if(G.state!=='playing'||G.dashCd>0)return;
@@ -942,7 +959,7 @@ function die(){G.state='dead';sfx.die();
   document.getElementById('goKills').textContent=G.p.kills;
   const dps=Math.round(G.dmgTotal/Math.max(1,G.t));
   let bk='—',bv=0;for(const k in G.dmgBy)if(G.dmgBy[k]>bv){bv=G.dmgBy[k];bk=k;}
-  const wn=(EN()?{bolt:'Bolt',orb:'Ashes',nova:'Wave',aura:'Blaze',arc:'Lightning',turret:'Turret',homing:'Missiles'}:{bolt:'Tir',orb:'Cendres',nova:'Onde',aura:'Brasier',arc:'Foudre',turret:'Tourelle',homing:'Missiles'})[bk]||'—';
+  const wn=(EN()?{bolt:'Bolt',orb:'Ashes',nova:'Wave',aura:'Blaze',arc:'Lightning',turret:'Turret',homing:'Missiles',meteor:'Meteors'}:{bolt:'Tir',orb:'Cendres',nova:'Onde',aura:'Brasier',arc:'Foudre',turret:'Tourelle',homing:'Missiles',meteor:'Météores'})[bk]||'—';
   document.getElementById('best').innerHTML=T('meilleur temps','best time')+' : <b>'+fmt(best)+'</b> &nbsp;·&nbsp; '+T('or gagné','gold earned')+' : <b>'+G.run.gold+'</b> ◉<br>'+T('DPS moyen','avg DPS')+' <b>'+dps+'</b> &nbsp;·&nbsp; '+T('arme reine','top weapon')+' <b>'+wn+'</b>';
   let lb=[];try{lb=JSON.parse(localStorage.getItem('ember_lb'))||[];}catch(e){}
   lb.push({t:Math.floor(G.t),c:getChar(),d:diffGet()});lb.sort((a,b)=>b.t-a.t);lb=lb.slice(0,5);
@@ -1047,10 +1064,10 @@ document.getElementById('pauseBtn').onclick=togglePause;
 document.getElementById('resumeBtn').onclick=togglePause;
 document.getElementById('quitBtn').onclick=()=>{setGold(getGold()+G.run.gold);G.run.gold=0;goMenu();};
 document.getElementById('goMenuBtn').onclick=goMenu;
-function goMenu(){G.state='menu';['pause','gameover','levelup','shop','chars','achv','opts'].forEach(hide);
+function goMenu(){G.state='menu';G.diff=null;['pause','gameover','levelup','shop','chars','achv','opts'].forEach(hide);
   document.getElementById('hud').classList.add('hidden');
   refreshMenuGold();refreshDiff();refreshChar();show('menu');}
-document.getElementById('diffBtn').onclick=()=>{const i=DIFFORDER.indexOf(diffGet());localStorage.setItem('ember_diff',DIFFORDER[(i+1)%DIFFORDER.length]);refreshDiff();};
+document.getElementById('diffBtn').onclick=()=>{G.diff=null;const i=DIFFORDER.indexOf(diffGet());localStorage.setItem('ember_diff',DIFFORDER[(i+1)%DIFFORDER.length]);refreshDiff();};
 function refreshDiff(){document.getElementById('diffName').textContent=L(DIFFS[diffGet()].name);}
 function refreshChar(){const c=CHARS.find(x=>x.id===getChar());document.getElementById('charName').textContent=c?L(c.name):L('La Braise');}
 document.getElementById('charBtn').onclick=()=>{ensureAudio();openChars();};
@@ -1098,7 +1115,7 @@ let resetArmed=false,resetTO=null;
 document.getElementById('resetBtn').onclick=()=>{const b=document.getElementById('resetBtn');
   if(!resetArmed){resetArmed=true;b.textContent=T('Confirmer ? (efface tout)','Confirm? (erases all)');b.classList.add('armed');
     resetTO=setTimeout(()=>{resetArmed=false;b.textContent=T('Réinitialiser le compte','Reset account');b.classList.remove('armed');},3000);}
-  else{clearTimeout(resetTO);['ember_gold','ember_meta','ember_best','ember_diff','ember_chars','ember_char','ember_achv','ember_lb'].forEach(k=>localStorage.removeItem(k));
+  else{clearTimeout(resetTO);ACHV_UN=null;['ember_gold','ember_meta','ember_best','ember_diff','ember_chars','ember_char','ember_achv','ember_lb'].forEach(k=>localStorage.removeItem(k));
     resetArmed=false;b.classList.remove('armed');b.textContent=T('Compte réinitialisé ✓','Account reset ✓');
     refreshMenuGold();refreshDiff();refreshChar();setTimeout(()=>{b.textContent=T('Réinitialiser le compte','Reset account');},1500);}};
 document.getElementById('shopBtn').onclick=()=>{ensureAudio();openShop('menu');};
@@ -1124,7 +1141,7 @@ function renderShop(){
     b.onclick=()=>{const id=b.dataset.id,m2=loadMeta(),lvl=m2[id]||0,u=META.find(x=>x.id===id),cost=u.cost(lvl);
       if(lvl>=u.max||getGold()<cost)return;setGold(getGold()-cost);m2[id]=lvl+1;saveMeta(m2);sfx.buy();renderShop();};});
 }
-function start(){ensureAudio();playMusic();reset();
+function start(){ensureAudio();if(AC&&AC.state==='suspended')AC.resume();playMusic();reset();ACHV_UN=null;G.diff=null;G.diff=diffGet();
   // Défi du jour = mêmes conditions pour tous : on n'applique NI la méta-progression NI les bonus de succès
   // (seuls le personnage et la difficulté imposés du jour comptent). En partie normale, tout s'applique.
   if(!window.__DAILY){applyMeta();applyAchv();}
@@ -1149,6 +1166,10 @@ refreshMenuGold();refreshDiff();refreshChar();
 window.addEventListener('gp:lang',()=>{ refreshMenuGold(); refreshDiff(); refreshChar(); });
 
 /* ---------- update ---------- */
+const HUDC={};
+function hudT(id,v){v=String(v);if(HUDC[id]!==v){HUDC[id]=v;document.getElementById(id).textContent=v;}}
+function hudW(id,v){const k=id+'w';if(HUDC[k]!==v){HUDC[k]=v;document.getElementById(id).style.width=v;}}
+function hudH(id,v){const k=id+'h';if(HUDC[k]!==v){HUDC[k]=v;document.getElementById(id).style.height=v;}}
 function update(dt){
   const p=G.p;G.t+=dt;if(sfxBudget>0)sfxBudget--;
   if(p.invuln>0)p.invuln-=dt;if(G.dmgFlash>0)G.dmgFlash-=dt;if(G.vacFlash>0)G.vacFlash-=dt;
@@ -1301,7 +1322,7 @@ function update(dt){
       else if(g.type==='vacuum'){activateVacuum();floatTxt(p.x,p.y-22,'VACUUM','#9bf5e4');}
       else if(g.type==='chest'){banner(T('COFFRE !','CHEST!'),'#ffd27a',T('Choisis une amélioration bonus.','Choose a bonus upgrade.'));sfx.over();queueLevelUp();}
       else if(g.type==='bomb'){bombBlast();}
-      else if(g.type==='heart'){G.p.hp=Math.min(G.p.maxhp,G.p.hp+G.p.maxhp*0.4);floatTxt(p.x,p.y-22,'+VIE','#ff8a9a');blip(700,.12,'sine',.04);}
+      else if(g.type==='heart'){G.p.hp=Math.min(G.p.maxhp,G.p.hp+G.p.maxhp*0.4);floatTxt(p.x,p.y-22,T('+VIE','+HP'),'#ff8a9a');blip(700,.12,'sine',.04);}
       else if(g.type==='magnet'){G.magBoost=7;banner(T('AIMANT','MAGNET'),'#9bf5e4');floatTxt(p.x,p.y-22,T('AIMANT','MAGNET'),'#9bf5e4');blip(900,.1,'sine',.03);}
       else if(g.type==='relic'){offerRelic();}
       G.loot.splice(i,1);}
@@ -1312,18 +1333,17 @@ function update(dt){
   for(let i=G.rings.length-1;i>=0;i--){const r=G.rings[i];r.t+=dt;r.r+=(r.max-r.r)*Math.min(1,dt*9);if(r.t>=r.life)G.rings.splice(i,1);}
   for(let i=G.floats.length-1;i>=0;i--){const f=G.floats[i];f.t-=dt;f.y+=f.vy*dt;f.vy*=.94;if(f.t<=0)G.floats.splice(i,1);}
 
-  document.getElementById('xpfill').style.width=(G.p.xp/G.p.xpNext*100)+'%';
-  document.getElementById('xptxt').textContent=Math.floor(G.p.xp)+'/'+G.p.xpNext;
-  document.getElementById('hpfill').style.width=(G.p.hp/G.p.maxhp*100)+'%';
-  document.getElementById('hptxt').textContent=Math.ceil(G.p.hp)+'/'+Math.round(G.p.maxhp);
-  document.getElementById('lvl').textContent=G.p.lvl;
-  document.getElementById('kills').textContent=G.p.kills;
-  document.getElementById('gold').textContent=G.run.gold;
-  document.getElementById('time').textContent=fmt(G.t);
-  const fr=document.getElementById('frfill'),frt=document.getElementById('frtxt');
-  if(G.overdrive>0){fr.style.width='100%';frt.textContent=G.overdrive.toFixed(1)+'s';}
-  else{fr.style.width=(G.frenzy*100)+'%';frt.textContent=Math.floor(G.frenzy*100)+'%';}
-  document.getElementById('dashCd').style.height=(G.dashCd>0?G.dashCd/G.dashCdMax*100:0)+'%';
+  hudW('xpfill',(G.p.xp/G.p.xpNext*100).toFixed(1)+'%');
+  hudT('xptxt',Math.floor(G.p.xp)+'/'+G.p.xpNext);
+  hudW('hpfill',(G.p.hp/G.p.maxhp*100).toFixed(1)+'%');
+  hudT('hptxt',Math.ceil(G.p.hp)+'/'+Math.round(G.p.maxhp));
+  hudT('lvl',G.p.lvl);
+  hudT('kills',G.p.kills);
+  hudT('gold',G.run.gold);
+  hudT('time',fmt(G.t));
+  if(G.overdrive>0){hudW('frfill','100%');hudT('frtxt',G.overdrive.toFixed(1)+'s');}
+  else{hudW('frfill',(G.frenzy*100).toFixed(1)+'%');hudT('frtxt',Math.floor(G.frenzy*100)+'%');}
+  hudH('dashCd',(G.dashCd>0?G.dashCd/G.dashCdMax*100:0).toFixed(1)+'%');
 }
 
 /* ---------- render ---------- */
@@ -1494,10 +1514,12 @@ GamePortal.init({gameId:'emberfall'});
   const char=chars[Math.floor(D.rng()*chars.length)];
   const diff=diffs[Math.floor(D.rng()*diffs.length)];
   window.__DAILY={date:D.date, char, diff};
-  const cn={ember:'La Braise',pyro:'Pyromancienne',gunner:'Artilleuse',wraith:'Spectre',midas:'Avare'};
-  const dn={normal:'Normal',nightmare:'Cauchemar',inferno:'Enfer'};
+  const en=GamePortal.lang==='en';
+  const cn=en?{ember:'The Ember',pyro:'Pyromancer',gunner:'Gunner',wraith:'Wraith',midas:'Miser'}
+             :{ember:'La Braise',pyro:'Pyromancienne',gunner:'Artilleuse',wraith:'Spectre',midas:'Avare'};
+  const dn=en?{normal:'Normal',nightmare:'Nightmare',inferno:'Inferno'}:{normal:'Normal',nightmare:'Cauchemar',inferno:'Enfer'};
   const b=document.getElementById('dailyBadge');
-  if(b){ b.textContent=T('DÉFI DU JOUR','DAILY CHALLENGE')+' · '+L(cn[char])+' · '+L(dn[diff]); b.style.display='block'; }
+  if(b){ b.textContent=GamePortal.t('DÉFI DU JOUR','DAILY CHALLENGE')+' · '+cn[char]+' · '+dn[diff]; b.style.display='block'; }
 })();
 </script>
 </body>

@@ -12,27 +12,28 @@
 <meta name="apple-mobile-web-app-title" content="Ember Arcade">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Roadmap — Ember Arcade</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="description" content="Ce qui est déjà en ligne et ce qui arrive sur Ember Arcade : nouveaux jeux, quêtes, saisons, économie.">
+<link rel="canonical" href="https://emberstudio.tech/roadmap.html">
+<link rel="preload" href="/fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts.css">
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-<nav class="nav"><div class="wrap row">
-  <a class="brand" href="/"><span class="dot"></span><span id="brand">EMBER ARCADE</span></a>
+<nav class="nav" aria-label="Navigation principale"><div class="wrap row">
+  <a class="brand" href="/"><span class="dot" aria-hidden="true"></span><span id="brand">EMBER ARCADE</span></a>
   <div class="navlinks">
     <a href="/" data-i18n-en="Games">Jeux</a>
     <a href="/daily.html" data-i18n-en="Daily">Défi</a>
     <a href="/leaderboard.html" data-i18n-en="Leaderboard">Classement</a>
-    <a href="/roadmap.html" class="on" data-i18n-en="Roadmap">Roadmap</a>
+    <a href="/roadmap.html" class="on" aria-current="page" data-i18n-en="Roadmap">Roadmap</a>
   </div>
-  <button class="chip" id="langChip" title="Langue / Language" style="cursor:pointer;font:700 11px 'JetBrains Mono',monospace">FR</button>
+  <button type="button" class="chip" id="langChip" title="Langue / Language" aria-label="Langue / Language" style="font:700 11px 'JetBrains Mono',monospace">FR</button>
   <a class="chip" href="/#profil" id="profilChip" title="Ton profil & tes succès" style="text-decoration:none">
     <span style="font:700 12px 'JetBrains Mono',monospace;color:#ffd27a">Nv&nbsp;<b id="navLvl">1</b></span>
-    <span style="width:46px;height:6px;border-radius:3px;background:rgba(255,255,255,.13);overflow:hidden;display:inline-block"><span id="navXp" style="display:block;height:100%;width:0;background:linear-gradient(90deg,#9fe8ff,#7ad7ff)"></span></span>
+    <span class="xpmini" style="width:46px;height:6px;border-radius:3px;background:rgba(255,255,255,.13);overflow:hidden;display:inline-block"><span id="navXp" style="display:block;height:100%;width:0;background:linear-gradient(90deg,#9fe8ff,#7ad7ff)"></span></span>
     <span style="font:700 12px 'JetBrains Mono',monospace;color:#ffb04d">◉&nbsp;<b id="navCoins">0</b></span>
   </a>
-  <div class="chip" id="userChip" title="Changer de pseudo"><span class="av"></span><span data-i18n-en="Name">Pseudo</span> <b id="uname">…</b></div>
+  <button type="button" class="chip" id="userChip" title="Changer de pseudo"><span class="av" aria-hidden="true"></span><span class="lbl" data-i18n-en="Name">Pseudo</span> <b id="uname">…</b></button>
 </div></nav>
 
 <header class="hero" style="padding-bottom:20px"><div class="scan"></div><div class="wrap">
@@ -82,6 +83,8 @@
         <li data-i18n-en-html="<b style=&quot;color:var(--text)&quot;>Ember Coins</b> — the site's common currency, earned by playing and through achievements. <span style=&quot;color:var(--muted)&quot;>(Each game may keep its own internal currency — e.g. Ember Hill's coins.)</span>"><b style="color:var(--text)">Ember Coins</b> — la monnaie commune du site, gagnée en jouant aux jeux et via les succès. <span style="color:var(--muted)">(Chaque jeu peut garder sa propre monnaie interne — ex. les pièces d'Ember Hill.)</span></li>
         <li data-i18n-en-html="<b style=&quot;color:var(--text)&quot;>Lifespan</b> of each game shown on its card."><b style="color:var(--text)">Durée de vie</b> de chaque jeu affichée sur sa fiche.</li>
         <li data-i18n-en="First security pass: leaderboard XSS fix, CSP/HSTS headers, tightened anti-cheat caps.">Premier passage de sécurité : correctif XSS du classement, en-têtes CSP/HSTS, plafonds anti-triche resserrés.</li>
+        <li data-i18n-en-html="&lt;b style=&quot;color:var(--text)&quot;&gt;Daily quests&lt;/b&gt;: 3 shared goals per day, rewarded in Ember Coins."><b style="color:var(--text)">Quêtes du jour</b> : 3 objectifs communs par jour, récompensés en Ember Coins.</li>
+        <li data-i18n-en-html="&lt;b style=&quot;color:var(--text)&quot;&gt;Full quality audit&lt;/b&gt; (October 2026): mobile layout of every page and game, daily challenge fairness, cloud save of coins and XP, lighter assets, accessibility."><b style="color:var(--text)">Audit qualité complet</b> (octobre 2026) : affichage mobile de toutes les pages et de tous les jeux, équité du défi du jour, sauvegarde en ligne des pièces et de l'XP, ressources allégées, accessibilité.</li>
       </ul>
     </div>
 
@@ -102,7 +105,7 @@
       <h3 data-i18n-en="Make players want to come back">Donner envie de revenir</h3>
       <ul>
         <li data-i18n-en="Weekly and friends leaderboards, not just all-time.">Classements hebdomadaires et entre amis, pas seulement all-time.</li>
-        <li data-i18n-en="Daily &amp; weekly quests with rewards.">Quêtes quotidiennes & hebdomadaires avec récompenses.</li>
+        <li data-i18n-en="Weekly quests with rewards (daily quests are live).">Quêtes hebdomadaires avec récompenses (les quêtes du jour sont en ligne).</li>
         <li data-i18n-en="Seasons: the daily challenge aggregated into a seasonal ranking.">Saisons : le défi du jour agrégé en classement saisonnier.</li>
         <li data-i18n-en="Cross-game achievements, score sharing, return notifications (opt-in).">Succès transversaux, partage de score, notifications de retour (opt-in).</li>
       </ul>
@@ -160,7 +163,14 @@
   </p>
 </main>
 
-<footer class="foot"><div class="wrap" style="display:flex;gap:16px;align-items:center;width:100%"><a href="/" data-i18n-en="← Back to the arcade">← Retour à la salle</a><span class="mono" style="margin-left:auto;color:var(--faint)" data-i18n-en="© AofZ Inc. — site &amp; content">© AofZ Inc. — site &amp; contenu</span></div></footer>
+<footer class="foot"><div class="wrap">
+  <span id="footName">Ember Arcade</span>
+  <a href="/" data-i18n-en="Games">Jeux</a>
+  <a href="/leaderboard.html" data-i18n-en="Leaderboard">Classement</a>
+  <a href="/roadmap.html" data-i18n-en="Roadmap">Roadmap</a>
+  <a href="/mentions-legales.html" data-i18n-en="Legal &amp; privacy">Mentions légales &amp; confidentialité</a>
+  <span class="by mono">© <a href="https://azunivers.netlify.app/" rel="noopener">AZ Univers</a> <span data-i18n-en="— site &amp; content">— site &amp; contenu</span></span>
+</div></footer>
 
 <script src="/config.js"></script>
 <script src="/sdk.js"></script>
